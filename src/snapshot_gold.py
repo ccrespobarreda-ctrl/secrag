@@ -202,26 +202,54 @@ def relocate(cur, snapshot: dict, questions: list[dict], write: bool,
         for index, body in candidates:
             hits = sum(1 for p in r["probes"] if p in body)
             scored.append((hits / len(r["probes"]), index))
-        scored.sort(reverse=True)
+        scored.sort(key=lambda t: -t[0])
 
-        best_score, best_index = scored[0]
-        runner = scored[1][0] if len(scored) > 1 else 0.0
+        best_score = scored[0][0]
 
         if best_score < CONFIDENT:
             lost += 1
             report.append(
                 f"  {r['id']:<7} {r['doc_id']} chunk {r['chunk_index']}: best "
-                f"match scores {best_score:.2f} at index {best_index} — below "
+                f"match scores {best_score:.2f} at index {scored[0][1]} — below "
                 f"the threshold, read it")
             continue
 
-        if best_score - runner < AMBIGUOUS_MARGIN:
+        # Several candidates can score identically, and it is not a defect of
+        # the corpus: consecutive financial tables in one filing are near
+        # duplicates, and boilerplate repeats across sections. So the tie is
+        # broken by what the reparse can physically do rather than by score.
+        #
+        # A reparse that only trims the tail of each section can delete a chunk
+        # but never create one, so an index can fall or stay and cannot rise.
+        # The nearest non-rising candidate is therefore the right one, and the
+        # first chunk of a document -- index 0 -- cannot move at all.
+        #
+        # Sorting by (score, index) descending got this exactly backwards: with
+        # a tie it preferred the FURTHEST candidate. Measured on the real
+        # corpus, that sent HNST chunk 0 to 158 and COLM chunk 99 to 100, both
+        # of which had the original index sitting right there scoring the same.
+        original = r["chunk_index"]
+        tied = [i for s, i in scored if s >= best_score - 1e-9]
+        best_index = min(tied, key=lambda i: (i > original, abs(original - i), i))
+
+        # The genuinely ambiguous case is different: the old chunk was split, so
+        # its probes are distributed between two new chunks and neither holds
+        # them all. That shows up as close but UNEQUAL scores.
+        runner = next((s for s, _ in scored if s < best_score - 1e-9), 0.0)
+        if best_score - runner < AMBIGUOUS_MARGIN and best_score < 1.0:
             ambiguous += 1
             report.append(
-                f"  {r['id']:<7} {r['doc_id']} chunk {r['chunk_index']}: "
-                f"{best_index} ({best_score:.2f}) and {scored[1][1]} "
+                f"  {r['id']:<7} {r['doc_id']} chunk {original}: "
+                f"{best_index} ({best_score:.2f}) and the next candidate "
                 f"({runner:.2f}) match almost equally — the chunk was split")
             continue
+
+        if len(tied) > 1:
+            report.append(
+                f"  {r['id']:<7} {r['doc_id']} chunk {original}: "
+                f"{len(tied)} candidates scored {best_score:.2f} "
+                f"({', '.join(str(i) for i in tied[:5])}) — took {best_index}, "
+                f"the nearest index that did not rise")
 
         if best_index == r["chunk_index"]:
             same += 1

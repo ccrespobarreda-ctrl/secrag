@@ -9,7 +9,7 @@
     cifra desglosada por categoria, sin la linea de total.'
   gold_chunks:
   - doc_id: URBN-10-K-2026
-    chunk_index: 186
+    chunk_index: 183
     contains: 6,165,376
 - id: Q002
   question: What were Under Armour's net revenues in fiscal 2026?
@@ -23,10 +23,10 @@
     cifra esta pero las cabeceras de ano quedan en el fragmento anterior.'
   gold_chunks:
   - doc_id: UAA-10-K-2026
-    chunk_index: 126
+    chunk_index: 123
     contains: 4,966,370
   - doc_id: UAA-10-K-2026
-    chunk_index: 184
+    chunk_index: 181
     contains: 4,966,370
 - id: Q003
   question: How does Lululemon recognize revenue from product sales?
@@ -40,7 +40,7 @@
     por subarriendos: coincidencia literal que no responde.'
   gold_chunks:
   - doc_id: LULU-10-K-2026
-    chunk_index: 118
+    chunk_index: 114
 - id: Q004
   question: What was Nike's inventory balance at the end of fiscal 2026?
   type: extractive
@@ -52,7 +52,7 @@
     FY2024 dentro del mismo fragmento.'
   gold_chunks:
   - doc_id: NKE-10-K-2026
-    chunk_index: 86
+    chunk_index: 84
     contains: '7.5'
 - id: Q005
   question: Which auditor signed Crocs' financial statements?
@@ -65,7 +65,7 @@
     en el ultimo; el recuperador devolvio el 733 primero. Valida la recuperacion de paginas F.
   gold_chunks:
   - doc_id: CROX-10-K-2025
-    chunk_index: 169
+    chunk_index: 166
     contains: Deloitte
 - id: Q006
   question: On what date does Nike's fiscal year end?
@@ -89,7 +89,7 @@
   notes: Item 7. Rango 5, dentro del top-8. Puestos 1, 2 y 6 fueron de URBN, empresa equivocada.
   gold_chunks:
   - doc_id: CHWY-10-K-2026
-    chunk_index: 124
+    chunk_index: 118
     contains: 12,601.5
 - id: Q008
   question: What brands does Deckers Outdoor own?
@@ -119,7 +119,7 @@
     al decir cuantas ofrecen examenes de vista. Puesto 2 fue de ANF.
   gold_chunks:
   - doc_id: WRBY-10-K-2025
-    chunk_index: 156
+    chunk_index: 154
 - id: Q010
   question: What were Wayfair's total net revenues for the year ended December 31, 2025?
   type: extractive
@@ -133,13 +133,13 @@
     metricas clave, fuera del top-100. De once coincidencias literales el recuperador encontro dos.
   gold_chunks:
   - doc_id: W-10-K-2025
-    chunk_index: 151
+    chunk_index: 150
     contains: 12,457
   - doc_id: W-10-K-2025
-    chunk_index: 147
+    chunk_index: 146
     contains: 12,457
   - doc_id: W-10-K-2025
-    chunk_index: 108
+    chunk_index: 107
     contains: 12,457
 - id: Q011
   question: What are Peloton's primary sources of revenue?
@@ -153,10 +153,10 @@
     puestos 1, 3, 4 y 6 desarrollaban una sola fuente cada uno.
   gold_chunks:
   - doc_id: PTON-10-K-2026
-    chunk_index: 139
+    chunk_index: 138
     contains: Connected
   - doc_id: PTON-10-K-2026
-    chunk_index: 146
+    chunk_index: 145
     contains: Connected
 - id: Q012
   question: What was Lululemon's inventory balance at fiscal year end?
@@ -171,10 +171,10 @@
     URBN.
   gold_chunks:
   - doc_id: LULU-10-K-2026
-    chunk_index: 87
+    chunk_index: 83
     contains: '1.7'
   - doc_id: LULU-10-K-2026
-    chunk_index: 100
+    chunk_index: 96
     contains: 1,700,753
 - id: Q013
   question: What brands does Gap Inc. operate?
@@ -191,7 +191,7 @@
     chunk_index: 0
     contains: Navy
   - doc_id: GAP-10-K-2026
-    chunk_index: 128
+    chunk_index: 125
     contains: Navy
 - id: Q014
   question: Which independent registered public accounting firm audited Urban Outfitters?
@@ -206,13 +206,13 @@
     el top-8. El rango 4 fue COLM, otra empresa tambien auditada por Deloitte: acertar por accidente.'
   gold_chunks:
   - doc_id: URBN-10-K-2026
-    chunk_index: 108
+    chunk_index: 105
     contains: Deloitte
   - doc_id: URBN-10-K-2026
-    chunk_index: 120
+    chunk_index: 117
     contains: Deloitte
   - doc_id: URBN-10-K-2026
-    chunk_index: 119
+    chunk_index: 116
     contains: Deloitte
 - id: Q015
   question: What was Crocs' gross profit for fiscal 2025?
@@ -228,13 +228,13 @@
     con la misma metrica.'
   gold_chunks:
   - doc_id: CROX-10-K-2025
-    chunk_index: 170
+    chunk_index: 167
     contains: 2,357,055
   - doc_id: CROX-10-K-2025
-    chunk_index: 104
+    chunk_index: 101
     contains: 2,357,055
   - doc_id: CROX-10-K-2025
-    chunk_index: 169
+    chunk_index: 166
     contains: 2,357,055
 - id: Q016
   question: In how many countries are Yeti products sold?
@@ -276,10 +276,10 @@
     con la frase exacta: contexto plausible para responder mal citando una fuente real.'
   gold_chunks:
   - doc_id: UAA-10-K-2026
-    chunk_index: 217
+    chunk_index: 214
     contains: North
   - doc_id: UAA-10-K-2026
-    chunk_index: 220
+    chunk_index: 217
 - id: Q019
   question: What was Columbia Sportswear's dividend per share?
   type: extractive
@@ -314,7 +314,7 @@
     Los seis resultados fueron de FIGS: segunda pregunta sin contaminacion.'
   gold_chunks:
   - doc_id: FIGS-10-K-2025
-    chunk_index: 212
+    chunk_index: 210
   - doc_id: FIGS-10-K-2025
     chunk_index: 4
 - id: Q021
@@ -432,13 +432,13 @@
     de recompra de acciones. Puestos 3 a 6: URBN, ANF x2, NKE.'
   gold_chunks:
   - doc_id: UAA-10-K-2026
-    chunk_index: 86
+    chunk_index: 84
     contains: 2,859,420
   - doc_id: UAA-10-K-2026
-    chunk_index: 87
+    chunk_index: 85
     contains: 442,503
   - doc_id: UAA-10-K-2026
-    chunk_index: 88
+    chunk_index: 86
     contains: North
 - id: Q026
   question: What risks does Etsy disclose about seller and buyer behaviour on its marketplace?
@@ -485,11 +485,11 @@
     de la Nota 1: cuarto caso de fragmento heterogeneo. Puestos 2 y 4 ANF, puesto 6 DECK.'
   gold_chunks:
   - doc_id: GAP-10-K-2026
-    chunk_index: 57
+    chunk_index: 55
   - doc_id: GAP-10-K-2026
-    chunk_index: 102
+    chunk_index: 99
   - doc_id: GAP-10-K-2026
-    chunk_index: 103
+    chunk_index: 100
 - id: Q028
   question: What does Wayfair disclose about its logistics and delivery network?
   type: multi_chunk
@@ -519,7 +519,7 @@
     chunk_index: 7
     contains: Wayfair
   - doc_id: W-10-K-2025
-    chunk_index: 166
+    chunk_index: 165
     contains: Wayfair
   - doc_id: W-10-K-2025
     chunk_index: 5
@@ -554,7 +554,7 @@
   - doc_id: ANF-10-K-2026
     chunk_index: 56
   - doc_id: ANF-10-K-2026
-    chunk_index: 83
+    chunk_index: 80
 - id: Q030
   question: What does Honest Company say about its product categories and its channel mix?
   type: multi_chunk
@@ -572,16 +572,16 @@
     sola coincidencia inutil; ''product categories'' llego a los tres buenos a la primera.'
   gold_chunks:
   - doc_id: HNST-10-K-2025
-    chunk_index: 172
+    chunk_index: 171
     contains: Retail
   - doc_id: HNST-10-K-2025
-    chunk_index: 159
+    chunk_index: 158
     contains: Diapers
   - doc_id: HNST-10-K-2025
     chunk_index: 0
     contains: Diapers
   - doc_id: HNST-10-K-2025
-    chunk_index: 160
+    chunk_index: 159
     contains: Retail
 - id: Q031
   question: Do both Nike and Under Armour cite foreign currency exchange rates as a risk factor?
@@ -620,7 +620,7 @@
     filtro, el top-6 fue cinco LULU y un W: la comparativa vuelve a concentrarse en una sola empresa.'
   gold_chunks:
   - doc_id: LEVI-10-K-2025
-    chunk_index: 267
+    chunk_index: 266
   - doc_id: NKE-10-K-2026
     chunk_index: 5
     contains: Nike
@@ -645,10 +645,10 @@
   - doc_id: CHWY-10-K-2026
     chunk_index: 33
   - doc_id: W-10-K-2025
-    chunk_index: 223
+    chunk_index: 222
     contains: Wayfair
   - doc_id: W-10-K-2025
-    chunk_index: 224
+    chunk_index: 223
     contains: Wayfair
 - id: Q034
   question: Do both Gap and Abercrombie & Fitch identify tariffs as a risk factor?
@@ -668,7 +668,7 @@
     dos empresas nombradas.'
   gold_chunks:
   - doc_id: FIGS-10-K-2025
-    chunk_index: 203
+    chunk_index: 201
   - doc_id: ANF-10-K-2026
     chunk_index: 53
   - doc_id: ANF-10-K-2026
@@ -695,7 +695,7 @@
   - doc_id: DECK-10-K-2026
     chunk_index: 137
   - doc_id: CROX-10-K-2025
-    chunk_index: 170
+    chunk_index: 167
 - id: Q041
   question: What is the home address of Etsy's chief executive officer?
   type: unanswerable_absent
