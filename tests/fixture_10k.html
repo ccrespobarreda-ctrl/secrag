@@ -1,0 +1,56 @@
+<html><head><title>10-K</title></head><body>
+<!-- TRAMPA 1: el índice repite los encabezados de Item antes que las secciones reales -->
+<div><table>
+<tr><td>Item 1.</td><td>Business</td><td>3</td></tr>
+<tr><td>Item 1A.</td><td>Risk Factors</td><td>12</td></tr>
+<tr><td>Item 7.</td><td>Management's Discussion and Analysis</td><td>45</td></tr>
+<tr><td>Item 8.</td><td>Financial Statements and Supplementary Data</td><td>60</td></tr>
+</table></div>
+<p>&nbsp;</p><p>​</p>
+
+<!-- TRAMPA 2: formatos de encabezado distintos entre secciones -->
+<div style="font-weight:bold">ITEM&nbsp;1.&nbsp;&nbsp;&nbsp;BUSINESS</div>
+<p>Our products are sold through company-owned retail stores, digital platforms and wholesale partners.</p>
+<p>We operate in three reportable segments organized by geography.</p>
+<p>Our products are sold through company-owned retail stores, digital platforms and wholesale partners.</p>
+<p>Our products are sold through company-owned retail stores, digital platforms and wholesale partners.</p>
+
+<p>&nbsp;</p>
+
+<p><b>Item 1A.</b> <b>Risk&nbsp;Factors</b></p>
+<p>Fluctuations in foreign currency exchange rates may adversely affect our reported results.</p>
+<p>Fluctuations in foreign currency exchange rates may adversely affect our reported results.</p>
+<p>We rely on a limited number of contract manufacturers located outside the United States.</p>
+<p>We rely on a limited number of contract manufacturers located outside the United States.</p>
+<p>Fluctuations in foreign currency exchange rates may adversely affect our reported results.</p>
+<p>The loss of any single supplier could disrupt our ability to deliver product on schedule.</p>
+
+
+<!-- TRAMPA 3: tabla maquetada con divs, no con <table> -->
+<div><div style="display:table-row"><div>Revenue</div><div>51,217</div></div>
+<div style="display:table-row"><div>Cost of sales</div><div>28,925</div></div></div>
+
+<span style="font-weight:700">Item&nbsp;3.  Legal Proceedings</span>
+<p>We are party to various legal proceedings arising in the ordinary course of business.</p>
+<p>We are party to various legal proceedings arising in the ordinary course of business.</p>
+
+
+<div><b>Item 7. Management&#8217;s Discussion and Analysis of Financial Condition</b></div>
+<p>Gross margin decreased 250 basis points, driven by higher ocean freight and elevated markdowns.</p>
+<p>Gross margin decreased 250 basis points, driven by higher ocean freight and elevated markdowns.</p>
+<p>Total revenues for fiscal 2023 were $51.2&nbsp;billion, an increase of 10% over fiscal 2022.</p>
+<p>Total revenues for fiscal 2023 were $51.2&nbsp;billion, an increase of 10% over fiscal 2022.</p>
+<p>Selling and administrative expense grew 8%, reflecting increased demand creation investment.</p>
+
+
+<p style="font-weight:bold">Item 8.&#160;&#160;Financial Statements and Supplementary Data</p>
+<p>Consolidated revenues were $51,217 million for the year ended May&nbsp;31, 2023.</p>
+<p>Consolidated revenues were $51,217 million for the year ended May&nbsp;31, 2023.</p>
+<p>Consolidated revenues were $51,217 million for the year ended May&nbsp;31, 2023.</p>
+<p>Consolidated revenues were $51,217 million for the year ended May&nbsp;31, 2023.</p>
+
+
+<!-- TRAMPA 4: exhibits al final, no hay que indexarlos -->
+<div><b>Item 15. Exhibits and Financial Statement Schedules</b></div>
+<p>3.1 Restated Articles of Incorporation (incorporated by reference)</p>
+</body></html>

@@ -1,0 +1,153 @@
+{
+ "generated": "2026-08-14T01:55:51",
+ "k": 16,
+ "rrf_k": 60,
+ "answerable": 34,
+ "unanswerable": 16,
+ "strategies": {
+  "semantic": {
+   "recall_at_k": 0.6176470588235294,
+   "mean_rr": 0.29835838181426416,
+   "coverage": 0.35294117647058826,
+   "n": 34,
+   "recall_by_type": {
+    "extractive": 0.6842105263157895,
+    "multi_chunk": 0.6,
+    "comparative": 0.4
+   },
+   "coverage_by_type": {
+    "extractive": 0.45614035087719296,
+    "multi_chunk": 0.275,
+    "comparative": 0.11666666666666665
+   }
+  },
+  "keyword": {
+   "recall_at_k": 0.5,
+   "mean_rr": 0.2728634110987052,
+   "coverage": 0.2980392156862745,
+   "n": 34,
+   "recall_by_type": {
+    "extractive": 0.3157894736842105,
+    "multi_chunk": 0.7,
+    "comparative": 0.8
+   },
+   "coverage_by_type": {
+    "extractive": 0.2894736842105263,
+    "multi_chunk": 0.32166666666666666,
+    "comparative": 0.2833333333333333
+   }
+  },
+  "hybrid": {
+   "recall_at_k": 0.7647058823529411,
+   "mean_rr": 0.3692033864827982,
+   "coverage": 0.47794117647058826,
+   "n": 34,
+   "recall_by_type": {
+    "extractive": 0.7894736842105263,
+    "multi_chunk": 0.7,
+    "comparative": 0.8
+   },
+   "coverage_by_type": {
+    "extractive": 0.6140350877192983,
+    "multi_chunk": 0.33333333333333337,
+    "comparative": 0.25
+   }
+  },
+  "hybrid+company": {
+   "recall_at_k": 0.8823529411764706,
+   "mean_rr": 0.4017284186401833,
+   "coverage": 0.6235294117647059,
+   "n": 34,
+   "recall_by_type": {
+    "extractive": 0.8421052631578947,
+    "multi_chunk": 0.9,
+    "comparative": 1.0
+   },
+   "coverage_by_type": {
+    "extractive": 0.7017543859649124,
+    "multi_chunk": 0.6116666666666667,
+    "comparative": 0.35
+   }
+  },
+  "SABOTAGE starved": {
+   "recall_at_k": 0.20588235294117646,
+   "mean_rr": 0.20588235294117646,
+   "coverage": 0.10147058823529412,
+   "n": 34,
+   "recall_by_type": {
+    "extractive": 0.2631578947368421,
+    "multi_chunk": 0.2,
+    "comparative": 0.0
+   },
+   "coverage_by_type": {
+    "extractive": 0.15789473684210525,
+    "multi_chunk": 0.045,
+    "comparative": 0.0
+   }
+  },
+  "SABOTAGE no-keyword": {
+   "recall_at_k": 0.6176470588235294,
+   "mean_rr": 0.29835838181426416,
+   "coverage": 0.35294117647058826,
+   "n": 34,
+   "recall_by_type": {
+    "extractive": 0.6842105263157895,
+    "multi_chunk": 0.6,
+    "comparative": 0.4
+   },
+   "coverage_by_type": {
+    "extractive": 0.45614035087719296,
+    "multi_chunk": 0.275,
+    "comparative": 0.11666666666666665
+   }
+  },
+  "SABOTAGE no-semantic": {
+   "recall_at_k": 0.5,
+   "mean_rr": 0.2728634110987052,
+   "coverage": 0.2980392156862745,
+   "n": 34,
+   "recall_by_type": {
+    "extractive": 0.3157894736842105,
+    "multi_chunk": 0.7,
+    "comparative": 0.8
+   },
+   "coverage_by_type": {
+    "extractive": 0.2894736842105263,
+    "multi_chunk": 0.32166666666666666,
+    "comparative": 0.2833333333333333
+   }
+  },
+  "SABOTAGE or-keyword": {
+   "recall_at_k": 0.47058823529411764,
+   "mean_rr": 0.2765398816869405,
+   "coverage": 0.2882352941176471,
+   "n": 34,
+   "recall_by_type": {
+    "extractive": 0.3157894736842105,
+    "multi_chunk": 0.7,
+    "comparative": 0.6
+   },
+   "coverage_by_type": {
+    "extractive": 0.2894736842105263,
+    "multi_chunk": 0.32166666666666666,
+    "comparative": 0.21666666666666665
+   }
+  },
+  "SABOTAGE no-company": {
+   "recall_at_k": 0.7647058823529411,
+   "mean_rr": 0.3692033864827982,
+   "coverage": 0.47794117647058826,
+   "n": 34,
+   "recall_by_type": {
+    "extractive": 0.7894736842105263,
+    "multi_chunk": 0.7,
+    "comparative": 0.8
+   },
+   "coverage_by_type": {
+    "extractive": 0.6140350877192983,
+    "multi_chunk": 0.33333333333333337,
+    "comparative": 0.25
+   }
+  }
+ }
+}

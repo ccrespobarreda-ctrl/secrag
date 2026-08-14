@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEC filings RAG — evaluation results</title>
+<meta name="description" content="Retrieval and refusal measured over 50 hand-labeled questions on 19 SEC 10-K filings.">
+<style>
+:root{
+  --ink:#12181f; --ink-2:#3a4653; --ink-3:#6b7885;
+  --rule:#dde3e9; --rule-2:#eef2f5; --bg:#fbfcfd; --panel:#fff;
+  --pos:#0f766e; --neg:#b4325c; --warn:#a16207;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--body);
+     font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:0 clamp(1rem,4vw,2.5rem)}
+header{border-bottom:1px solid var(--rule);padding:clamp(2.5rem,6vw,4rem) 0 2rem}
+.eyebrow{font-family:var(--mono);font-size:.7rem;letter-spacing:.11em;
+         text-transform:uppercase;color:var(--ink-3)}
+h1{font-size:clamp(1.7rem,4.2vw,2.6rem);line-height:1.15;color:var(--ink);
+   margin:.7rem 0 0;max-width:32ch;letter-spacing:-.02em}
+.lede{max-width:64ch;margin:1.1rem 0 0}
+.lede strong{color:var(--ink)}
+section{padding:clamp(2rem,5vw,3.2rem) 0;border-bottom:1px solid var(--rule)}
+h2{font-size:clamp(1.15rem,2.6vw,1.5rem);color:var(--ink);margin:0 0 .3rem;
+   letter-spacing:-.01em}
+h2+.sub{color:var(--ink-3);font-size:.94rem;margin:0 0 1.4rem;max-width:66ch}
+h3{font-size:.98rem;color:var(--ink);margin:2rem 0 .6rem}
+table{width:100%;border-collapse:collapse;font-size:.87rem;margin:.4rem 0 1rem}
+th{font-family:var(--mono);font-weight:500;font-size:.65rem;letter-spacing:.07em;
+   text-transform:uppercase;color:var(--ink-3);text-align:right;
+   padding:0 .45rem .55rem;border-bottom:1px solid var(--rule);vertical-align:bottom}
+th:first-child{text-align:left}
+td{padding:.5rem .45rem;text-align:right;font-family:var(--mono);font-weight:500;
+   border-bottom:1px solid var(--rule-2);font-variant-numeric:tabular-nums}
+td:first-child{text-align:left;font-family:var(--body);font-weight:400;color:var(--ink-2)}
+tr.best td{color:var(--ink);font-weight:600}
+tr.sab td{color:var(--ink-3)}
+td.pos{color:var(--pos)} td.neg{color:var(--neg)} td.warn{color:var(--warn)}
+caption{caption-side:bottom;text-align:left;padding-top:.7rem;font-size:.82rem;
+        color:var(--ink-3);line-height:1.55}
+.cards{display:grid;gap:1px;background:var(--rule);
+       grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin:1.2rem 0}
+.card{background:var(--panel);padding:1rem 1.1rem}
+.card .k{font-family:var(--mono);font-size:.62rem;letter-spacing:.09em;
+         text-transform:uppercase;color:var(--ink-3);display:block}
+.card .v{font-family:var(--mono);font-size:1.5rem;font-weight:600;color:var(--ink);
+         display:block;margin:.25rem 0 .2rem}
+.card .v.pos{color:var(--pos)} .card .v.neg{color:var(--neg)}
+.card .d{font-size:.79rem;color:var(--ink-3);display:block;line-height:1.45}
+.note{background:var(--panel);border-left:2px solid var(--ink-3);
+      padding:.9rem 1.1rem;margin:1.2rem 0;font-size:.9rem;max-width:70ch}
+.note b{color:var(--ink)}
+details{background:var(--panel);border:1px solid var(--rule);margin:.4rem 0;
+        border-radius:2px}
+summary{padding:.6rem .9rem;cursor:pointer;font-size:.87rem;display:flex;
+        gap:.7rem;align-items:baseline;flex-wrap:wrap}
+summary::marker{color:var(--ink-3)}
+summary .qid{font-family:var(--mono);font-weight:600;color:var(--ink)}
+summary .qtype{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;
+               text-transform:uppercase;color:var(--ink-3)}
+summary .verdict{font-family:var(--mono);font-size:.7rem;margin-left:auto}
+.v-ok{color:var(--pos)} .v-bad{color:var(--neg)} .v-ref{color:var(--ink-3)}
+.qbody{padding:0 .9rem 1rem;border-top:1px solid var(--rule-2);font-size:.89rem}
+.qbody dt{font-family:var(--mono);font-size:.63rem;letter-spacing:.08em;
+          text-transform:uppercase;color:var(--ink-3);margin:.9rem 0 .2rem}
+.qbody dd{margin:0}
+.answer{background:var(--bg);padding:.7rem .85rem;border-radius:2px;
+        white-space:pre-wrap;font-size:.86rem}
+.chunks{font-family:var(--mono);font-size:.78rem;color:var(--ink-3)}
+footer{padding:2.5rem 0 4rem;font-size:.85rem;color:var(--ink-3)}
+footer a{color:var(--ink-2)}
+</style>
+</head><body>
+
+<header><div class="wrap">
+  <div class="eyebrow">19 SEC 10-K filings · 50 labeled questions · claude-sonnet-5</div>
+  <h1>Asked 16 questions it could not answer, it invented 1.</h1>
+  <p class="lede">Question answering over 4,169 chunks of SEC annual reports,
+  with citations verified in code. The hard part is not producing fluent answers;
+  it is not producing them when the documents do not support one. Sixteen of the
+  fifty questions have no answer in the corpus and five are written to bait an
+  invention — a fiscal year outside the filings, a business segment that does not
+  exist. Across 3 runs, <strong>2.1%</strong>
+  of responses to those questions were classified as answering, and the adversarial
+  five produced none.</p>
+  <p class="lede">The cost is refusing <strong>5.9%</strong>
+  of the questions it could have answered. That is bounded by retrieval, not by
+  caution: the retriever surfaces a correct chunk
+  <strong>88%</strong> of the time, and where it does
+  not, refusing is the right answer.</p>
+</div></header>
+
+
+<section id="retrieval"><div class="wrap">
+  <h2>Retrieval</h2>
+  <p class="sub">Measured against the 34 answerable questions, whose
+  answer chunks were identified by reading the filings. Recall@16 asks whether any
+  correct chunk arrived; coverage asks what fraction of them did. The other
+  16 questions have no answer chunks by definition and belong to the
+  refusal measurement below.</p>
+
+  <table>
+    <thead><tr><th>strategy</th><th>Recall@16</th><th>MRR</th><th>Coverage</th></tr></thead>
+    <tbody><tr class=""><td>semantic</td><td>0.618</td><td>0.298</td><td>0.353</td></tr><tr class=""><td>keyword</td><td>0.500</td><td>0.273</td><td>0.298</td></tr><tr class=""><td>hybrid</td><td>0.765</td><td>0.369</td><td>0.478</td></tr><tr class="best"><td>hybrid+company</td><td>0.882</td><td>0.402</td><td>0.624</td></tr><tr class="sab"><td>sabotage · starved</td><td>0.206</td><td>0.206</td><td>0.101</td></tr><tr class="sab"><td>sabotage · no-keyword</td><td>0.618</td><td>0.298</td><td>0.353</td></tr><tr class="sab"><td>sabotage · no-semantic</td><td>0.500</td><td>0.273</td><td>0.298</td></tr><tr class="sab"><td>sabotage · or-keyword</td><td>0.471</td><td>0.277</td><td>0.288</td></tr><tr class="sab"><td>sabotage · no-company</td><td>0.765</td><td>0.369</td><td>0.478</td></tr></tbody>
+    <caption>Five degradations, each disabling one capability. All five move the
+    metric down, which is what makes the harness worth trusting: a check that only
+    ever passes cannot distinguish a working system from a broken one.</caption>
+  </table>
+
+  <h3>By question type — Recall@16 / coverage</h3>
+  <table>
+    <thead><tr><th>strategy</th><th>comparative</th><th>extractive</th><th>multi_chunk</th></tr></thead>
+    <tbody><tr class=""><td>semantic</td><td>0.400<span style="color:var(--ink-3)"> / 0.117</span></td><td>0.684<span style="color:var(--ink-3)"> / 0.456</span></td><td>0.600<span style="color:var(--ink-3)"> / 0.275</span></td></tr><tr class=""><td>keyword</td><td>0.800<span style="color:var(--ink-3)"> / 0.283</span></td><td>0.316<span style="color:var(--ink-3)"> / 0.289</span></td><td>0.700<span style="color:var(--ink-3)"> / 0.322</span></td></tr><tr class=""><td>hybrid</td><td>0.800<span style="color:var(--ink-3)"> / 0.250</span></td><td>0.789<span style="color:var(--ink-3)"> / 0.614</span></td><td>0.700<span style="color:var(--ink-3)"> / 0.333</span></td></tr><tr class="best"><td>hybrid+company</td><td>1.000<span style="color:var(--ink-3)"> / 0.350</span></td><td>0.842<span style="color:var(--ink-3)"> / 0.702</span></td><td>0.900<span style="color:var(--ink-3)"> / 0.612</span></td></tr></tbody>
+    <caption>The aggregate hid two opposite behaviours for most of this project.
+    Semantic search wins on extractive questions and loses badly on comparatives;
+    lexical search does the reverse. A single number averaged them into
+    meaninglessness.</caption>
+  </table>
+
+  <div class="note">
+    <b>Recall@16 and coverage diverge most where the answer is distributed.</b>
+    On comparatives, recall reads 1.000 and coverage 0.350: a comparative needs
+    evidence from two filings, and finding one of them counts as a hit. Reporting
+    only recall would have called the weakest question type the strongest.
+  </div>
+</div></section>
+
+<section id="generation"><div class="wrap">
+  <h2>Refusal, and what it costs</h2>
+  <p class="sub">Fifty questions, 3 runs each. Sixteen have no answer in
+  the corpus and five of those are written to bait an invention — a fiscal year
+  outside the filings, a business segment that does not exist.</p>
+
+  <table>
+    <thead><tr><th></th><th>answerable (102)</th><th>unanswerable (48)</th></tr></thead>
+    <tbody>
+      <tr><td>answered</td>
+          <td class="pos">94.1%</td>
+          <td class="neg">2.1%</td></tr>
+      <tr><td>refused</td>
+          <td class="warn">5.9%</td>
+          <td class="pos">97.9%</td></tr>
+    </tbody>
+    <caption>Both columns matter. A system that replies "insufficient context" to
+    everything scores a perfect refusal rate and is useless; one that always
+    answers invents freely. Either number alone is trivially gamed.</caption>
+  </table>
+
+  <div class="cards">
+    <div class="card"><span class="k">refusal, unanswerable</span>
+      <span class="v pos">97.9%</span>
+      <span class="d">target: high</span></div>
+    <div class="card"><span class="k">false refusal, answerable</span>
+      <span class="v warn">5.9%</span>
+      <span class="d">target: low</span></div>
+    <div class="card"><span class="k">answered without support</span>
+      <span class="v neg">2.1%</span>
+      <span class="d">1 of 48 responses</span></div>
+    <div class="card"><span class="k">claims grounded in a citation</span>
+      <span class="v pos">98.1%</span>
+      <span class="d">316 claims judged, 0 judge failures</span></div>
+  </div>
+
+  <table>
+    <thead><tr><th>question type</th><th>responses</th><th>refused</th><th>answered</th></tr></thead>
+    <tbody><tr><td>comparative</td><td>15</td><td>20.0%</td><td>80.0%</td></tr><tr><td>extractive</td><td>57</td><td>5.3%</td><td>94.7%</td></tr><tr><td>multi_chunk</td><td>30</td><td>0.0%</td><td>100.0%</td></tr><tr><td>unanswerable_absent</td><td>33</td><td>97.0%</td><td>3.0%</td></tr><tr><td>unanswerable_adversarial</td><td>15</td><td>100.0%</td><td>0.0%</td></tr></tbody>
+    <caption>None of the five adversarial questions produced an answer in any run.
+    Those are the ones designed to be answered wrongly.</caption>
+  </table>
+
+  <div class="note">
+    <b>Groundedness is judged by the same model family that wrote the answers.</b>
+    That is a known weakness: LLM judges reward length and tend to agree with what
+    is put in front of them. An earlier version judged each citation separately: a
+    claim citing three excerpts was marked unsupported by the two that did not
+    contain its figure, while being perfectly supported. It also gave the judge a
+    ten-token budget, and nearly a fifth of verdicts came back empty — the judge
+    spending its allowance before answering, which is a failure of the evaluator
+    and not evidence about any claim. The figure above is one verdict per claim,
+    judged against all of its citations at once, over 316 claims with
+    0 judge failures.
+  </div>
+</div></section>
+
+<section id="gallery"><div class="wrap">
+  <h2>Every question, and what happened</h2>
+  <p class="sub">All fifty, with the labeled answer beside the generated one. A
+  live chat demo proves a system works on whatever a visitor types; this shows it
+  against answers established by reading the filings, including where it fails.</p>
+  
+<details>
+  <summary><span class="qid">Q001</span>
+    <span class="qtype">extractive</span>
+    <span>What were Urban Outfitters&#x27; total net sales for the fiscal year ended January 31, 2026?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>$6,165,376 thousand</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Urban Outfitters&#x27; total net sales for the fiscal year ended January 31, 2026 were $6,165,376 (in thousands) [4][16].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 1 gold chunks retrieved: [3518]<br>cited excerpts: [4, 16]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q002</span>
+    <span class="qtype">extractive</span>
+    <span>What were Under Armour&#x27;s net revenues in fiscal 2026?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>$4,966,370 thousand</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Under Armour&#x27;s total net revenues for Fiscal 2026 were $4,966,370 (in thousands), a decrease of $197,940 thousand, or 3.8%, compared to Fiscal 2025&#x27;s $5,164,310 thousand [2][3].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 2 gold chunks retrieved: [3236]<br>cited excerpts: [2, 3]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q003</span>
+    <span class="qtype">extractive</span>
+    <span>How does Lululemon recognize revenue from product sales?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Revenue is recognized when performance obligations are satisfied through the transfer of control; at point of sale in stores, and on receipt for e-commerce and wholesale.</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Lululemon recognizes revenue when performance obligations are satisfied through the transfer of control of promised goods or services to customers, meaning the customer has the ability to direct the use of, and obtain substantially all of the benefits from, the product—including transfer of legal title, physical possession, risks and rewards of ownership, and customer acceptance [1][2]. Revenue from company-operated stores and other retail locations is recognized at the point of sale [1][2]. E-commerce revenue, sales to wholesale accounts, and in-home fitness hardware sales are recognized upon receipt by the customer [1][2]. When payment is received before the customer receives the promised good, the payment is initially recorded as deferred revenue and recognized as revenue when control transfers to the customer [1][2]. All revenue is reported net of markdowns and discounts, sales taxes collected on behalf of taxing authorities, and returns, and is presented net of an allowance for estimated returns [1][2].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 1 gold chunks retrieved: [2315]<br>cited excerpts: [1, 2]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q004</span>
+    <span class="qtype">extractive</span>
+    <span>What was Nike&#x27;s inventory balance at the end of fiscal 2026?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>$7.5 billion</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Nike&#x27;s inventories as of May 31, 2026 were $7.5 billion, flat compared to the prior year, primarily reflecting an increase in units, offset by product mix [1].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">0 of 1 gold chunks retrieved: []<br>cited excerpts: [1]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q005</span>
+    <span class="qtype">extractive</span>
+    <span>Which auditor signed Crocs&#x27; financial statements?</span>
+    <span class="verdict v-ref">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Deloitte &amp; Touche LLP</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+The excerpts include audit reports referencing PCAOB ID No. 34 and a Consent of Deloitte &amp; Touche LLP exhibit [5][11], but none of the provided excerpts show the actual signature line identifying the auditor&#x27;s name on the financial statement audit report itself.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">0 of 1 gold chunks retrieved: []<br>cited excerpts: [5, 11]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q006</span>
+    <span class="qtype">extractive</span>
+    <span>On what date does Nike&#x27;s fiscal year end?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>May 31</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">NIKE&#x27;s fiscal year ends on May 31 (referred to as, for example, the fiscal years ended May 31, 2026, 2025, and 2024) [1].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 1 gold chunks retrieved: [2362]<br>cited excerpts: [1]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q007</span>
+    <span class="qtype">extractive</span>
+    <span>What were Chewy&#x27;s net sales for fiscal 2025?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>$12,601.5 million ($12.6 billion)</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Chewy&#x27;s net sales for Fiscal Year 2025 were $12,601.5 million (approximately $12.6 billion), an increase of $740.2 million, or 6.2%, compared to $11,861.3 million in Fiscal Year 2024 [4][10].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 1 gold chunks retrieved: [326]<br>cited excerpts: [4, 10]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q008</span>
+    <span class="qtype">extractive</span>
+    <span>What brands does Deckers Outdoor own?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>HOKA, UGG y Teva</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Deckers Outdoor Corporation&#x27;s three proprietary brands include HOKA®, UGG®, and Teva® [10]. The company also previously had operations for the Koolaburra by UGG® and AHNU® brands, which were being phased out with standalone operations ending during fiscal year 2026 [4]. Additionally, the company previously owned the Sanuk® brand, but completed the sale of that brand during the second quarter of fiscal year 2025 [4].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">0 of 2 gold chunks retrieved: []<br>cited excerpts: [4, 10]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q009</span>
+    <span class="qtype">extractive</span>
+    <span>How many retail stores did Warby Parker operate at the end of the fiscal year?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>323 tiendas a 31 de diciembre de 2025</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Warby Parker operated 323 retail stores as of December 31, 2025 [3][11].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 1 gold chunks retrieved: [3904]<br>cited excerpts: [3, 11]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q010</span>
+    <span class="qtype">extractive</span>
+    <span>What were Wayfair&#x27;s total net revenues for the year ended December 31, 2025?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>$12,457 million</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Wayfair&#x27;s net revenue for the year ended December 31, 2025 was $12,457 million, compared to $11,851 million in 2024 and $12,003 million in 2023 [5][3].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 3 gold chunks retrieved: [3670]<br>cited excerpts: [3, 5]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q011</span>
+    <span class="qtype">extractive</span>
+    <span>What are Peloton&#x27;s primary sources of revenue?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Suscripciones recurrentes y venta de Connected Fitness Products</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Peloton&#x27;s primary sources of revenue are its recurring content Subscription revenue and revenue from sales of its Connected Fitness Products and related accessories, including Precor-branded fitness products, delivery and installation services [7]. Connected Fitness Products Revenue also includes Peloton Bike portfolio rental products, extended warranty agreements, branded apparel, and commercial service contracts [2][3]. Subscription Revenue consists of revenue generated from Paid Connected Fitness Subscriptions and Paid Peloton App Subscriptions, offered on a month-to-month or annual prepaid basis, as well as revenue from content licensing arrangements [2][3]. For the fiscal year ended June 30, 2026, Connected Fitness Products Revenue was $770.4 million and Subscription Revenue was $1,675.6 million, together comprising Total revenue of $2,446.0 million [10].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">2 of 2 gold chunks retrieved: [2718, 2725]<br>cited excerpts: [2, 3, 7, 10]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q012</span>
+    <span class="qtype">extractive</span>
+    <span>What was Lululemon&#x27;s inventory balance at fiscal year end?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>$1.7 billion ($1,700,753 thousand)</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Lululemon&#x27;s inventory balance at fiscal year end (February 1, 2026) was $1,700,753 thousand (also referenced as &quot;$1.7 billion&quot;), compared to $1,442,081 thousand as of February 2, 2025 [6][10][12].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">2 of 2 gold chunks retrieved: [2284, 2297]<br>cited excerpts: [6, 10, 12]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q013</span>
+    <span class="qtype">extractive</span>
+    <span>What brands does Gap Inc. operate?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Old Navy, Gap, Banana Republic y Athleta</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Gap Inc. is a house of iconic American brands offering apparel, accessories, and personal care products for men, women, and children under the Old Navy, Gap, Banana Republic, and Athleta brands [1][2].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">2 of 2 gold chunks retrieved: [1491, 1619]<br>cited excerpts: [1, 2]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q014</span>
+    <span class="qtype">extractive</span>
+    <span>Which independent registered public accounting firm audited Urban Outfitters?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Deloitte &amp; Touche LLP</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Deloitte &amp; Touche LLP, based in Philadelphia, Pennsylvania, served as Urban Outfitters, Inc.&#x27;s independent registered public accounting firm, having audited the Company&#x27;s consolidated financial statements as of and for the years ended January 31, 2026 and 2025, as well as its internal control over financial reporting as of January 31, 2026 [1][7]. The firm has served as the Company&#x27;s auditor since 2005 [7]. This is further confirmed by the disclosure identifying Deloitte &amp; Touche LLP (PCAOB ID No. 34) as the independent registered public accounting firm [15].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">2 of 3 gold chunks retrieved: [3440, 3452]<br>cited excerpts: [1, 7, 15]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q015</span>
+    <span class="qtype">extractive</span>
+    <span>What was Crocs&#x27; gross profit for fiscal 2025?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>$2,357,055 thousand</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Crocs, Inc.&#x27;s gross profit for the year ended December 31, 2025, was $2,357,055 thousand, compared to $2,410,258 thousand in 2024, a decrease of $53,203 thousand, or 2.2% [2][9].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">2 of 3 gold chunks retrieved: [671, 737]<br>cited excerpts: [2, 9]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q016</span>
+    <span class="qtype">unanswerable_absent</span>
+    <span>In how many countries are Yeti products sold?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Based on the excerpts, YETI offers its products in the United States, Canada, Australia, New Zealand, the United Kingdom, Europe, and Japan, among others [15], and separately notes it operates in the U.S., Canada, Australia, New Zealand, the United Kingdom, Europe, and Asia [3]. These lists use &quot;among others&quot; or list regions rather than a precise country count, so a specific total number of countries where products are sold is not stated. Note that the excerpts do specify that as of January 3, 2026, YETI employed people across twelve countries, but this refers to employee locations, not necessarily countries where products are sold [7].
+
+INSUFFICIENT_CONTEXT
+A precise count of countries where YETI products are sold would likely be found in the &quot;Sales Channels&quot; or international markets disclosure within Item 1, Business, or in investor materials detailing geographic sales distribution.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: [3, 7, 15]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q017</span>
+    <span class="qtype">extractive</span>
+    <span>What percentage of Levi Strauss net revenues came from Europe and Asia combined?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>45%</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Europe and Asia businesses, collectively, contributed 45% of Levi Strauss &amp; Co.&#x27;s net revenues in fiscal year 2025, compared to 45% of net revenues in fiscal year 2024 [4][5].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">2 of 2 gold chunks retrieved: [2002, 2003]<br>cited excerpts: [4, 5]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q018</span>
+    <span class="qtype">extractive</span>
+    <span>What reportable segments does Under Armour disclose?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>North America, EMEA, Asia-Pacific y Latin America</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Under Armour discloses four reportable segments organized by geographic region: North America, EMEA, Asia-Pacific, and Latin America [3][5][6]. The Company also reports a &quot;Corporate Other&quot; category, which is not an operating segment but is used to capture certain unallocated items such as general and administrative expenses, restructuring charges, foreign currency hedge gains/losses, and results from the divested MapMyFitness platform [3][5][6]. This structure reflects the Company&#x27;s strategy of operating as a global brand, with its Chief Executive Officer serving as the Chief Operating Decision Maker (CODM) who reviews discrete financial information by these geographic regions [3].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 2 gold chunks retrieved: [3327]<br>cited excerpts: [3, 5, 6]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q019</span>
+    <span class="qtype">extractive</span>
+    <span>What was Columbia Sportswear&#x27;s dividend per share?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>$1.20 por accion</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Columbia Sportswear paid cash dividends of $1.20 per share for the year ended December 31, 2025 [1]. This is consistent with the cash dividends of $1.20 per share also reported for the year ended December 31, 2022 [3].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">2 of 3 gold chunks retrieved: [500, 502]<br>cited excerpts: [1, 3]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q020</span>
+    <span class="qtype">extractive</span>
+    <span>What does Figs sell, and to whom?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Ropa sanitaria: scrubwear y non-scrubwear, vendida en directo a profesionales sanitarios</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">FIGS, Inc. is a founder-led, direct-to-consumer healthcare apparel and lifestyle brand company that designs and sells scrubwear and non-scrubwear items, such as outerwear, underscrubs, footwear, compression socks, lab coats, loungewear and other apparel [1]. Its products are marketed and sold primarily in the United States, mainly through its digital platforms [1], though it also ships to numerous countries in North America, Central America, South America, Europe, Asia and the Middle East as part of its international expansion [7]. The core customer base consists of healthcare professionals, forming a community of approximately 2.9 million active customers as of December 31, 2025 [5][14]. In addition to individual consumers, FIGS operates a B2B platform called TEAMS, which serves institutional customers such as healthcare administrators, hospital departments, medical offices and concierge clinics seeking to standardize and professionalize their organizations&#x27; uniforms [7].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">2 of 2 gold chunks retrieved: [1242, 1450]<br>cited excerpts: [1, 5, 7, 14]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q021</span>
+    <span class="qtype">multi_chunk</span>
+    <span>What risks does Chewy identify regarding its dependence on suppliers?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Chewy identifica cinco riesgos de proveedores: dependencia de proveedores y socios de externalizacion fuera de EE UU (258); incapacidad de captar nuevos proveedores o perder los clave (236); proveedores con capacidad limitada que quiza no acompanen su crecimiento (237); dificultad para sustituir proveedores perdidos (238); y riesgo de que un proveedor incumpla normas de seguridad alimentaria (257).</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Chewy identifies several supplier-related risks. A significant portion of its private brand and non-consumable suppliers are located in China, and political/economic instability, financial instability of suppliers, labor problems, currency fluctuations, tariffs, trade restrictions, and natural disasters could disrupt its outsourcing partners and adversely affect its business [4]. The company also relies on suppliers with limited supply capabilities and has experienced disruptions where suppliers were unable to timely or cost-effectively provide products, which could impair growth if it continues [9]. There is a risk that significant suppliers could discontinue selling to Chewy or discontinue preferential pricing/exclusive incentives, and because pet food buyers are reluctant to switch products, losing a key supplier could be especially harmful [9]. Chewy also faces competitive risk if it cannot identify new suppliers or replace lost ones, and if premium pet food brands become more widely available through supermarkets, warehouse clubs, or mass merchants, or if such retailers offer these brands at lower prices, Chewy&#x27;s sales and margins could suffer [8]. Additionally, a reduction or discontinuance of trade allowances, cooperative advertising, and market development fund incentives from suppliers—or competitors receiving better incentives—could reduce profitability or competitive advantage [8]. Finally, Chewy is dependent on suppliers to comply with product safety laws, and failures by suppliers (including private brand manufacturers) to meet safety or quality standards could lead to recalls, litigation, or loss of consumer confidence [7].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">4 of 5 gold chunks retrieved: [237, 238, 257, 258]<br>cited excerpts: [4, 7, 8, 9]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q022</span>
+    <span class="qtype">multi_chunk</span>
+    <span>What segments does Levi Strauss report, and how did each perform?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Tres segmentos: Americas ($3,297.0M, +3.0%), Europe ($1,699.3M, +5.0%) y Asia ($1,134.4M, +4.8%). Beyond Yoga ($151.3M, +15.4%) se presenta aparte por no alcanzar los umbrales cuantitativos.</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Levi Strauss &amp; Co. reports its business through three geographic reportable segments comprising the Levi&#x27;s Brands business—Americas, Europe, and Asia—with the Beyond Yoga® business presented separately because it does not meet the quantitative thresholds for a reportable segment [3][5][7]. In fiscal year 2025 (ended November 30, 2025), segment net revenues were $3,297.0 million for Americas, $1,699.3 million for Europe, and $1,134.4 million for Asia, totaling $6,130.7 million for Levi&#x27;s Brands, plus $151.3 million from Beyond Yoga® for total net revenues of $6,282.0 million [1]. Segment operating income was $722.9 million for Americas (21.9% of segment net revenues, up 3.7% from $697.0 million/21.8% in FY2024), $366.7 million for Europe (21.6%, up 14.7% from $319.6 million/19.8%), and $148.6 million for Asia (13.1%, up 10.2% from $134.9 million/12.5%), for total Levi&#x27;s Brands operating income of $1,238.2 million (20.2% of net revenues), up 7.5% from $1,151.5 million (19.5%) in FY2024 [15]. Beyond Yoga® reported an operating loss of $(13.6) million in FY2025 (-9.0% of its net revenues), an improvement of 32.0% from a $(20.0) million loss (-15.3%) in FY2024 [15]. After accounting for restructuring charges of $(24.5) million, goodwill/intangible asset impairment charges of $(2.5) million, and corporate expenses of $(520.0) million, total operating income for FY2025 was $677.6 million, representing a 10.8% operating margin, up significantly from $262.7 million (4.4% margin) in FY2024 [15][1].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 3 gold chunks retrieved: [2000]<br>cited excerpts: [1, 3, 5, 7, 15]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q023</span>
+    <span class="qtype">multi_chunk</span>
+    <span>What risks does Nike identify relating to counterfeit products and intellectual property?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Nike declara que descubre periodicamente reproducciones falsificadas de sus productos y que, si no logra hacer valer sus derechos de propiedad intelectual, la venta continuada de esos productos podria perjudicar sus ventas y su marca.</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Nike identifies several risks relating to counterfeit products and intellectual property. It notes that it periodically discovers counterfeit reproductions of its products or products that otherwise infringe its intellectual property rights, and if unsuccessful in enforcing these rights, continued sales of such products could adversely affect sales, the brand, and could shift consumer preference away from Nike&#x27;s products [5]. Nike also states its actions to establish and protect intellectual property rights may not be adequate to prevent imitation by others, and it may be unable to prevent others from seeking to block sales of its products as violations of proprietary rights [5]. Additionally, Nike faces risk of liability if third parties successfully claim infringement of their intellectual property rights, which could result in expensive, time-consuming defense, costly license agreements, or significant damages or injunctions against development, manufacturing, use, importation, and/or sale of certain products [5][8]. The company also notes that laws in certain countries may not protect or allow enforcement of intellectual property rights to the same extent as U.S. laws, exposing Nike to significant expenses and liability, and potential adverse effects on business or financial condition if it cannot successfully protect its rights or resolve conflicts [8]. Finally, Nike highlights emerging risks from developing regulations around new technologies like generative AI, which may give rise to intellectual property infringement claims or reputational harm [8][9].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 1 gold chunks retrieved: [2431]<br>cited excerpts: [5, 8, 9]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q024</span>
+    <span class="qtype">multi_chunk</span>
+    <span>What supply chain and manufacturing risks does Lululemon disclose?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Lululemon declara varios riesgos: dependencia de proveedores internacionales y disrupciones de la cadena (2233); concentracion geografica del tejido, 34% de Taiwan y 29% de China continental, expuesta a riesgo geopolitico (2234); retrasos y sobrecostes de transporte (2236); aranceles y restricciones comerciales que comprimen margenes (2227); e inestabilidad economica y politica en los mercados de aprovisionamiento (2226).</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Lululemon discloses that its supply chain is dependent on international suppliers and could be disrupted by trade restrictions, political instability, war (including conflicts in the Middle East), terrorism, severe weather, natural disasters, public health crises, product recalls, labor supply shortages or stoppages, financial or operational instability of key suppliers and carriers, and changes in diplomatic or trade relationships, including sanctions, restrictions, and tariffs [2]. It does not manufacture its own products and relies predominantly on suppliers and manufacturers in APAC and China Mainland, with approximately 40% of products manufactured in Vietnam, 18% in Cambodia, 11% in Sri Lanka, 11% in Indonesia, and 7% in Bangladesh in 2025 [2][14]. Fabric sourcing is concentrated, with approximately 34% originating from Taiwan, 29% from China Mainland, 10% from South Korea, and 10% from Vietnam, exposing the company to geopolitical risks such as potential military conflict, trade restrictions, or disruptions affecting Taiwan [1][2]. A relatively small number of vendors supply and manufacture a significant portion of products—approximately 51 manufacturing vendors and 65 fabric suppliers in 2025, with the top five vendors producing 47% of products (largest at 15%) and the top five fabric suppliers producing 48% of fabric (largest at 20%)—so losing key vendors could adversely affect the business [1][10][14]. The company has no long-term contracts with suppliers or manufacturers, faces competition for fabrics and production capacity, and could encounter delays and added costs if it needs to expand or replace suppliers, including training new vendors in its quality standards [4][10]. Additional risks include noncompliance by suppliers/manufacturers with lululemon&#x27;s Vendor Code of Ethics or applicable laws, fluctuating raw material costs, product manufacturing or design defects, freight capacity constraints, and broader global political/economic instability including trade disputes, tariffs, customs changes, and legislation like the Uyghur Forced</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">4 of 5 gold chunks retrieved: [2226, 2233, 2234, 2236]<br>cited excerpts: [1, 2, 4, 10, 14]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q025</span>
+    <span class="qtype">multi_chunk</span>
+    <span>How did each of Under Armour&#x27;s segments perform in fiscal 2026?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Ingresos: North America $2,859,420 (-7.9%), EMEA $1,180,510 (+8.6%), Asia-Pacific $719,134 (-4.8%), Latin America $234,191 (+8.7%). Resultado operativo: North America $442,503 (-29.7%), EMEA $191,487 (+30.1%), Asia-Pacific $84,466 (+15.4%), Latin America $29,901 (-37.1%).</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Based on the excerpts, Under Armour&#x27;s segment performance in Fiscal 2026 compared to Fiscal 2025 was as follows:
+
+- **North America**: Net revenues decreased by $246.2 million, or 7.9%, to $2,859,420 (in thousands), driven by declines in both wholesale and direct-to-consumer channels, including e-commerce and owned/operated retail stores [16]. Total operating income for North America was $442,503 (in thousands) [9].
+- **EMEA**: Net revenues increased by $93.9 million, or 8.6%, to $1,180,510 (in thousands), driven by growth in both wholesale and direct-to-consumer channels (specifically owned and operated retail stores, partially offset by e-commerce declines) and license revenues, aided by favorable foreign exchange rates [16]. Total operating income for EMEA was $191,487 (in thousands) [9].
+- **Asia-Pacific**: Net revenues decreased by $36.3 million, or 4.8%, to $719,134 (in thousands) [16], with total operating income of $84,466 (in thousands) [9].
+- **Latin America**: Net revenues increased by $18.8 million, or 8.7%, to $234,191 (in thousands) [16], with total operating income of $29,901 (in thousands) [9].
+- **Corporate Other**: Net revenues were $(26,885) (in thousands), reflecting a change of $(28,129) thousand or (2261.2)%, primarily due to foreign currency hedge gains and losses [16].
+
+Overall, total net revenues decreased 3.8% for Fiscal 2026, with North America and Asia-Pacific declining while EMEA and Latin America grew [11][16].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 3 gold chunks retrieved: [3196]<br>cited excerpts: [9, 11, 16]</dd>
+    <dt>citation problems</dt><dd class="chunks">uncited figure: Based on the excerpts, Under Armour&#x27;s segment performance in Fiscal 20</dd>
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q026</span>
+    <span class="qtype">multi_chunk</span>
+    <span>What risks does Etsy disclose about seller and buyer behaviour on its marketplace?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Etsy declara varios riesgos sobre el comportamiento de vendedores y compradores: decisiones de politica percibidas como arbitrarias o inconsistentes y herramientas de moderacion inmaduras (1080); compradores insatisfechos por articulos que no son como se describian, vendedores populares desbordados y transacciones fraudulentas (1042); vendedores y compradores que se van o reducen su actividad, y los nuevos no generan el mismo GMS (1041); y retrasos de envio que encarecen costes al vendedor y deterioran la experiencia del comprador (1054).</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Etsy discloses that its financial performance—specifically GMS, revenue, and Adjusted EBITDA—depends significantly on attracting and retaining active buyers and sellers and increasing their engagement, noting that Etsy marketplace active buyers and GMS per active buyer on a trailing twelve month basis have already declined year-over-year [8]. The company warns that if existing buyers find the platform unappealing due to negative experiences, uncompetitive shipping charges, delayed shipping times, inadequate customer service, buyer fees, or declining interest in seller goods, they may purchase less and refer fewer new users, while dissatisfied sellers may stop listing items or using services and stop referring others, which could harm financial performance [8]. It also notes risk if broader trends supporting self-employment and supplemental income reverse, potentially reducing the number of sellers and listings [8]. Separately, Etsy discloses risk from bad actors and fraudsters who use tactics like social engineering, phishing, spam, and spoofing—sometimes amplified by AI—to exploit or defraud buyers and sellers, and acknowledges its detection tools and controls may not be adequate to keep up with evolving fraudulent techniques, potentially reducing seller and buyer trust and engagement [13]. Etsy also states that shortcomings, errors, or perceived unfairness in policy enforcement across its marketplaces (including differences between Etsy and Depop&#x27;s tools) could lead to negative publicity, distrust from members, legal/regulatory risk, or loss of confidence in its services [4]. Additionally, the company notes marketing efforts aimed at attracting new buyers, reactivating lapsed buyers, and encouraging habitual purchasing may not succeed, which could harm business growth [11].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 4 gold chunks retrieved: [1080]<br>cited excerpts: [4, 8, 11, 13]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q027</span>
+    <span class="qtype">multi_chunk</span>
+    <span>How did Gap&#x27;s individual brands perform during the fiscal year?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Ventas comparables FY2025: Old Navy Global +3%, Gap Global +6%, Banana Republic Global +3%, Athleta Global -9%, total Gap Inc +3%. Ventas netas FY2025 en millones: Old Navy $8,657, Gap $3,501, Banana Republic $1,916, Athleta $1,219.</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Based on the excerpts, Gap Inc.&#x27;s net sales for fiscal 2025 increased $280 million, or 2 percent, compared with fiscal 2024, with the increase &quot;primarily related to Old Navy Global and Gap Global, our two largest brands, partially offset by Athleta Global&quot; [12]. The overall company net sales were $15,366 million in fiscal 2025 versus $15,086 million in fiscal 2024 [3]. In terms of store footprint, Old Navy North America had a net increase of 6 stores (to 1,249), while other brands saw net closures: Gap North America (-19 to 453), Gap Asia (-12 to 122), Banana Republic North America (-20 to 380), Banana Republic Asia (-1 to 42), and Athleta North America (-10 to 260) [12]. The excerpts do not provide individual brand-level net sales or operating income figures beyond this directional commentary and store count changes.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">0 of 3 gold chunks retrieved: []<br>cited excerpts: [3, 12]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q028</span>
+    <span class="qtype">multi_chunk</span>
+    <span>What does Wayfair disclose about its logistics and delivery network?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>La red logistica de Wayfair consta de CastleGate y la Wayfair Delivery Network (WDN), mas CastleGate Forwarding para servicios de entrada. CastleGate permite a los proveedores posicionar inventario por adelantado en sus almacenes, con entrega en dos dias o menos a la mayoria de la poblacion de EE UU. El metodo principal de cumplimiento es una red de envio directo integrada con la tecnologia de los proveedores.</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Wayfair&#x27;s logistics network was built specifically for the home category, where items can be bulky, heavy, and prone to damage, with its primary fulfillment method being a drop-ship network integrated with suppliers&#x27; back-end technology to send order information directly to a supplier&#x27;s warehouse [1][11]. Delivery is made primarily through FedEx for small parcel products, and through third-party line haul trucking companies and last mile home delivery agents for large parcel products [1][11][10]. The company has grown the percentage of orders shipped from its CastleGate warehouses, supported by CastleGate Forwarding (CGF) services offering inbound freight, drayage, and ocean services for suppliers shipping from Asia directly to CastleGate locations [1][4]. The majority of large parcel items are delivered through the Wayfair Delivery Network (WDN), which includes consolidation centers, cross docks, and last mile delivery facilities [1][4]. Wayfair believes its proprietary logistics network helps drive incremental sales through faster delivery times, lower prices, and a better home delivery experience, and for CastleGate-shipped items it can deliver many products to a majority of the U.S. population in two days or less [1][13]. The company also notes it primarily relies on a single carrier, FedEx, for small parcel delivery and on third-party national, regional, and local transportation companies for large parcel deliveries, which exposes it to risks beyond its control such as weather, labor issues, and supply chain disruptions [10].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">5 of 5 gold chunks retrieved: [3521, 3524, 3526, 3529, 3685]<br>cited excerpts: [1, 4, 10, 11, 13]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q029</span>
+    <span class="qtype">multi_chunk</span>
+    <span>What tariff and trade risks does Abercrombie &amp; Fitch identify, and what mitigation does it describe?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Riesgo: la mayor parte de la mercancia se fabrica fuera de EE UU y los aranceles impuestos a esos paises han afectado adversamente al negocio (54, 55); otros paises han impuesto aranceles de represalia (56). Mitigacion: gestion de costes de producto, reduccion de gastos operativos y crecimiento del precio medio unitario (57). Impacto: los aranceles restaron 90 millones de dolares al resultado operativo en Fiscal 2025, 170 puntos basicos sobre ventas netas (84).</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Abercrombie &amp; Fitch identifies significant uncertainty from changing tariff rates and shifting U.S. trade policies, including retaliatory tariffs imposed by other countries on U.S. exports, which could disrupt global trade flows and adversely affect the business [1]. The company notes that increased or maintained elevated tariffs on goods from sourcing countries would raise merchandise costs relative to typical costs, potentially harming margins and consumer demand [1]. It also flags risks of incorrectly anticipating trade policy outcomes, missing business opportunities, or failing to adapt strategies effectively [6]. Notably, tariffs on imported goods negatively impacted operating income by $90 million, or 170 basis points as a percent of net sales, during Fiscal 2025, and the company expects an additional approximately $40 million incremental impact (about 70 basis points) in Fiscal 2026 from a 15% tariff on all U.S. imports [2][7]. As a subsequent event, the company disclosed that the U.S. Supreme Court struck down certain IEEPA tariffs in February 2026 and a new 10% global tariff under Section 122 of the Trade Act was announced, with uncertain impact including possible tariff refunds [3]. To mitigate these risks, the company describes a &quot;playbook&quot; of strategies including evaluating supply chain footprint changes, negotiating with vendors, managing product costs, pursuing average unit retail (AUR) growth, and considering operating expense reductions, while acknowledging these efforts may not fully offset tariff impacts [1][7].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">3 of 5 gold chunks retrieved: [56, 57, 84]<br>cited excerpts: [1, 2, 3, 6, 7]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q030</span>
+    <span class="qtype">multi_chunk</span>
+    <span>What does Honest Company say about its product categories and its channel mix?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Categorias: Diapers and Wipes, Skin and Personal Care, y Household and Wellness. Canal: ingresos por venta a traves de minoristas lideres y sus webs, sitios de comercio electronico de terceros y su propia web, agrupados en dos canales de informacion, Retail y Digital.</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Honest Company describes itself as a personal care company offering products spanning categories across wipes, personal care, diapers, and beauty, for consumers from babies to adults [1][2]. In terms of product-level performance, point of sale consumption growth in 2025 significantly outpaced the industry in wipes (31% vs. 5% industry) and baby personal care (12% vs. 3% industry), while diapers declined 15% versus a 1% industry decline [12][15].
+
+On channel mix, the Company generates revenue by selling through leading retailers and their websites, third-party ecommerce sites, and, prior to December 31, 2025, through Honest.com [11]. Revenue generated from Honest.com was 10%, 13% and 17% of total revenue during the years ended December 31, 2025, 2024 and 2023, respectively, before the Company discontinued Honest.com as a shipping and fulfillment channel effective December 31, 2025 [6][4]. This shift is part of &quot;Powering Honest Growth,&quot; a transformation initiative aimed at exiting certain lower-margin, non-strategic categories and channels—including Honest.com fulfillment, apparel, and Canadian retail/online stores—to improve simplicity, focus, and profitability [10][16]. The Company also notes a loss of distribution with two major customers on certain diaper SKUs due to retailer footprint changes and shifts toward non-gendered prints, negatively impacting diaper revenue [5].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">4 of 4 gold chunks retrieved: [1623, 1782, 1783, 1795]<br>cited excerpts: [1, 2, 4, 5, 6, 10, 11, 12, 15, 16]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q031</span>
+    <span class="qtype">comparative</span>
+    <span>Do both Nike and Under Armour cite foreign currency exchange rates as a risk factor?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Si, ambos. Nike lo declara en Item 1A: &#x27;We transact in various currencies, which creates exposure to fluctuations in foreign currency exchange rates relative to the U.S. Dollar&#x27;. Under Armour tambien en Item 1A: &#x27;our results of operations could be adversely impacted by changes in foreign currency exchange rates&#x27;.</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Yes. NIKE identifies foreign currency exchange risk as a significant exposure, describing its foreign exchange risk management program that addresses currency fluctuations affecting its consolidated results of operations, financial position, and cash flows [1], with detailed transactional exposures related to product costs, external sales, and monetary assets/liabilities [7][9]. Similarly, Under Armour explicitly states in its risk factors that &quot;Our financial results could be adversely impacted by currency exchange rate fluctuations,&quot; noting that approximately 48% of Fiscal 2026 consolidated net revenues were generated outside the United States, exposing the company to translation and transaction currency risks [4]. Under Armour further discusses this risk in its market risk disclosures, describing its foreign exchange risk management program consisting of designated cash flow hedges and undesignated hedges across multiple currency pairs [6][14]. Both companies therefore cite foreign currency exchange rate risk as a material factor affecting their financial results.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 2 gold chunks retrieved: [3165]<br>cited excerpts: [1, 4, 6, 7, 9, 14]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q032</span>
+    <span class="qtype">comparative</span>
+    <span>Do both Lululemon and Nike report a direct-to-consumer channel?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Si, ambos. Lululemon declara tres canales de venta principales: tiendas propias, comercio electronico y otros (2154). Nike vende a traves de NIKE Direct, que agrupa tiendas propias y plataformas digitales, ademas de mayoristas (2367).</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Yes. lululemon operates company-operated stores and e-commerce, along with other channels such as temporary locations, wholesale, outlets, and license and supply arrangements [9][7]. NIKE reports a &quot;NIKE Direct&quot; channel comprised of NIKE-owned retail stores and sales through its digital platforms (&quot;NIKE Brand Digital&quot;), which is a direct-to-consumer channel distinct from its wholesale operations [2][8].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 3 gold chunks retrieved: [2364]<br>cited excerpts: [2, 7, 8, 9]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q033</span>
+    <span class="qtype">comparative</span>
+    <span>Do both Chewy and Wayfair describe risks related to acquiring new customers?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Si, ambos. Chewy declara que su exito depende de captar clientes de forma rentable, retener a los existentes y aumentar las ventas netas por cliente activo (235). Wayfair declara que puede no lograr captar nuevos clientes ni aumentar el gasto de los existentes, con dano a su negocio y resultados (3742).</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Yes. Chewy discloses a risk factor that its success depends on acquiring and retaining new customers cost-effectively, noting that customer acquisition requires significant investment and that net sales from new customers may not exceed acquisition costs, potentially materially and adversely affecting its business, financial condition and results of operations [13]. Wayfair, meanwhile, discusses risks tied to expanding its business into new brands, channels, products, programs, services, technologies and geographic markets (e.g., launching Muse and Wayfair Rewards), noting these efforts require substantial upfront investment and may not generate satisfactory net revenue to offset costs, with potential material adverse effects if market acceptance is lacking [6]. Both companies therefore address customer-acquisition-related risks, though Chewy&#x27;s disclosure is framed explicitly around new customer acquisition and retention costs [13], while Wayfair&#x27;s is framed around expansion into new offerings/markets as a means of growth [6].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 3 gold chunks retrieved: [3742]<br>cited excerpts: [6, 13]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q034</span>
+    <span class="qtype">comparative</span>
+    <span>Do both Gap and Abercrombie &amp; Fitch identify tariffs as a risk factor?</span>
+    <span class="verdict v-ref">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Si, ambos en Item 1A. Gap declara que los aumentos de aranceles y otras restricciones comerciales podrian afectar adversamente a su negocio, resultados y situacion financiera (1441). Abercrombie declara que la mayor parte de su mercancia se fabrica fuera de EE UU y que los aranceles impuestos han afectado adversamente al negocio (54, 55), y que otros paises han impuesto aranceles de represalia (56).</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+The excerpts provided are exclusively from Abercrombie &amp; Fitch Co.&#x27;s 10-K filing and contain no information about Gap Inc.&#x27;s risk factor disclosures; Gap&#x27;s own 10-K filing would be needed to determine whether it identifies tariffs as a risk factor.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 4 gold chunks retrieved: [56]<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q035</span>
+    <span class="qtype">comparative</span>
+    <span>Which reports higher net revenues, Crocs or Deckers Outdoor?</span>
+    <span class="verdict v-ok">answered</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>Deckers Outdoor, con $5,378,411 miles frente a los $4,040,647 miles de Crocs. Deckers cierra ejercicio en marzo de 2026 y Crocs en diciembre de 2025, asi que los periodos no son identicos.</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">Deckers Outdoor Corporation reports higher net revenues than Crocs. Deckers&#x27; total net sales for the fiscal year ended March 31, 2026 were $5,472,296 (in thousands) [16], compared to Crocs, Inc.&#x27;s total consolidated revenues of $4,040,647 thousand for the year ended December 31, 2025 [15].</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">1 of 3 gold chunks retrieved: [950]<br>cited excerpts: [15, 16]</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q041</span>
+    <span class="qtype">unanswerable_absent</span>
+    <span>What is the home address of Etsy&#x27;s chief executive officer?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+This information would typically be found in Etsy&#x27;s proxy statement (DEF 14A) or other personnel records, not in the 10-K filing, and companies generally do not disclose executives&#x27; home addresses in public SEC filings.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q042</span>
+    <span class="qtype">unanswerable_absent</span>
+    <span>How many employees does Wayfair plan to hire next year?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+The excerpts do not disclose future hiring plans; this information, if available, would typically appear in a workforce planning or human capital disclosure not included here.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q043</span>
+    <span class="qtype">unanswerable_absent</span>
+    <span>What was the total compensation package of Nike&#x27;s chief executive officer?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+This would typically be found in NIKE&#x27;s proxy statement (DEF 14A) Summary Compensation Table, which discloses the CEO&#x27;s total compensation package.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q044</span>
+    <span class="qtype">unanswerable_absent</span>
+    <span>How much did Lululemon spend on digital advertising during the year?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+A breakdown of specific digital advertising spend would likely be found in the Marketing/Integrated Marketing disclosures or Selling, General and Administrative Expenses detail within the Item 7 MD&amp;A or notes to the financial statements, which is not provided in these excerpts (only &quot;digital marketing expenses&quot; increase figures, not total spend, are mentioned).</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q045</span>
+    <span class="qtype">unanswerable_absent</span>
+    <span>What are the names of Chewy&#x27;s five largest suppliers?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+A list of Chewy&#x27;s largest suppliers would likely be found in a supply chain or vendor concentration disclosure, which is not included in these excerpts.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q046</span>
+    <span class="qtype">unanswerable_adversarial</span>
+    <span>What were Wayfair&#x27;s net revenues for fiscal 2030?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+This filing is a 10-K for fiscal year 2025 (covering fiscal years 2025, 2024, and 2023); a report or filing covering fiscal year 2030 would be needed to answer this question.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q047</span>
+    <span class="qtype">unanswerable_adversarial</span>
+    <span>What percentage of Crocs&#x27; fiscal 2025 revenue came from its metaverse division?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+The excerpts do not mention a &quot;metaverse division&quot; or any related revenue breakdown; this information, if it exists, would likely be found in a more detailed segment or product line disclosure within the 10-K.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q048</span>
+    <span class="qtype">unanswerable_adversarial</span>
+    <span>By how much did Nike&#x27;s board increase the CEO&#x27;s salary in fiscal 2026?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+This would require executive compensation disclosures, such as the Summary Compensation Table or Compensation Discussion and Analysis, typically found in NIKE&#x27;s proxy statement (DEF 14A) rather than the 10-K excerpts provided.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q049</span>
+    <span class="qtype">unanswerable_absent</span>
+    <span>What is the average salary of a Warby Parker retail employee?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+The 10-K excerpts do not disclose per-employee compensation figures; this would typically require internal compensation records or a proxy statement disclosure not present here.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q050</span>
+    <span class="qtype">unanswerable_absent</span>
+    <span>How much revenue did Crocs&#x27; store on Fifth Avenue generate?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+This would likely be found in individual store-level sales disclosures, which are not typically broken out in a 10-K filing.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q051</span>
+    <span class="qtype">unanswerable_absent</span>
+    <span>What are the payment terms in Peloton&#x27;s contract with its main manufacturer?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+The excerpts describe Peloton&#x27;s general reliance on contract manufacturers and third-party suppliers, including purchase order and cancellation practices, but do not identify a &quot;main manufacturer&quot; or specify payment terms of any such contract; this information would likely be found in Peloton&#x27;s material supply/manufacturing agreements or related exhibits to the 10-K.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q052</span>
+    <span class="qtype">unanswerable_absent</span>
+    <span>How many stores does Abercrombie &amp; Fitch plan to open in the next three years?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+The excerpts describe the number of stores opened, remodeled, and closed during Fiscal 2025 and Fiscal 2024, but do not include any forward-looking store opening plans or targets for the next three years; this information, if disclosed, would likely appear in a strategic outlook or investor presentation section not included here.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q053</span>
+    <span class="qtype">unanswerable_absent</span>
+    <span>What is the customer lifetime value Yeti uses in its internal planning?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+The excerpts provided do not include any discussion of customer lifetime value or related internal planning metrics; this information, if disclosed, would likely appear in YETI&#x27;s internal management discussion of key performance indicators or investor presentations, which are not part of the excerpted filing sections here.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q054</span>
+    <span class="qtype">unanswerable_adversarial</span>
+    <span>What were Etsy&#x27;s net revenues for fiscal 2018?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+The excerpts only cover fiscal years 2023–2025 and do not contain revenue figures for fiscal 2018; this information would be found in Etsy&#x27;s FY2018 Form 10-K.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: none</dd>
+    
+  </dl></div>
+</details>
+<details>
+  <summary><span class="qid">Q055</span>
+    <span class="qtype">unanswerable_adversarial</span>
+    <span>How much revenue did Lululemon&#x27;s footwear segment generate in fiscal 2026?</span>
+    <span class="verdict v-ok">refused</span></summary>
+  <div class="qbody"><dl>
+    <dt>labeled answer</dt>
+    <dd>— none; this question has no answer in the corpus</dd>
+    <dt>generated, run 0</dt>
+    <dd class="answer">INSUFFICIENT_CONTEXT
+
+The excerpts disaggregate net revenue by category only into &quot;Women&#x27;s apparel,&quot; &quot;Men&#x27;s apparel,&quot; and &quot;Accessories and other categories&quot; (with footwear grouped into the latter, not broken out separately), and fiscal 2026 is a future/next fiscal year not yet reported in these excerpts [4][6]; a segment-level footwear breakout would need to be found in a future 10-K filing or additional financial disclosures not present here.</dd>
+    <dt>retrieval</dt>
+    <dd class="chunks">no gold chunks — the corpus does not answer this<br>cited excerpts: [4, 6]</dd>
+    
+  </dl></div>
+</details>
+</div></section>
+
+<footer><div class="wrap">
+  <p>Every figure on this page is read from <code>eval/results/*.json</code> at
+  build time. Nothing is typed in by hand, so the page cannot drift from what was
+  measured.</p>
+  <p>The corpus is public: 19 10-K filings pulled from SEC EDGAR. The labels are
+  not — they were assigned by reading the filings, and the criterion is stated in
+  the repository, because a recall figure without its labeling criterion is
+  uninterpretable.</p>
+  <p>Retrieval: 16 chunks per query, hybrid dense and lexical with
+  reciprocal rank fusion, restricted to the company named in the question.
+  Generation: claude-sonnet-5, 3 runs per question. Embeddings computed
+  locally; only the generation call leaves the machine.</p>
+</div></footer>
+
+</body></html>

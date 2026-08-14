@@ -1,0 +1,41 @@
+# Pruned against the imports the code actually makes. Three packages were listed
+# and never imported, and one of them was the tokenizer src/chunk.py spends a
+# paragraph arguing against using.
+
+# Ingestion and parsing
+beautifulsoup4>=4.12
+lxml>=5.0                 # parse.py asks for it by name: BeautifulSoup(html, "lxml")
+
+# Embeddings, local on CPU
+sentence-transformers>=3.0
+numpy>=1.26               # imported directly by embed.py, load.py, diagnose_vectors.py
+
+# Database
+psycopg2-binary>=2.9
+
+# Generation
+#
+# The [vertex] extra pulls google-auth, which AnthropicVertex needs. Without it
+# `LLM_PROVIDER=vertex` fails at import, which is the whole path docs/vertex-setup
+# documents. The plain package is enough only for the direct API.
+anthropic[vertex]>=0.40
+
+# Evaluation
+pyyaml>=6.0
+
+# ── removed, and why ─────────────────────────────────────────────────
+#
+# tiktoken     Never imported. src/chunk.py counts with the model's own
+#              WordPiece tokenizer on purpose: counting 420 with OpenAI's
+#              segmentation and embedding with BERT's makes the 420 fiction.
+#              Shipping the dependency the code argues against invites the
+#              reasonable question of whether the argument is real.
+#
+# pandas       Never imported. Nothing in src/ builds a dataframe.
+#
+# pgvector     Never imported. src/load.py serialises vectors to the '[...]'
+#              literal by hand and pgvector's work happens in the database, via
+#              `create extension vector` in sql/schema.sql.
+#
+# python-dotenv  Never imported. The environment is set by load-env.ps1 and by
+#              docker compose, not read from Python.
