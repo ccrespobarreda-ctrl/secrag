@@ -87,6 +87,28 @@ ITEM_SECTIONS = {
 # exhibit index is boilerplate; indexing them adds noise to retrieval.
 SECTIONS_TO_INDEX = ["Item 1", "Item 1A", "Item 3", "Item 7", "Item 7A", "Item 8"]
 
+# Items that are never indexed but must still be recognised, because a heading
+# the parser does not know cannot close the section before it.
+#
+# Item 9 sits between Item 8 and Item 9A. With neither in this list, the body of
+# Item 8 -- the financial statements, the section the corpus exists for -- ran
+# past its own end and swallowed Item 9 whole:
+#
+#     "...as set forth in the index to consolidated financial statements on
+#      page F-1.  ITEM 9. Changes in and Disagreements with Accountants  None."
+#
+# These carry no title because none is ever shown. They exist to be a boundary.
+BOUNDARY_ONLY_ITEMS = [
+    "Item 4",    # Mine Safety Disclosures
+    "Item 6",    # Selected Financial Data / [Reserved]
+    "Item 9",    # Changes in and Disagreements with Accountants
+    "Item 9B",   # Other Information
+    "Item 9C",   # Foreign Jurisdictions that Prevent Inspections
+    "Item 10", "Item 11", "Item 12", "Item 13", "Item 14",
+    "Item 15",   # Exhibits
+    "Item 16",   # Form 10-K Summary
+]
+
 # ─────────────────────────────────────────────────────────────────────
 # Chunking
 # ─────────────────────────────────────────────────────────────────────

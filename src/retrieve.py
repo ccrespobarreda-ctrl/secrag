@@ -74,7 +74,7 @@ COMPANY_ALIASES: dict[str, tuple[str, ...]] = {
     "DECK": ("deckers", "ugg", "hoka"),
     "UAA":  ("under armour", "under armor"),
     "COLM": ("columbia sportswear", "columbia"),
-    "GAP":  ("gap inc", "the gap", "old navy", "banana republic", "athleta"),
+    "GAP":  ("gap inc", "old navy", "banana republic", "athleta"),
     "ANF":  ("abercrombie", "hollister"),
     "URBN": ("urban outfitters", "anthropologie", "free people"),
     "WRBY": ("warby parker", "warby"),
@@ -82,6 +82,31 @@ COMPANY_ALIASES: dict[str, tuple[str, ...]] = {
     "HNST": ("honest company", "the honest"),
     "LEVI": ("levi strauss", "levi's", "levis", "levi"),
     "PTON": ("peloton",),
+}
+
+# SKX is in config.COMPANIES and has no entry here on purpose: Skechers did not
+# resolve in the SEC ticker index and is not in data/manifest.json, so there are
+# 19 filings for 20 configured tickers. An alias for a company the corpus does
+# not contain would filter every one of its questions down to nothing.
+
+# ─────────────────────────────────────────────────────────────────────
+# Names that are also ordinary words
+# ─────────────────────────────────────────────────────────────────────
+# A literal alias plus a word boundary is not enough for every company, and Gap
+# failed in both directions at once:
+#
+#   "What were Gap's net sales in fiscal 2025?"      -> nothing detected
+#   "Describe the gap in supply chain coverage"      -> GAP detected
+#
+# The first because no alias was the bare word; the second because "the gap"
+# was in the list above and matches the common noun exactly. The bare word was
+# left out to avoid the false positive and produced it anyway.
+#
+# So the ambiguous names get a pattern: the word, optionally possessive, except
+# where the preposition that follows makes it a common noun. Everything else
+# stays a literal, because a literal is easier to read and to add to.
+COMPANY_PATTERNS: dict[str, str] = {
+    "GAP": r"\bgap(?:'s|\u2019s)?\b(?!\s+(?:in|between|of|to|from|versus|vs\.?)\b)",
 }
 
 
@@ -103,6 +128,16 @@ def detect_companies(question: str) -> list[str]:
             if m:
                 found.append((m.start(), ticker))
                 break
+
+    # Patterns are checked for tickers no literal matched, so a specific alias
+    # ("old navy") still wins the position it appears at.
+    matched = {t for _, t in found}
+    for ticker, pattern in COMPANY_PATTERNS.items():
+        if ticker in matched:
+            continue
+        m = _re.search(pattern, lowered)
+        if m:
+            found.append((m.start(), ticker))
 
     seen, out = set(), []
     for _, ticker in sorted(found):
@@ -258,6 +293,24 @@ def search_hybrid(cur, query: str, query_vector: list[float],
             from chunks c
             join documents d using (doc_id)
             where c.content_tsv @@ {expr} {where}
+            -- Redundant, and kept deliberately.
+            --
+            -- Without it this reads like a bug: LIMIT with no ORDER BY should
+            -- return an arbitrary 50 rows. It does not, and the plan says why:
+            --
+            --     Limit  ->  WindowAgg  ->  Sort (Sort Key: ts_rank ... DESC)
+            --
+            -- row_number() OVER (ORDER BY ts_rank) forces the sort, WindowAgg
+            -- emits in that order, and LIMIT truncates the sorted stream. Both
+            -- forms were measured against the same fixture and returned ranks
+            -- 1..50 identically, on identical plans -- the planner recognises
+            -- that this clause matches the window ordering and adds no second
+            -- sort, so the line costs nothing.
+            --
+            -- It stays because the guarantee lives in the window clause, not
+            -- here: change that ORDER BY and the pool silently stops being the
+            -- top of anything.
+            order by ts_rank(c.content_tsv, {expr}) desc
             limit %(pool)s
         ),
         fused as (

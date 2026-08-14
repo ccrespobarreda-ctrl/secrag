@@ -161,19 +161,33 @@ def find_sections(text: str) -> list[dict]:
     candidates = []
     for m in _ITEM_PATTERN.finditer(text):
         item = f"Item {m.group(1).upper()}"
-        if item not in C.ITEM_SECTIONS:
+        # Boundary-only items are collected so they can close the section before
+        # them, and dropped before anything is emitted. Without them in the list
+        # an unknown heading is invisible, and the previous section runs through
+        # it: Item 8 was ending at Item 9A and carrying Item 9 inside it.
+        if item not in C.ITEM_SECTIONS and item not in C.BOUNDARY_ONLY_ITEMS:
             continue
         candidates.append({
             "item": item,
-            "title": C.ITEM_SECTIONS[item],
+            "title": C.ITEM_SECTIONS.get(item, ""),
+            "boundary_only": item not in C.ITEM_SECTIONS,
             "heading_text": m.group(0).strip()[:90],
+            # Two offsets, because the body starts after this heading and ends
+            # before the next one. Using a single offset put every section's
+            # last line inside the previous section: Item 8 ended with
+            # "ITEM 9. Changes in and Disagreements with Accountants" attached.
+            "heading_start": m.start(),
             "start": m.end(),
         })
 
     sections = []
     for i, cand in enumerate(candidates):
-        end = candidates[i + 1]["start"] if i + 1 < len(candidates) else len(text)
+        end = (candidates[i + 1]["heading_start"] if i + 1 < len(candidates)
+               else len(text))
         body = text[cand["start"]:end].strip()
+
+        if cand["boundary_only"]:
+            continue
 
         if len(body) < MIN_SECTION_CHARS:
             log.debug("  skipped %s at offset %d (%d chars — table of contents)",
