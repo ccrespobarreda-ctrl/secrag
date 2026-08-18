@@ -1,0 +1,53 @@
+{
+ "generated": "2026-08-17T17:25:03",
+ "judge": "claude-sonnet-5",
+ "run_judged": 0,
+ "n_answerable": 1,
+ "counts": {
+  "PARTIALLY_CORRECT": 1,
+  "CORRECT": 0,
+  "INCORRECT": 0,
+  "REFUSED": 0,
+  "NO_REFERENCE": 0,
+  "JUDGE_ERROR": 0
+ },
+ "correct_rate": 0.0,
+ "incorrect_rate": 0.0,
+ "note": "Correctness compares the generated answer against a reference written by reading the filing. It is not groundedness: an answer can be fully supported by the excerpt it cites and still state a different fact than the question asked for.",
+ "results": [
+  {
+   "id": "Q022",
+   "type": "multi_chunk",
+   "verdict": "PARTIALLY_CORRECT",
+   "reason": "Segment names and revenue figures match, but the reference's net revenue growth percentages (Americas +3.0%, Europe +5.0%, Asia +4.8%, Beyond Yoga +15.4%) are missing, replaced instead by unrelated operating income growth figures.",
+   "raw": "{\"verdict\": \"PARTIALLY_CORRECT\", \"reason\": \"Segment names and revenue figures match, but the reference's net revenue growth percentages (Americas +3.0%, Europe +5.0%, Asia +4.8%, Beyond Yoga +15.4%) are missing, replaced instead by unrelated operating income growth figures.\"}",
+   "reference": "Tres segmentos: Americas ($3,297.0M, +3.0%), Europe ($1,699.3M, +5.0%) y Asia ($1,134.4M, +4.8%). Beyond Yoga ($151.3M, +15.4%) se presenta aparte por no alcanzar los umbrales cuantitativos.",
+   "generated": "Levi Strauss & Co. manages its business according to three reportable segments\u2014Americas, Europe, and Asia\u2014which collectively comprise the Levi's Brands business, including the Levi's\u00ae, Levi Strauss Signature\u2122 and Denizen\u00ae brands [1][3][5][6][7]. Additionally, the Beyond Yoga\u00ae business is managed separately and does not meet the quantitative thresholds for reportable segments but is presented separately for transparency [1][3][5][6][7].\n\nFor the year ended November 30, 2025, segment net revenues were: Americas $3,297.0 million, Europe $1,699.3 million, and Asia $1,134.4 million, totaling $6,130.7 million for Levi's Brands, with Beyond Yoga\u00ae adding $151.3 million for total net revenues of $6,282.0 million [1]. Segment operating income was Americas $722.9 million (21.9% of net revenues), Europe $366.7 million (21.6% of net revenues), and Asia $148.6 million (13.1% of net revenues), for total Levi's Brands operating income of $1,238.2 million (20.2% of net revenues) [1][15]. Beyond Yoga\u00ae reported an operating loss of $(13.6) million [1][15]. Compared to the prior year, Americas operating income grew 3.7%, Europe grew 14.7%, and Asia grew 10.2%, while Beyond Yoga\u00ae's loss improved by 32.0% [15].",
+   "gold_chunk_ids": [
+    2000,
+    2018,
+    2019
+   ],
+   "gold_retrieved": [
+    2000
+   ],
+   "cited": [
+    1,
+    3,
+    5,
+    6,
+    7,
+    15
+   ],
+   "cited_chunk_ids": [
+    2190,
+    2000,
+    1999,
+    1887,
+    2189,
+    2027
+   ],
+   "correct_without_gold": false
+  }
+ ]
+}

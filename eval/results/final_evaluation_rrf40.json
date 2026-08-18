@@ -1,0 +1,99 @@
+{
+  "status": "FINAL_FROZEN",
+  "retrieval_config": {
+    "pool": 50,
+    "top_k": 16,
+    "rrf_k": 40
+  },
+  "retrieval": {
+    "semantic": {
+      "recall_at_16": 0.5,
+      "mrr": 0.228,
+      "coverage": 0.394
+    },
+    "keyword": {
+      "recall_at_16": 0.412,
+      "mrr": 0.159,
+      "coverage": 0.303
+    },
+    "hybrid": {
+      "recall_at_16": 0.559,
+      "mrr": 0.287,
+      "coverage": 0.433
+    },
+    "hybrid_company": {
+      "recall_at_16": 0.735,
+      "mrr": 0.31,
+      "coverage": 0.589
+    },
+    "hybrid_company_by_type": {
+      "comparative": {
+        "recall": 0.6,
+        "coverage": 0.3
+      },
+      "extractive": {
+        "recall": 0.632,
+        "coverage": 0.588
+      },
+      "multi_chunk": {
+        "recall": 1.0,
+        "coverage": 0.735
+      }
+    }
+  },
+  "generation": {
+    "runs": 3,
+    "responses": 150,
+    "answerable_responses": 102,
+    "unanswerable_responses": 48,
+    "unanswerable_refusal_rate": 1.0,
+    "false_refusal_rate": 0.029,
+    "refusal_decision_flips": 0,
+    "automatic_hallucination_rate": 0.0,
+    "grounded_claims": 319,
+    "claims_decided": 326,
+    "groundedness": 0.979,
+    "unsupported_claims": 7,
+    "groundedness_judge_failures": 1,
+    "citation_verifier_problem_responses": 6
+  },
+  "correctness_run0_reconciled": {
+    "answerable_questions": 34,
+    "correct": 31,
+    "partially_correct": 2,
+    "incorrect": 0,
+    "refused": 1,
+    "judge_error": 0,
+    "correct_rate": 0.9117647058823529,
+    "correct_or_partial_rate": 0.9705882352941176
+  },
+  "manual_findings": {
+    "Q005": "Retrieval miss. Refusal appropriate given retrieved context.",
+    "Q022": "PARTIALLY_CORRECT. Correct segment revenue amounts, but requested revenue growth rates were omitted/replaced with operating-income growth.",
+    "Q027": "Core gold answer correct, but response added an incorrect claim that Old Navy North America had net openings; source shows 7 net closures.",
+    "Q033": "PARTIALLY_CORRECT. Chewy evidence correct; Wayfair-specific customer-acquisition gold evidence was not retrieved.",
+    "Q044": "Correct refusal decision, but all three runs included a $49.0M figure in the refusal, violating strict refusal-format requirements."
+  },
+  "benchmark_notes": {
+    "canonical_gold_labels_verified": 62,
+    "answerable_questions": 34,
+    "unanswerable_questions": 16,
+    "alternative_evidence_cases": [
+      "Q007",
+      "Q008",
+      "Q009",
+      "Q014",
+      "Q015",
+      "Q020",
+      "Q034",
+      "Q035"
+    ],
+    "interpretation": "Retrieval Recall@16 is recall against canonical labeled chunks. Eight questions judged correct without retrieving their canonical gold had explicit alternative supporting evidence in retrieved chunks."
+  },
+  "source_artifacts": [
+    "eval/results/retrieval_final.json",
+    "eval/results/generation_final_rrf40.json",
+    "eval/results/correctness_final_rrf40_run0.json",
+    "eval/results/correctness_q022_retry.json"
+  ]
+}

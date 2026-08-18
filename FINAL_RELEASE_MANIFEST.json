@@ -1,0 +1,191 @@
+{
+  "release": {
+    "name": "SECRAG",
+    "release_id": "SECRAG-RRF40-2026-08-17",
+    "status": "FINAL_FROZEN",
+    "created_at": "2026-08-17T17:42:48.796992+02:00"
+  },
+  "corpus_and_benchmark": {
+    "chunks": 4169,
+    "questions_total": 50,
+    "answerable_questions": 34,
+    "unanswerable_questions": 16,
+    "canonical_gold_labels": 62,
+    "label_validation": {
+      "resolved": 62,
+      "without_anchor": 0,
+      "failed": 0
+    },
+    "benchmark_file": "eval/questions_canonical.yaml"
+  },
+  "configuration": {
+    "pool": 50,
+    "top_k": 16,
+    "rrf_k": 40,
+    "generation_model": "claude-sonnet-5",
+    "embedding_model": "BAAI/bge-small-en-v1.5"
+  },
+  "retrieval": {
+    "semantic": {
+      "recall_at_16": 0.5,
+      "mrr": 0.228,
+      "coverage": 0.394
+    },
+    "keyword": {
+      "recall_at_16": 0.412,
+      "mrr": 0.159,
+      "coverage": 0.303
+    },
+    "hybrid": {
+      "recall_at_16": 0.559,
+      "mrr": 0.287,
+      "coverage": 0.433
+    },
+    "hybrid_company": {
+      "recall_at_16": 0.735,
+      "mrr": 0.31,
+      "coverage": 0.589
+    },
+    "hybrid_company_by_type": {
+      "comparative": {
+        "recall": 0.6,
+        "coverage": 0.3
+      },
+      "extractive": {
+        "recall": 0.632,
+        "coverage": 0.588
+      },
+      "multi_chunk": {
+        "recall": 1.0,
+        "coverage": 0.735
+      }
+    }
+  },
+  "generation": {
+    "runs": 3,
+    "responses": 150,
+    "answerable_responses": 102,
+    "unanswerable_responses": 48,
+    "unanswerable_refusal_rate": 1.0,
+    "false_refusal_rate": 0.029,
+    "refusal_decision_flips": 0,
+    "automatic_hallucination_rate": 0.0,
+    "grounded_claims": 319,
+    "claims_decided": 326,
+    "groundedness": 0.979,
+    "unsupported_claims": 7,
+    "groundedness_judge_failures": 1,
+    "citation_verifier_problem_responses": 6
+  },
+  "correctness": {
+    "answerable_questions": 34,
+    "correct": 31,
+    "partially_correct": 2,
+    "incorrect": 0,
+    "refused": 1,
+    "judge_error": 0,
+    "correct_rate": 0.9117647058823529,
+    "correct_or_partial_rate": 0.9705882352941176
+  },
+  "manual_findings": {
+    "Q005": "Retrieval miss. Refusal appropriate given retrieved context.",
+    "Q022": "PARTIALLY_CORRECT. Correct segment revenue amounts, but requested revenue growth rates were omitted/replaced with operating-income growth.",
+    "Q027": "Core gold answer correct, but response added an incorrect claim that Old Navy North America had net openings; source shows 7 net closures.",
+    "Q033": "PARTIALLY_CORRECT. Chewy evidence correct; Wayfair-specific customer-acquisition gold evidence was not retrieved.",
+    "Q044": "Correct refusal decision, but all three runs included a $49.0M figure in the refusal, violating strict refusal-format requirements."
+  },
+  "benchmark_notes": {
+    "canonical_gold_labels_verified": 62,
+    "answerable_questions": 34,
+    "unanswerable_questions": 16,
+    "alternative_evidence_cases": [
+      "Q007",
+      "Q008",
+      "Q009",
+      "Q014",
+      "Q015",
+      "Q020",
+      "Q034",
+      "Q035"
+    ],
+    "interpretation": "Retrieval Recall@16 is recall against canonical labeled chunks. Eight questions judged correct without retrieving their canonical gold had explicit alternative supporting evidence in retrieved chunks."
+  },
+  "methodology_notes": [
+    "Retrieval Recall@16 is measured against canonical labeled gold chunks. Eight questions judged correct without retrieving their canonical gold contained explicit alternative supporting evidence in the retrieved top-16.",
+    "Generation answer/refusal stability was evaluated across three runs. Zero refusal-decision flips does not imply identical answer content across runs.",
+    "Answer correctness was evaluated on generation run 0. Q022's initial correctness judge returned an empty reply and was retried separately; its reconciled verdict is PARTIALLY_CORRECT.",
+    "Groundedness was judged by the same model family used for generation. The reported groundedness score is therefore model-judged rather than independent external validation.",
+    "Automatic hallucination rate refers to answer/refusal evaluation on unanswerable questions. Manual claim-level review identified the additional issues recorded in manual_findings."
+  ],
+  "known_limitations": [
+    "Q005: canonical answer evidence was not retrieved in top-16; the model appropriately refused.",
+    "Q022: correct revenue amounts but incomplete requested growth-rate information.",
+    "Q027: core answer correct, but an ancillary Old Navy store-count statement inverted the sign.",
+    "Q033: Wayfair-specific customer-acquisition evidence was not retrieved, producing a partial answer.",
+    "Q044: correct refusal decision, but the refusal included a $49.0M figure and violated strict refusal formatting.",
+    "Correctness was judged for run 0 rather than independently for all three generation runs.",
+    "Groundedness judge belongs to the same model family as the generator."
+  ],
+  "final_artifacts": [
+    {
+      "path": "src/config.py",
+      "bytes": 15781,
+      "sha256": "5FAACC51771D19B437391E1EB1344922094FD243E548BFCEDF108BA659256DAD"
+    },
+    {
+      "path": "src/retrieve.py",
+      "bytes": 18029,
+      "sha256": "13E6ABE14D23641BB48F638532D6D536F99C67962204CF0FC3126B988EB8B850"
+    },
+    {
+      "path": "src/generate.py",
+      "bytes": 12255,
+      "sha256": "FA8513B75C8F1B5BA1BC11147DB0E1FDAC0C1856EB64E26435E321EA962465AC"
+    },
+    {
+      "path": "src/evaluate_retrieval.py",
+      "bytes": 11794,
+      "sha256": "AAE9CB188B532745FC9D0DD0864344273F80EFCC009B503B6F9205B59C6A54D4"
+    },
+    {
+      "path": "src/evaluate_generation.py",
+      "bytes": 20057,
+      "sha256": "F1264B2B55283A8C255B5D4E4523B38A908D5E902A3250B1CAF157E4CD7B0ECE"
+    },
+    {
+      "path": "src/evaluate_correctness.py",
+      "bytes": 11226,
+      "sha256": "A5DF48647CB4EFF4E1847C94886CC23E8E378000D08E8EDB4A686F8E4356DA49"
+    },
+    {
+      "path": "eval/questions_canonical.yaml",
+      "bytes": 27494,
+      "sha256": "8F40D8387DC52A072DEC0F4204D0DAFF2C499F05A42F00B4A027F952A3CA6429"
+    },
+    {
+      "path": "eval/results/retrieval_final.json",
+      "bytes": 1694,
+      "sha256": "2F2080B657E78397A6A5DF481C689F8BED077B9404D074BB4D401264953B83D9"
+    },
+    {
+      "path": "eval/results/generation_final_rrf40.json",
+      "bytes": 333779,
+      "sha256": "015DE847646DE2E25D1BA78144185A144EBE3E844B4CA58AAC1D182FE2545C11"
+    },
+    {
+      "path": "eval/results/correctness_final_rrf40_run0.json",
+      "bytes": 52898,
+      "sha256": "00841A80F85CB6D448C8F6417393DE9B01AE605954396D403E35C7F5E0D40F06"
+    },
+    {
+      "path": "eval/results/correctness_q022_retry.json",
+      "bytes": 2999,
+      "sha256": "7D1FCB7549BD777E5A92B2EED193CEFA6532F4BBA683B22647E1A85E70ACC92D"
+    },
+    {
+      "path": "eval/results/final_evaluation_rrf40.json",
+      "bytes": 3055,
+      "sha256": "822559303C27B4E6F5585B52033D32AED6328293FBACE0FDFC0F6C000B1546DB"
+    }
+  ]
+}
