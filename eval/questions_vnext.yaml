@@ -1,0 +1,695 @@
+- id: Q001
+  question: What were Urban Outfitters' total net sales for the fiscal year ended January 31, 2026?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 3453
+  gold_answer: $6,165,376 thousand
+  notes: 'Item 8, nota de desglose por segmento. Rango 16, fuera del top-8. 3517 descartado: tiene la cifra desglosada por
+    categoria, sin la linea de total.'
+  gold_chunks:
+  - doc_id: URBN-10-K-2026
+    chunk_index: 121
+    contains: 6,165,376
+- id: Q002
+  question: What were Under Armour's net revenues in fiscal 2026?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 3236
+  gold_answer: $4,966,370 thousand
+  notes: 'Item 8. 3236 es la cuenta de resultados, 3294 el desglose por segmento. 3189 descartado: la cifra esta pero las
+    cabeceras de ano quedan en el fragmento anterior.'
+  gold_chunks:
+  - doc_id: UAA-10-K-2026
+    chunk_index: 126
+    contains: 4,966,370
+- id: Q003
+  question: How does Lululemon recognize revenue from product sales?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 2315
+  gold_answer: Revenue is recognized when performance obligations are satisfied through the transfer of control. Company-operated
+    store revenue is recognized at the point of sale, while e-commerce and wholesale revenue is recognized upon receipt by
+    the customer.
+  notes: 'Final audit: current corpus evidence is chunk 2315.'
+  gold_chunks:
+  - doc_id: LULU-10-K-2026
+    chunk_index: 118
+    contains: transfer of control
+- id: Q004
+  question: What was Nike's inventory balance at the end of fiscal 2026?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 2447
+  gold_answer: $7.5 billion
+  notes: 'Auditoria manual: 2418 y 2419 contienen literalmente que los inventarios a 31 de mayo de 2026 fueron $7.5 billion.
+    Son evidencia valida duplicada por solapamiento entre chunks. El antiguo ID 2448 estaba desfasado respecto al corpus actual.'
+  gold_chunks:
+  - doc_id: NKE-10-K-2026
+    chunk_index: 85
+    contains: '7.5'
+- id: Q005
+  question: Which auditor signed Crocs' financial statements?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 736
+  gold_answer: Deloitte & Touche LLP
+  notes: 'Auditoria manual: 723 contiene la firma directa /s/ Deloitte & Touche LLP en el informe sobre los estados financieros.
+    El chunk 717 solo menciona Consent of Deloitte & Touche LLP y es evidencia indirecta; no se acepta como gold directo.
+    El antiguo ID 736 estaba desfasado.'
+  gold_chunks:
+  - doc_id: CROX-10-K-2025
+    chunk_index: 169
+    contains: Deloitte
+- id: Q006
+  question: On what date does Nike's fiscal year end?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 2362
+  gold_answer: May 31
+  notes: Item 1. Rango 1 - primer acierto dentro del top-8.
+  gold_chunks:
+  - doc_id: NKE-10-K-2026
+    chunk_index: 0
+    contains: May 31
+- id: Q007
+  question: What were Chewy's net sales for fiscal 2025?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 326
+  gold_answer: $12,601.5 million ($12.6 billion)
+  notes: Item 7. Rango 5, dentro del top-8. Puestos 1, 2 y 6 fueron de URBN, empresa equivocada.
+  gold_chunks:
+  - doc_id: CHWY-10-K-2026
+    chunk_index: 118
+    contains: 12,601.5
+- id: Q008
+  question: What brands does Deckers Outdoor own?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 813
+  gold_answer: HOKA, UGG y Teva
+  notes: 'Auditoria manual: 800 (Item 1), 854 (Item 7) y 909 (Item 8, Note 1) contienen explicitamente que las tres marcas
+    propietarias son HOKA, UGG y Teva. El 909 fue recuperado y es evidencia valida duplicada en otra seccion del filing. Los
+    antiguos IDs 813 y 867 estaban desfasados.'
+  gold_chunks:
+  - doc_id: DECK-10-K-2026
+    chunk_index: 0
+    contains: HOKA
+- id: Q009
+  question: How many retail stores did Warby Parker operate at the end of the fiscal year?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 3903
+  gold_answer: Warby Parker had 323 retail stores as of December 31, 2025.
+  notes: 'Final audit: chunk 3903 directly reports Store Count 323 at period end.'
+  gold_chunks:
+  - doc_id: WRBY-10-K-2025
+    chunk_index: 155
+    contains: '2025'
+- id: Q010
+  question: What were Wayfair's total net revenues for the year ended December 31, 2025?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 3670
+  gold_answer: $12,457 million
+  notes: 3670 es la cuenta de resultados completa, rango 6. 3666 lo dice en prosa. 3627 es la tabla de metricas clave, fuera
+    del top-100. De once coincidencias literales el recuperador encontro dos.
+  gold_chunks:
+  - doc_id: W-10-K-2025
+    chunk_index: 151
+    contains: 12,457
+- id: Q011
+  question: What are Peloton's primary sources of revenue?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 2718
+  - 2725
+  gold_answer: Suscripciones recurrentes y venta de Connected Fitness Products
+  notes: 2718 en Item 7 nombra ambas fuentes en una frase, rango 5. 2725 desarrolla una de ellas. Los puestos 1, 3, 4 y 6
+    desarrollaban una sola fuente cada uno.
+  gold_chunks:
+  - doc_id: PTON-10-K-2026
+    chunk_index: 138
+    contains: Connected
+  - doc_id: PTON-10-K-2026
+    chunk_index: 145
+    contains: Connected
+- id: Q012
+  question: What was Lululemon's inventory balance at fiscal year end?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 2297
+  gold_answer: $1.7 billion ($1,700,753 thousand)
+  notes: 2284 en Item 7 lo dice en una frase y queda fuera del top-100. 2297 es el balance consolidado, rango 22. Ninguno
+    en el top-8. El puesto 1 fue la definicion del ano fiscal y el 5 un fragmento de URBN.
+  gold_chunks:
+  - doc_id: LULU-10-K-2026
+    chunk_index: 100
+    contains: 1,700,753
+- id: Q013
+  question: What brands does Gap Inc. operate?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 1491
+  gold_answer: Old Navy, Gap, Banana Republic y Athleta
+  notes: 1491 en Item 1, rango 1. 1619 en Item 8 los enumera como segmentos operativos. Primer caso en que el top-3 entero
+    es del Item 1 correcto.
+  gold_chunks:
+  - doc_id: GAP-10-K-2026
+    chunk_index: 0
+    contains: Navy
+- id: Q014
+  question: Which independent registered public accounting firm audited Urban Outfitters?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 3451
+  gold_answer: Deloitte & Touche LLP
+  notes: '3440 (rango 92) lo declara en una frase. 3452 y 3451 llevan la firma del informe. Ninguno en el top-8. El rango
+    4 fue COLM, otra empresa tambien auditada por Deloitte: acertar por accidente.'
+  gold_chunks:
+  - doc_id: URBN-10-K-2026
+    chunk_index: 119
+    contains: Deloitte
+- id: Q015
+  question: What was Crocs' gross profit for fiscal 2025?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 736
+  gold_answer: $2,357,055 thousand
+  notes: '737 (Item 8, rango 6) es la cuenta de resultados. 671 (Item 7, rango 18) la tabla comparativa. 736 fuera del top-100.
+    Los rangos 1 a 5 fueron CHWY, GAP, NKE y LEVI: cuatro empresas equivocadas con la misma metrica.'
+  gold_chunks:
+  - doc_id: CROX-10-K-2025
+    chunk_index: 169
+    contains: 2,357,055
+- id: Q016
+  question: In how many countries are Yeti products sold?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: 'Yeti no declara un numero de paises de venta. Menciona doce paises de empleados y nombra regiones de expansion,
+    pero no la cifra. Reclasificada tras buscarla. Columbia dice ''115 countries'' y el recuperador lo devuelve en el puesto
+    5: cifra correcta de la empresa equivocada, en el formato que la pregunta pide.'
+- id: Q017
+  question: What percentage of Levi Strauss net revenues came from Europe and Asia combined?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 2003
+  - 2002
+  gold_answer: 45%
+  notes: 'Item 7. 2003 en rango 4 con la frase completa. 2002 en rango 5 la contiene al final. Los seis resultados fueron
+    de LEVI: primera pregunta sin contaminacion de otra empresa.'
+  gold_chunks:
+  - doc_id: LEVI-10-K-2025
+    chunk_index: 116
+    contains: 45%
+  - doc_id: LEVI-10-K-2025
+    chunk_index: 115
+    contains: 45%
+- id: Q018
+  question: What reportable segments does Under Armour disclose?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 3327
+  gold_answer: North America, EMEA, Asia-Pacific y Latin America
+  notes: 'Item 8. 3327 rango 22, 3330 fuera del top-100. Ninguno en el top-8. El unico UAA del top-6 fue el indice de notas
+    (3243). Los puestos 2, 3, 5 y 6 fueron ANF, COLM, CROX y DECK declarando SUS segmentos con la frase exacta: contexto plausible
+    para responder mal citando una fuente real.'
+  gold_chunks:
+  - doc_id: UAA-10-K-2026
+    chunk_index: 217
+    contains: North
+- id: Q019
+  question: What was Columbia Sportswear's dividend per share?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 502
+  - 501
+  - 500
+  gold_answer: $1.20 por accion
+  notes: Item 8, estado de cambios en el patrimonio. 502 rango 1, 500 rango 3. Los seis resultados fueron de COLM. $1.20 aparece
+    en los tres ejercicios presentados, asi que la cifra es la misma para 2023, 2024 y 2025.
+  gold_chunks:
+  - doc_id: COLM-10-K-2025
+    chunk_index: 100
+    contains: '1.20'
+  - doc_id: COLM-10-K-2025
+    chunk_index: 99
+    contains: '1.20'
+  - doc_id: COLM-10-K-2025
+    chunk_index: 98
+    contains: '1.20'
+- id: Q020
+  question: What does Figs sell, and to whom?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 1239
+  gold_answer: FIGS sells scrubwear and non-scrubwear designed for healthcare professionals, primarily through its direct-to-consumer
+    digital platform.
+  notes: 'Final audit: chunk 1239 alone contains healthcare professionals, DTC, scrubwear and non-scrubwear.'
+  gold_chunks:
+  - doc_id: FIGS-10-K-2025
+    chunk_index: 1
+    contains: healthcare professionals primarily through our direct-to-consumer
+- id: Q021
+  question: What risks does Chewy identify regarding its dependence on suppliers?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 258
+  - 236
+  - 237
+  - 238
+  - 257
+  gold_answer: Chewy identifies risks associated with suppliers and outsourcing partners, including inability to source or
+    retain suppliers, suppliers with limited supply capabilities, inability to replace lost suppliers, product safety failures,
+    and dependence on suppliers and outsourcing partners outside the U.S.
+  notes: 'Final audit: chunks 258, 236, 237, 238 and 257 cover five distinct supplier risks.'
+  gold_chunks:
+  - doc_id: CHWY-10-K-2026
+    chunk_index: 56
+    contains: outsourcing partners
+  - doc_id: CHWY-10-K-2026
+    chunk_index: 34
+    contains: unable to source additional suppliers
+  - doc_id: CHWY-10-K-2026
+    chunk_index: 35
+    contains: limited supply capabilities
+  - doc_id: CHWY-10-K-2026
+    chunk_index: 36
+    contains: replace the loss of any of our existing suppliers
+  - doc_id: CHWY-10-K-2026
+    chunk_index: 55
+    contains: product safety requirements
+- id: Q022
+  question: What segments does Levi Strauss report, and how did each perform?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 2000
+  - 2018
+  - 2019
+  gold_answer: 'Tres segmentos: Americas ($3,297.0M, +3.0%), Europe ($1,699.3M, +5.0%) y Asia ($1,134.4M, +4.8%). Beyond Yoga
+    ($151.3M, +15.4%) se presenta aparte por no alcanzar los umbrales cuantitativos.'
+  notes: 'Item 7. Cobertura 1 de 3. 2000 (rango 3) nombra los segmentos; 2018, que tiene la tabla de ingresos, no entra en
+    el top-8. Acierto parcial: el sistema sabria cuales son los segmentos pero no como fueron.'
+  gold_chunks:
+  - doc_id: LEVI-10-K-2025
+    chunk_index: 113
+    contains: Americas
+  - doc_id: LEVI-10-K-2025
+    chunk_index: 131
+    contains: 3,297.0
+  - doc_id: LEVI-10-K-2025
+    chunk_index: 132
+    contains: Americas
+- id: Q023
+  question: What risks does Nike identify relating to counterfeit products and intellectual property?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 2431
+  gold_answer: Nike periodically discovers counterfeit reproductions and other products that infringe its intellectual property
+    rights. Failure to enforce those rights could adversely affect sales and the Nike brand.
+  notes: 'Final audit: chunk 2431 explicitly discusses counterfeit reproductions and IP enforcement.'
+  gold_chunks:
+  - doc_id: NKE-10-K-2026
+    chunk_index: 69
+    contains: Failure
+- id: Q024
+  question: What supply chain and manufacturing risks does Lululemon disclose?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 2233
+  - 2227
+  gold_answer: Lululemon depends on international suppliers and faces supply-chain disruption risks, including geopolitical
+    and sourcing concentration risk in Taiwan. Trade restrictions, tariffs and customs changes can also disrupt the supply
+    chain, increase costs, delay shipments and compress margins.
+  notes: 'Final audit: 2233 covers international supplier disruption and Taiwan concentration; 2227 covers tariffs/trade restrictions.
+    Overlapping chunks were removed.'
+  gold_chunks:
+  - doc_id: LULU-10-K-2026
+    chunk_index: 36
+    contains: Taiwan
+  - doc_id: LULU-10-K-2026
+    chunk_index: 30
+    contains: Trade
+- id: Q025
+  question: How did each of Under Armour's segments perform in fiscal 2026?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 3196
+  - 3197
+  gold_answer: 'Ingresos: North America $2,859,420 (-7.9%), EMEA $1,180,510 (+8.6%), Asia-Pacific $719,134 (-4.8%), Latin
+    America $234,191 (+8.7%). Resultado operativo: North America $442,503 (-29.7%), EMEA $191,487 (+30.1%), Asia-Pacific $84,466
+    (+15.4%), Latin America $29,901 (-37.1%).'
+  notes: 'Item 7. Recall@8 = 0, cobertura 0 de 3. Ninguna de las dos tablas aparece. Los puestos 1 y 2 fueron UAA pero inutiles:
+    el indice de notas (3243, tercera aparicion en primera posicion) y una tabla de recompra de acciones. Puestos 3 a 6: URBN,
+    ANF x2, NKE.'
+  gold_chunks:
+  - doc_id: UAA-10-K-2026
+    chunk_index: 86
+    contains: 2,859,420
+  - doc_id: UAA-10-K-2026
+    chunk_index: 87
+    contains: 442,503
+- id: Q026
+  question: What risks does Etsy disclose about seller and buyer behaviour on its marketplace?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 1080
+  - 1042
+  - 1039
+  gold_answer: Etsy identifies risks including policy and enforcement decisions perceived as arbitrary or inconsistent, fraudulent
+    transactions and negative buyer experiences, and failure to attract, retain and maintain engagement among buyers and sellers.
+  notes: 'Final audit: 1080 covers policy/enforcement risk; 1042 buyer/fraud/fulfilment risk; 1039 buyer/seller attraction
+    and retention.'
+  gold_chunks:
+  - doc_id: ETSY-10-K-2025
+    chunk_index: 90
+    contains: Etsy
+  - doc_id: ETSY-10-K-2025
+    chunk_index: 52
+    contains: fraudulent transactions
+  - doc_id: ETSY-10-K-2025
+    chunk_index: 49
+    contains: Etsy
+- id: Q027
+  gold_chunk_ids:
+  - 1548
+  - 1593
+  gold_answer: Fiscal 2025 comparable sales were Old Navy Global +3%, Gap Global +6%, Banana Republic Global +3% and Athleta
+    Global -9%. Fiscal 2025 net sales were $8,657 million for Old Navy, $3,501 million for Gap, $1,916 million for Banana
+    Republic and $1,219 million for Athleta.
+  notes: 'Final audit: 1548 covers comparable sales by brand; 1593 covers net sales by brand. Overlapping 1594 removed.'
+  question: How did Gap's individual brands perform during the fiscal year?
+  type: multi_chunk
+  answerable: true
+  gold_chunks:
+  - doc_id: GAP-10-K-2026
+    chunk_index: 57
+    contains: '2025'
+  - doc_id: GAP-10-K-2026
+    chunk_index: 102
+    contains: '2025'
+- id: Q028
+  gold_chunk_ids:
+  - 3529
+  - 3521
+  - 3526
+  - 3685
+  - 3524
+  gold_answer: La red logistica de Wayfair consta de CastleGate y la Wayfair Delivery Network (WDN), mas CastleGate Forwarding
+    para servicios de entrada. CastleGate permite a los proveedores posicionar inventario por adelantado en sus almacenes,
+    con entrega en dos dias o menos a la mayoria de la poblacion de EE UU. El metodo principal de cumplimiento es una red
+    de envio directo integrada con la tecnologia de los proveedores. CGF ofrece flete de entrada, transporte terrestre y servicios
+    oceanicos desde Asia.
+  notes: 'Cobertura 4 de 5: rangos 1, 2, 3 y 7. Mejor resultado de todo el conjunto. Los seis del top-6 fueron de W, ninguna
+    contaminacion. Probable causa: ''CastleGate'' y ''Wayfair Delivery Network'' son terminos propios que no existen en ningun
+    otro filing.'
+  question: What does Wayfair disclose about its logistics and delivery network?
+  type: multi_chunk
+  answerable: true
+  gold_chunks:
+  - doc_id: W-10-K-2025
+    chunk_index: 10
+    contains: CastleGate
+  - doc_id: W-10-K-2025
+    chunk_index: 2
+    contains: Wayfair
+  - doc_id: W-10-K-2025
+    chunk_index: 7
+    contains: Wayfair
+  - doc_id: W-10-K-2025
+    chunk_index: 165
+    contains: Wayfair
+  - doc_id: W-10-K-2025
+    chunk_index: 5
+    contains: CastleGate
+- id: Q029
+  gold_chunk_ids:
+  - 54
+  - 56
+  - 57
+  - 84
+  gold_answer: Abercrombie identifies tariff risk because a predominant portion of its merchandise is manufactured outside
+    the U.S.; retaliatory tariffs can also disrupt global trade. Mitigation includes managing product costs, reducing operating
+    expenses and pursuing average unit retail growth. Tariffs reduced Fiscal 2025 operating income by about $90 million, or
+    170 basis points of net sales.
+  notes: 'Final audit: 54 sourcing/tariff exposure; 56 retaliatory tariffs; 57 mitigation; 84 quantified $90m impact. Overlapping
+    55 removed.'
+  question: What tariff and trade risks does Abercrombie & Fitch identify, and what mitigation does it describe?
+  type: multi_chunk
+  answerable: true
+  gold_chunks:
+  - doc_id: ANF-10-K-2026
+    chunk_index: 53
+    contains: '2025'
+  - doc_id: ANF-10-K-2026
+    chunk_index: 55
+    contains: '2025'
+  - doc_id: ANF-10-K-2026
+    chunk_index: 56
+    contains: Mitigation
+  - doc_id: ANF-10-K-2026
+    chunk_index: 83
+    contains: '2025'
+- id: Q030
+  gold_chunk_ids:
+  - 1623
+  - 1795
+  gold_answer: 'Categorias: wipes, personal care, diapers y beauty. Canal: venta a traves de retailers y sus websites, third-party
+    ecommerce sites y, antes del 31 de diciembre de 2025, Honest.com. Desde esa fecha Honest.com dejo de ser un canal de shipping/fulfillment.'
+  notes: 'Cobertura 3 de 4, rangos 1, 2 y 3. Los seis del top-6 fueron de HNST, sin contaminacion. Segunda mejor recuperacion
+    del conjunto tras la Q028 de Wayfair. Nota de metodo: la busqueda con --expect ''Diapers and Wipes'' dio una sola coincidencia
+    inutil; ''product categories'' llego a los tres fragmentos buenos a la primera.'
+  question: What does Honest Company say about its product categories and its channel mix?
+  type: multi_chunk
+  answerable: true
+  gold_chunks:
+  - doc_id: HNST-10-K-2025
+    chunk_index: 0
+    contains: Honest
+  - doc_id: HNST-10-K-2025
+    chunk_index: 172
+    contains: '2025'
+- id: Q031
+  question: Do both Nike and Under Armour cite foreign currency exchange rates as a risk factor?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 2389
+  - 3165
+  gold_answer: 'Si, ambos. Nike lo declara en Item 1A: ''We transact in various currencies, which creates exposure to fluctuations
+    in foreign currency exchange rates relative to the U.S. Dollar''. Under Armour tambien en Item 1A: ''our results of operations
+    could be adversely impacted by changes in foreign currency exchange rates''.'
+  notes: 'Comparativa. Recall@8 = 0. NKE 2389 fuera del top-100; UAA 3165 en rango 36. La pregunta es sobre Item 1A y el top-3
+    fue todo NKE del Item 7, que trata la divisa como impacto contable y no como riesgo declarado. Puestos 4, 5 y 6: ETSY,
+    COLM y CROX. Ninguna aparicion de UAA pese a nombrarla la pregunta.'
+  gold_chunks:
+  - doc_id: NKE-10-K-2026
+    chunk_index: 27
+    contains: We transact in various currencies, which
+  - doc_id: UAA-10-K-2026
+    chunk_index: 55
+    contains: our results of operations could be
+- id: Q032
+  question: Do both Lululemon and Nike report a direct-to-consumer channel?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 2314
+  - 2362
+  gold_answer: Yes. Lululemon reports company-operated store and e-commerce net revenue as direct sales channels, while Nike
+    reports NIKE Direct operations, comprised of Nike-owned retail stores and digital platforms.
+  notes: 'Final audit: corrected stale cross-company label. 2314 is LULU; 2362 is NKE.'
+  gold_chunks:
+  - doc_id: LULU-10-K-2026
+    chunk_index: 117
+    contains: Lululemon
+  - doc_id: NKE-10-K-2026
+    chunk_index: 0
+    contains: Nike
+- id: Q033
+  question: Do both Chewy and Wayfair describe risks related to acquiring new customers?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 230
+  - 3541
+  gold_answer: Yes. Chewy says failure to acquire and retain new customers cost-effectively could harm growth and profitability.
+    Wayfair similarly says failure to acquire new customers, reactivate prior customers or retain existing customers cost-effectively
+    could harm its business.
+  notes: 'Final audit: 230 is Chewy''s acquisition risk; 3541 is Wayfair''s acquisition risk.'
+  gold_chunks:
+  - doc_id: CHWY-10-K-2026
+    chunk_index: 28
+    contains: fail to acquire and retain new customers
+  - doc_id: W-10-K-2025
+    chunk_index: 22
+    contains: fail to acquire new customers
+- id: Q034
+  question: Do both Gap and Abercrombie & Fitch identify tariffs as a risk factor?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 1508
+  - 54
+  gold_answer: Yes. Gap states that trade matters, including U.S. tariffs, have had and could continue to have an adverse
+    effect on its business. Abercrombie similarly states that changes in tariff policy affecting merchandise and raw materials
+    have and could continue to adversely affect its business.
+  notes: 'Final audit: corrected stale FIGS label. 1508 is GAP tariff risk; 54 is ANF tariff risk.'
+  gold_chunks:
+  - doc_id: GAP-10-K-2026
+    chunk_index: 17
+    contains: Trade matters, including the imposition of tariffs
+  - doc_id: ANF-10-K-2026
+    chunk_index: 53
+    contains: Changes in tariff policy
+- id: Q035
+  question: Which reports higher net revenues, Crocs or Deckers Outdoor?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 916
+  - 736
+  gold_answer: Deckers Outdoor, con $5,472,296 miles frente a los $4,040,647 miles de Crocs. Deckers cierra el ejercicio el
+    31 de marzo de 2026 y Crocs el 31 de diciembre de 2025, por lo que los periodos no son identicos.
+  notes: 'Auditoria manual: 903 (DECK, Item 8, estados financieros) reporta net sales de $5,472,296 miles para el ejercicio
+    terminado el 31 de marzo de 2026; 723 (CROX, Item 8, estados financieros) reporta revenues de $4,040,647 miles para el
+    ejercicio terminado el 31 de diciembre de 2025. La cifra anterior de Deckers, $5,378,411, no aparece en DECK-10-K-2026
+    y era una referencia incorrecta o stale.'
+  gold_chunks:
+  - doc_id: DECK-10-K-2026
+    chunk_index: 103
+    contains: 5,472,296
+  - doc_id: CROX-10-K-2025
+    chunk_index: 169
+    contains: 4,040,647
+- id: Q041
+  question: What is the home address of Etsy's chief executive officer?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: A 10-K never contains this.
+- id: Q042
+  question: How many employees does Wayfair plan to hire next year?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: Headcount plans are not disclosed. Current headcount is; the plan is not.
+- id: Q043
+  question: What was the total compensation package of Nike's chief executive officer?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: Executive compensation lives in the DEF 14A proxy statement.
+- id: Q044
+  question: How much did Lululemon spend on digital advertising during the year?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: Marketing expense is aggregated into SG&A; the breakdown is not disclosed.
+- id: Q045
+  question: What are the names of Chewy's five largest suppliers?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: Supplier concentration is described; individual names are not.
+- id: Q046
+  question: What were Wayfair's net revenues for fiscal 2030?
+  type: unanswerable_adversarial
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: The corpus ends well before 2030. The phrasing is identical to Q001.
+- id: Q047
+  question: What percentage of Crocs' fiscal 2025 revenue came from its metaverse division?
+  type: unanswerable_adversarial
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: No such division exists. Presupposes a fact not in evidence.
+- id: Q048
+  question: By how much did Nike's board increase the CEO's salary in fiscal 2026?
+  type: unanswerable_adversarial
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: Executive compensation is in the proxy statement, not the 10-K. A reader would reasonably expect it to be here.
+- id: Q049
+  question: What is the average salary of a Warby Parker retail employee?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+- id: Q050
+  question: How much revenue did Crocs' store on Fifth Avenue generate?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: Store-level financials are never in a 10-K.
+- id: Q051
+  question: What are the payment terms in Peloton's contract with its main manufacturer?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+- id: Q052
+  question: How many stores does Abercrombie & Fitch plan to open in the next three years?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: Current store counts appear; multi-year opening plans do not.
+- id: Q053
+  question: What is the customer lifetime value Yeti uses in its internal planning?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: An internal metric, not a disclosure.
+- id: Q054
+  question: What were Etsy's net revenues for fiscal 2018?
+  type: unanswerable_adversarial
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: Before the corpus window. A 10-K shows three years, not eight.
+- id: Q055
+  question: How much revenue did Lululemon's footwear segment generate in fiscal 2026?
+  type: unanswerable_adversarial
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: Presupposes a reportable segment that does not exist. Footwear products may be mentioned; a footwear segment is not
+    reported.
