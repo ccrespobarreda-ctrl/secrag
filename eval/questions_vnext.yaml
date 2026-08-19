@@ -1268,3 +1268,115 @@
   - doc_id: RVLV-10-K-2025
     chunk_index: 6
     contains: we generated $1.2 billion in net sales, served 2.8 million active customers, offered over 1,600 brands and delivered over 230,000 unique styles
+- id: Q091
+  question: What was Gap's average manufacturing cost per unit of denim in fiscal 2025?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_absent dev. Cost of goods sold is reported in aggregate; per-unit manufacturing cost is never disclosed.
+- id: Q092
+  question: What royalty rate does Under Armour pay its endorsers under its sponsorship agreements?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_absent dev. The filing states that royalty payments to endorsers are based on a predetermined percentage of sales, but never discloses
+    the percentage itself.
+- id: Q093
+  question: How is Levi Strauss's workforce distributed across its business functions?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_absent dev. Total headcount is disclosed; a breakdown by department or function is not.
+- id: Q094
+  question: What is the conversion rate of Skechers' e-commerce websites?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_absent dev. An internal e-commerce metric rather than a disclosure; the term does not appear anywhere in the filing.
+- id: Q095
+  question: What is the annual rent Urban Outfitters pays for an individual Anthropologie store?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_absent holdout. Lease costs are reported in aggregate; rent for a single store location is never disclosed.
+- id: Q096
+  question: What is the specified shelf life of The Honest Company's diaper products?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_absent holdout. A product specification rather than a financial disclosure; shelf life and product expiration are not addressed in the
+    filing.
+- id: Q097
+  question: What is Columbia Sportswear's internal sales forecast for the next fiscal year?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_absent holdout. Internal forecasts are not published; the filing discusses strategy and risk but issues no forward sales projection.
+- id: Q098
+  question: How much did FIGS spend to implement its enterprise resource planning system?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_absent holdout. The cost of an individual IT project is absorbed into operating expenses and not itemized.
+- id: Q099
+  question: How many units of the UGG Classic boot did Deckers sell in fiscal 2026?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_absent holdout. Net sales are reported by brand and channel; unit volumes for an individual product are not disclosed.
+- id: Q100
+  question: What is the median age of REVOLVE's active customers?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_absent holdout. The filing describes a next-generation, predominantly female customer demographic in qualitative terms but discloses no
+    age figure.
+- id: Q101
+  question: What percentage of Columbia Sportswear's total orders were placed through mobile devices in 2025?
+  type: unanswerable_adversarial
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_adversarial dev. Columbia never mentions mobile orders. REVOLVE discloses that 77.2% of its total orders were placed through mobile devices,
+    so retrieval is likely to surface the right figure for the wrong company.
+- id: Q102
+  question: How did Skechers' acquisition of Vans affect its fiscal 2026 revenues?
+  type: unanswerable_adversarial
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_adversarial dev. Presupposes an acquisition that never took place; the premise is false rather than the data merely missing.
+- id: Q103
+  question: What were Levi Strauss's net revenues for the first quarter of fiscal 2026?
+  type: unanswerable_adversarial
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_adversarial holdout. Quarterly figures are reported in a 10-Q, not a 10-K. The annual revenues are present in the excerpts and invite
+    substitution.
+- id: Q104
+  question: What percentage of YETI's 2025 net sales came from its Apparel reportable segment?
+  type: unanswerable_adversarial
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_adversarial holdout. YETI states that it operates as one reportable operating segment; apparel is a platform inside the Other category
+    and its individual share is not disclosed. The category mix of 40%, 58% and 2% sits nearby and invites a wrong attribution.
+- id: Q105
+  question: How many Brand and Factory House stores did Under Armour operate as of March 31, 2027?
+  type: unanswerable_adversarial
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_adversarial holdout. One year beyond the reporting period. The March 31, 2026 count of 443 stores is disclosed and differs only in the
+    year.
