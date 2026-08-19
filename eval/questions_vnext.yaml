@@ -945,3 +945,126 @@
   - doc_id: LEVI-10-K-2025
     chunk_index: 11
     contains: approximately 1,300 of these stores
+- id: Q056
+  question: How many active buyers and active sellers did the Etsy marketplace have as of December 31, 2025?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 996
+  gold_answer: 86.5 million active buyers and 5.6 million active sellers.
+  notes: vNext extractive dev. Gold evidence manually audited; asks for Etsy marketplace participant counts at year end.
+  gold_chunks:
+  - doc_id: ETSY-10-K-2025
+    chunk_index: 6
+    contains: 86.5 million active buyers and 5.6 million active sellers
+- id: Q057
+  question: Approximately how many new styles did REVOLVE launch per week on average in 2025?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 2876
+  gold_answer: Over 2,400 new styles per week on average.
+  notes: vNext extractive dev. Gold evidence manually audited; asks for REVOLVE's average weekly new-style launch rate.
+  gold_chunks:
+  - doc_id: RVLV-10-K-2025
+    chunk_index: 1
+    contains: over 2,400 new styles launched per week on average in 2025
+- id: Q058
+  question: What share of the U.S. population can Chewy reach with overnight and two-day shipping?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 208
+  gold_answer: Over 80% of the U.S. population overnight and almost 100% in two days.
+  notes: vNext extractive dev. Gold evidence manually audited; asks for Chewy's stated fulfillment-network delivery reach.
+  gold_chunks:
+  - doc_id: CHWY-10-K-2026
+    chunk_index: 6
+    contains: over 80% of the U.S. population overnight and almost 100% in two days
+- id: Q059
+  question: As of December 31, 2025, how many active customers did Wayfair have, and what percentage of orders came from repeat buyers during the year?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 3625
+  gold_answer: 21 million active customers, and 80.3% of orders came from repeat buyers.
+  notes: vNext extractive dev. Gold evidence manually audited; asks for Wayfair customer scale and repeat-order share.
+  gold_chunks:
+  - doc_id: W-10-K-2025
+    chunk_index: 106
+    contains: 21 million active customers and during the year ended December 31, 2025, 80.3% of orders came from repeat buyers
+- id: Q060
+  question: How many active customers did FIGS have as of December 31, 2025?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 1242
+  gold_answer: Approximately 2.9 million active customers.
+  notes: vNext extractive holdout. Gold evidence manually audited during benchmark construction; not for retrieval tuning.
+  gold_chunks:
+  - doc_id: FIGS-10-K-2025
+    chunk_index: 4
+    contains: approximately 2.9 million active customers
+- id: Q061
+  question: What percentage of the fabric used in Under Armour's apparel and accessories came from its top five suppliers in fiscal 2026?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 3118
+  gold_answer: Approximately 43%.
+  notes: vNext extractive holdout. Gold evidence manually audited during benchmark construction; not for retrieval tuning.
+  gold_chunks:
+  - doc_id: UAA-10-K-2026
+    chunk_index: 8
+    contains: top five suppliers provided approximately 43% of the fabric
+- id: Q062
+  question: How many global company-owned retail stores did Deckers have as of March 31, 2026, and how were they split between UGG and HOKA?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 816
+  gold_answer: '203 stores in total: 141 UGG brand retail stores and 62 HOKA brand retail stores.'
+  notes: vNext extractive holdout. Gold evidence manually audited during benchmark construction; asks for Deckers' company-owned retail-store count and brand split.
+  gold_chunks:
+  - doc_id: DECK-10-K-2026
+    chunk_index: 3
+    contains: '203 global Company-owned retail stores (including
+
+
+      141 UGG brand retail stores and 62 HOKA brand retail stores)'
+- id: Q063
+  question: What percentage of Crocs' consolidated revenues came from its direct-to-consumer channel in 2025?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 577
+  gold_answer: 52.1%.
+  notes: vNext extractive holdout. Gold evidence manually audited during benchmark construction; asks for Crocs' 2025 DTC revenue mix.
+  gold_chunks:
+  - doc_id: CROX-10-K-2025
+    chunk_index: 10
+    contains: 52.1%, 49.7%, and 48.0%, respectively, of our consolidated revenues were derived through our DTC channel
+- id: Q064
+  question: What were lululemon's sales per square foot in 2025?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 2202
+  gold_answer: $1,426 per square foot.
+  notes: vNext extractive holdout. Gold evidence manually audited during benchmark construction; asks for lululemon's stated 2025 store productivity metric.
+  gold_chunks:
+  - doc_id: LULU-10-K-2026
+    chunk_index: 5
+    contains: sales per square foot were $1,426
+- id: Q065
+  question: What share of total revenues did non-U.S. NIKE Brand and Converse sales account for in fiscal 2026?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 2366
+  gold_answer: Approximately 56% of total revenues.
+  notes: vNext extractive holdout. Gold evidence manually audited during benchmark construction; asks for NIKE's stated non-U.S. sales share.
+  gold_chunks:
+  - doc_id: NKE-10-K-2026
+    chunk_index: 4
+    contains: non-U.S. NIKE Brand and Converse sales accounted for approximately 56% of total revenues
