@@ -693,3 +693,255 @@
   gold_answer: null
   notes: Presupposes a reportable segment that does not exist. Footwear products may be mentioned; a footwear segment is not
     reported.
+- id: Q076
+  question: Which company sells its products in more countries, Columbia Sportswear or Levi Strauss?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 407
+  - 1888
+  gold_answer: Levi Strauss. Its products are sold in approximately 120 countries, compared with Columbia Sportswear's 115 countries.
+  notes: vNext comparative dev. Gold evidence manually audited; compares company-level geographic sales reach.
+  gold_chunks:
+  - doc_id: COLM-10-K-2025
+    chunk_index: 5
+    contains: We sell our products in 115 countries
+  - doc_id: LEVI-10-K-2025
+    chunk_index: 1
+    contains: Our products are sold in approximately 120 countries
+- id: Q077
+  question: How do REVOLVE and FIGS use data-driven merchandising to manage inventory risk?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 2882
+  - 1245
+  gold_answer: REVOLVE uses a data-driven read-and-react merchandising model to identify trends, curate assortments, plan reorders and manage pricing while limiting fashion and inventory risk. FIGS uses shallow initial buys and data-driven repurchasing decisions to test products and lower inventory risk.
+  notes: vNext comparative dev. Gold evidence manually audited; compares two distinct data-driven inventory-risk strategies.
+  gold_chunks:
+  - doc_id: RVLV-10-K-2025
+    chunk_index: 7
+    contains: read and react
+  - doc_id: FIGS-10-K-2025
+    chunk_index: 7
+    contains: data-driven repurchasing decisions to lower inventory risk
+- id: Q078
+  question: How do NIKE and Under Armour structure their outsourced manufacturing networks?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 2368
+  - 3119
+  gold_answer: NIKE outsources nearly all footwear and apparel production to independent contract manufacturers across a large multinational factory network, with significant production concentration in countries including Vietnam, Indonesia and China. Under Armour similarly outsources substantially all production, using 40 primary contract manufacturers in 17 countries for apparel and accessories and seven primary contract manufacturers for footwear, with production concentrated in several Asian countries.
+  notes: vNext comparative dev. Gold evidence manually audited; focuses on outsourced manufacturing network structure and concentration.
+  gold_chunks:
+  - doc_id: NKE-10-K-2026
+    chunk_index: 6
+    contains: 95 finished goods footwear factories
+  - doc_id: UAA-10-K-2026
+    chunk_index: 9
+    contains: 40 primary contract manufacturers
+- id: Q079
+  question: How do Peloton and Urban Outfitters use subscription-based business models?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 2584
+  - 3340
+  gold_answer: Peloton sells monthly or annual memberships that provide access to Connected Fitness and app-based fitness and wellness content. Urban Outfitters operates Nuuly, primarily a monthly women's apparel rental subscription in which subscribers select products, wear them and swap into new products the following month.
+  notes: vNext comparative dev. Gold evidence manually audited; compares digital fitness memberships with apparel rental subscriptions.
+  gold_chunks:
+  - doc_id: PTON-10-K-2026
+    chunk_index: 5
+    contains: Membership billed on a monthly or annual basis
+  - doc_id: URBN-10-K-2026
+    chunk_index: 8
+    contains: subscription rental service
+- id: Q080
+  question: How do Abercrombie & Fitch and Urban Outfitters manage inventory risk from changing customer demand and fashion trends?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 8
+  - 3358
+  gold_answer: Abercrombie & Fitch uses an agile inventory model intended to optimize inventory levels, production volumes, speed and responsiveness to customer demand. Urban Outfitters emphasizes predicting and responding to volatile customer tastes and fashion trends; forecasting errors can lead to unsold inventory and markdowns, and it uses data analytics to obtain timely customer insights.
+  notes: vNext comparative dev. Gold evidence manually audited; compares operational inventory agility with fashion-demand forecasting risk.
+  gold_chunks:
+  - doc_id: ANF-10-K-2026
+    chunk_index: 7
+    contains: agile inventory model
+  - doc_id: URBN-10-K-2026
+    chunk_index: 26
+    contains: Customer tastes and fashion trends are volatile
+- id: Q081
+  question: How do Wayfair and Etsy differ in their approach to inventory and fulfillment?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 3521
+  - 994
+  - 1009
+  gold_answer: Wayfair relies primarily on supplier-direct shipping while also operating its own logistics capabilities, including CastleGate and the Wayfair Delivery Network, and allows suppliers to forward-position inventory in CastleGate facilities. Etsy operates an asset-light marketplace and explicitly states that it does not hold physical inventory; shipping to buyers is offered by sellers, while Etsy provides marketplace services including optional shipping labels.
+  notes: vNext comparative dev. Final evidence audit added Etsy's explicit no-physical-inventory statement and seller-provided shipping evidence.
+  gold_chunks:
+  - doc_id: W-10-K-2025
+    chunk_index: 2
+    contains: The majority of our products are shipped to customers directly from our suppliers
+  - doc_id: ETSY-10-K-2025
+    chunk_index: 4
+    contains: we do not hold physical inventory
+  - doc_id: ETSY-10-K-2025
+    chunk_index: 19
+    contains: shipping offered by sellers to buyers
+- id: Q082
+  question: How do Warby Parker and FIGS combine digital direct-to-consumer channels with physical retail?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 3748
+  - 1238
+  gold_answer: Warby Parker operates an integrated omnichannel platform combining digital commerce with 323 retail stores. FIGS sells primarily through its DTC digital platform while also operating physical retail stores called Community Hubs.
+  notes: vNext comparative holdout. Gold evidence manually audited during benchmark construction; not for retrieval tuning.
+  gold_chunks:
+  - doc_id: WRBY-10-K-2025
+    chunk_index: 0
+    contains: integrated, omnichannel platform across digital commerce and 323 retail stores
+  - doc_id: FIGS-10-K-2025
+    chunk_index: 0
+    contains: Community Hubs
+- id: Q083
+  question: How do Crocs and Columbia Sportswear differ in the geographic and supplier concentration of their outsourced manufacturing?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 581
+  - 405
+  gold_answer: 'Crocs describes a globally diversified third-party manufacturing base but remains concentrated: in 2025 about 45% of Crocs Brand production was in Vietnam, its largest manufacturer produced about 45%, and its second largest about 28%. Columbia uses contract manufacturing across multiple countries, but concentration varies by category; apparel, accessories and equipment were spread across 16 countries, while about 80% of footwear production was in Vietnam and its five largest footwear manufacturers represented about 80% of production.'
+  notes: vNext comparative holdout. Gold evidence manually audited during benchmark construction; focuses specifically on geographic and supplier concentration.
+  gold_chunks:
+  - doc_id: CROX-10-K-2025
+    chunk_index: 14
+    contains: largest third-party manufacturer for the Crocs Brand
+  - doc_id: COLM-10-K-2025
+    chunk_index: 3
+    contains: Five of the largest contract finished goods manufacturers
+- id: Q084
+  question: How do Abercrombie & Fitch and Gap use loyalty programs and customer data to deepen customer engagement?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 10
+  - 1493
+  gold_answer: Abercrombie & Fitch uses myAbercrombie and Hollister House Rewards, with purchase-based points, rewards, tier benefits, customer insights and personalization intended to support repeat business. Gap uses its integrated Encore loyalty program across its brands and first-party data to deliver more personalized content, offers and experiences while increasing loyalty-member lifetime value.
+  notes: vNext comparative holdout. Gold evidence manually audited during benchmark construction; not for retrieval tuning.
+  gold_chunks:
+  - doc_id: ANF-10-K-2026
+    chunk_index: 9
+    contains: myAbercrombie
+  - doc_id: GAP-10-K-2026
+    chunk_index: 2
+    contains: Encore
+- id: Q085
+  question: How do Deckers Outdoor and Gap manage inventory risk when demand must be forecast before products are sold?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 822
+  - 1513
+  - 1514
+  gold_answer: Deckers faces long lead times that require manufacturing decisions months before anticipated demand and manages inventory through forecasts, existing orders, SKU discipline, lead-time reduction, liquidation channels and pre-season ordering. Gap likewise orders merchandise before trends are confirmed, creating markdown and shortage risk, and invests in inventory optimization, in-season response, customer-behavior analysis and improved assortment allocation.
+  notes: vNext comparative holdout. Gold evidence manually audited during benchmark construction; includes separate Gap risk and mitigation chunks.
+  gold_chunks:
+  - doc_id: DECK-10-K-2026
+    chunk_index: 9
+    contains: long lead times
+  - doc_id: GAP-10-K-2026
+    chunk_index: 22
+    contains: too much inventory may cause excessive markdowns
+  - doc_id: GAP-10-K-2026
+    chunk_index: 23
+    contains: in-season response to demand
+- id: Q086
+  question: How do The Honest Company and Lululemon oversee third-party suppliers and manufacturing partners for quality and compliance?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 1627
+  - 2205
+  gold_answer: The Honest Company conducts quality audits of third-party partners and requires compliance with its quality standards, including controlled documentation, cleaning and safety protocols and laboratory controls. Lululemon closely assesses and monitors suppliers for quality, ethical standards and compliance with applicable laws and its Vendor Code of Ethics, using inspection and verification firms.
+  notes: vNext comparative holdout. Gold evidence manually audited during benchmark construction; compares third-party supplier oversight mechanisms.
+  gold_chunks:
+  - doc_id: HNST-10-K-2025
+    chunk_index: 4
+    contains: conduct quality audits of our third-party partners
+  - doc_id: LULU-10-K-2026
+    chunk_index: 8
+    contains: shared commitment to quality and ethical standards
+- id: Q087
+  question: How do YETI and Peloton combine direct sales channels with third-party retail distribution?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 3997
+  - 2589
+  gold_answer: YETI uses an omni-channel mix of direct-to-consumer and wholesale sales; DTC accounted for 60% of 2025 net sales and wholesale for 40%, with a broad network of retail partners. Peloton combines e-commerce and consumer sales with its own retail stores, business-to-business sales and third-party retailers.
+  notes: vNext comparative holdout. Gold evidence manually audited during benchmark construction; compares direct and third-party distribution mixes.
+  gold_chunks:
+  - doc_id: YETI-10-K-2026
+    chunk_index: 7
+    contains: wholesale and our direct-to-consumer
+  - doc_id: PTON-10-K-2026
+    chunk_index: 10
+    contains: Third-Party Retailers
+- id: Q088
+  question: How have Chewy and Warby Parker expanded their core product businesses into healthcare services?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 207
+  - 3755
+  gold_answer: Chewy has expanded from pet-product retail into pet healthcare through Chewy Pharmacy, telehealth, insurance and wellness offerings, and Chewy Vet Care clinics. Warby Parker has expanded beyond glasses toward comprehensive vision care, including contact lenses, eye exams and broader vision-care services.
+  notes: vNext comparative holdout. Final gold audit uses Warby Parker's dedicated holistic vision-care expansion chunk rather than its general company overview.
+  gold_chunks:
+  - doc_id: CHWY-10-K-2026
+    chunk_index: 5
+    contains: Connect with a Vet
+  - doc_id: WRBY-10-K-2025
+    chunk_index: 7
+    contains: Expanding our holistic vision care offering
+- id: Q089
+  question: How do YETI and lululemon use ambassador networks to support product development and brand engagement?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 3999
+  - 4008
+  - 2204
+  gold_answer: YETI collaborates with its ambassadors to test prototypes and provide feedback used in final product design, and also uses ambassadors in marketing and community-event efforts to promote the brand. Lululemon uses its ambassador network in integrated marketing to build awareness and engagement and also seeks ambassador input during product design and development.
+  notes: vNext comparative holdout. Gold evidence manually audited during benchmark construction; requires both product-development and brand-engagement roles.
+  gold_chunks:
+  - doc_id: YETI-10-K-2026
+    chunk_index: 9
+    contains: collaborate with our YETI Ambassadors
+  - doc_id: YETI-10-K-2026
+    chunk_index: 18
+    contains: YETI Ambassadors
+  - doc_id: LULU-10-K-2026
+    chunk_index: 7
+    contains: ambassador network
+- id: Q090
+  question: How do Gap and Levi Strauss use franchised or third-party-operated stores to support international distribution?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 1497
+  - 1898
+  gold_answer: Gap uses franchise agreements in about 35 countries, under which third parties operate stores and websites for its brands. Levi Strauss uses franchised, licensed and other brand-dedicated stores operated by independent third parties outside the United States; approximately 1,300 such stores were a key element of its international distribution as of November 30, 2025.
+  notes: vNext comparative holdout. Gold evidence manually audited during benchmark construction; compares third-party international retail distribution.
+  gold_chunks:
+  - doc_id: GAP-10-K-2026
+    chunk_index: 6
+    contains: about 35 countries around the world
+  - doc_id: LEVI-10-K-2025
+    chunk_index: 11
+    contains: approximately 1,300 of these stores
