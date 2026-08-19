@@ -1068,3 +1068,203 @@
   - doc_id: NKE-10-K-2026
     chunk_index: 4
     contains: non-U.S. NIKE Brand and Converse sales accounted for approximately 56% of total revenues
+- id: Q066
+  question: How do Peloton's Paid Connected Fitness and Paid App subscription offerings differ?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 2580
+  - 2585
+  gold_answer: A Paid Connected Fitness Subscription is tied to a Peloton Connected Fitness Product and may cover a person, household, or commercial property. Paid
+    App Subscriptions provide access through Peloton's apps, including standalone app memberships; App Memberships do not provide classes through Peloton-branded
+    Connected Fitness hardware and cannot track performance metrics using those devices.
+  notes: vNext multi_chunk dev. Gold evidence manually audited; requires combining Peloton's subscription definitions with app-access limitations.
+  gold_chunks:
+  - doc_id: PTON-10-K-2026
+    chunk_index: 1
+    contains: Paid Connected Fitness Subscription
+  - doc_id: PTON-10-K-2026
+    chunk_index: 6
+    contains: App Memberships do not have access to classes via a Peloton-branded Connected Fitness Product
+- id: Q067
+  question: How large was Columbia Sportswear's DTC brick-and-mortar footprint across the U.S., LAAP, and Europe-direct markets as of December 31, 2025?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 408
+  - 409
+  - 410
+  gold_answer: Columbia's U.S. DTC brick-and-mortar channel sold products in over 170 retail stores, its LAAP DTC channel in over 305 retail stores, and its Europe-direct
+    DTC channel in over 70 retail stores.
+  notes: vNext multi_chunk dev. Gold evidence manually audited; requires aggregating regional DTC store footprints from three separate chunks.
+  gold_chunks:
+  - doc_id: COLM-10-K-2025
+    chunk_index: 6
+    contains: over 170 retail stores
+  - doc_id: COLM-10-K-2025
+    chunk_index: 7
+    contains: over 305 retail stores
+  - doc_id: COLM-10-K-2025
+    chunk_index: 8
+    contains: over 70 retail stores
+- id: Q068
+  question: What reportable segments does Urban Outfitters operate, and what was the store footprint of Anthropologie, Free People, and FP Movement as of January
+    31, 2026?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 3332
+  - 3336
+  - 3337
+  gold_answer: 'Urban Outfitters reports three segments: Retail, Subscription, and Wholesale. As of January 31, 2026, it operated 254 Anthropologie stores, 180 Free
+    People brand stores, and 88 FP Movement brand stores.'
+  notes: vNext multi_chunk dev. Gold evidence manually audited; combines segment structure with physical-store counts disclosed across separate brand chunks.
+  gold_chunks:
+  - doc_id: URBN-10-K-2026
+    chunk_index: 0
+    contains: Retail, Subscription and Wholesale
+  - doc_id: URBN-10-K-2026
+    chunk_index: 4
+    contains: 254 Anthropologie stores
+  - doc_id: URBN-10-K-2026
+    chunk_index: 5
+    contains: we operated 180 Free People brand stores, of which 167 were located in North America and 13 were located in Europe, and 88 FP Movement brand stores
+      all located in North America
+- id: Q069
+  question: How many Brand and Factory House stores did Under Armour operate as of March 31, 2026, and what specific actions does it describe to improve inventory
+    performance?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 3115
+  - 3120
+  gold_answer: As of March 31, 2026, Under Armour had 443 Brand and Factory House stores, including 198 in North America and 245 in international markets. It describes
+    improving inventory performance through disciplined product purchasing, reduced production lead times, and enhanced planning and execution of selling excess inventory
+    through its Factory House stores and other liquidation channels.
+  notes: vNext multi_chunk dev. Gold evidence manually audited; the store count and the specific inventory-performance levers are disclosed in separate chunks, so
+    neither alone answers the question.
+  gold_chunks:
+  - doc_id: UAA-10-K-2026
+    chunk_index: 5
+    contains: 443 Brand and Factory House stores, including 198 stores in North America and 245 stores in our international markets
+  - doc_id: UAA-10-K-2026
+    chunk_index: 10
+    contains: disciplined product purchasing, reduced production lead times and enhanced planning and execution of selling excess inventory through our Factory House
+      stores and other liquidation channels
+- id: Q070
+  question: What was YETI's 2025 net sales mix by product category, and how were its annual net sales distributed across the four quarters?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 3991
+  - 4003
+  gold_answer: In 2025, Coolers & Equipment represented 40% of YETI net sales, Drinkware 58%, and Other 2%. Net sales were distributed 19% in the first quarter, 24%
+    in the second, 26% in the third, and 31% in the fourth.
+  notes: vNext multi_chunk holdout. Gold evidence manually audited during benchmark construction; requires combining product mix with quarterly seasonality and is
+    not for retrieval tuning.
+  gold_chunks:
+  - doc_id: YETI-10-K-2026
+    chunk_index: 1
+    contains: 40%, 58%, and 2% of net sales
+  - doc_id: YETI-10-K-2026
+    chunk_index: 13
+    contains: first, second, third, and fourth quarters represented 19%, 24%, 26%, and 31%
+- id: Q071
+  question: What omnichannel capabilities does Abercrombie & Fitch describe, and how did it reshape its store fleet during fiscal 2025?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 4
+  - 6
+  gold_answer: Abercrombie & Fitch describes purchase-online-pickup-in-store, ship-from-store, and cross-channel returns as omnichannel capabilities. During fiscal
+    2025, it opened 62 new stores, remodeled 47, right-sized 11, and closed 22.
+  notes: vNext multi_chunk holdout. Gold evidence manually audited during benchmark construction; combines omnichannel capabilities with store-fleet actions and is
+    not for retrieval tuning.
+  gold_chunks:
+  - doc_id: ANF-10-K-2026
+    chunk_index: 3
+    contains: purchase-online-pickup-in-store, ship-from-store, and cross-channel returns
+  - doc_id: ANF-10-K-2026
+    chunk_index: 5
+    contains: opened 62 new store locations, remodeled 47 store locations, right-sized an additional 11 store locations and closed 22 stores
+- id: Q072
+  question: How does Deckers structure its direct-to-consumer channel and its finished-goods manufacturing network?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 815
+  - 820
+  gold_answer: Deckers' DTC channel consists of company-owned e-commerce websites and retail stores that operate as an interconnected omnichannel marketplace. Finished-goods
+    production is outsourced to independent manufacturers, mostly in Southeast Asia; in fiscal 2026 production was predominantly in Vietnam and Indonesia, with less
+    than 5% produced in China or any other individual country.
+  notes: vNext multi_chunk holdout. Gold evidence manually audited during benchmark construction; combines channel structure with outsourced manufacturing concentration
+    and is not for retrieval tuning.
+  gold_chunks:
+  - doc_id: DECK-10-K-2026
+    chunk_index: 2
+    contains: 'Our DTC channel is comprised of our Company-owned e-commerce websites and retail
+
+
+      stores where products are sold at retail prices. Our e-commerce websites and retail stores are intertwined and
+
+
+      interdependent in an omnichannel marketplace'
+  - doc_id: DECK-10-K-2026
+    chunk_index: 7
+    contains: production of our finished goods is outsourced to independent manufacturers
+- id: Q073
+  question: What strategic priorities does Crocs describe for its brands, and what share of consolidated revenues came from digital sales in 2025?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 568
+  - 570
+  gold_answer: Crocs' priorities include igniting its core brand icons, expanding wearing occasions through product diversification, and driving market-share gains
+    in priority markets. Digital sales represented 37.8% of consolidated revenues in 2025.
+  notes: vNext multi_chunk holdout. Gold evidence manually audited during benchmark construction; combines brand-growth priorities with digital-sales mix and is not
+    for retrieval tuning.
+  gold_chunks:
+  - doc_id: CROX-10-K-2025
+    chunk_index: 1
+    contains: Ignite our icons
+  - doc_id: CROX-10-K-2025
+    chunk_index: 3
+    contains: Our digital sales in 2025 were 37.8% of consolidated revenues
+- id: Q074
+  question: How was Levi Strauss's fiscal 2025 business concentrated by product, gender, and flagship brand?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 1893
+  - 1895
+  gold_answer: In fiscal 2025, pants represented 67% of total units sold and tops 29%, while footwear represented less than 1%. Men's products generated 60% of net
+    revenues and women's products 39%. Levi's brand products accounted for 94% of net revenues.
+  notes: vNext multi_chunk holdout. Gold evidence manually audited during benchmark construction; combines product and gender mix with flagship-brand revenue concentration
+    and is not for retrieval tuning.
+  gold_chunks:
+  - doc_id: LEVI-10-K-2025
+    chunk_index: 6
+    contains: The remainder of our products are footwear, which represented less than 1% of our total units sold in fiscal year 2025 and 2% of our total units sold
+      in fiscal years 2024 and 2023, and accessories. Men's products generated 60%, 62% and 63% of our net revenues in fiscal years 2025, 2024 and 2023, respectively.
+      Women's products generated 39%, 37% and 36% of our net revenues
+  - doc_id: LEVI-10-K-2025
+    chunk_index: 8
+    contains: brand products accounted for 94%, 94% and 92% of our net revenues
+- id: Q075
+  question: What operating scale and mobile-order mix did REVOLVE report for 2025?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 2879
+  - 2881
+  gold_answer: In 2025, 77.2% of REVOLVE's total orders were placed through mobile devices. REVOLVE also reported $1.2 billion in net sales, 2.8 million active customers,
+    more than 1,600 brands, and more than 230,000 unique styles.
+  notes: vNext multi_chunk holdout. Gold evidence manually audited during benchmark construction; combines mobile-order share with operating scale and is not for
+    retrieval tuning.
+  gold_chunks:
+  - doc_id: RVLV-10-K-2025
+    chunk_index: 4
+    contains: 77.2% of our total orders
+  - doc_id: RVLV-10-K-2025
+    chunk_index: 6
+    contains: we generated $1.2 billion in net sales, served 2.8 million active customers, offered over 1,600 brands and delivered over 230,000 unique styles
