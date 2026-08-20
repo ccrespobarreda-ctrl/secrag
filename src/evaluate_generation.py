@@ -71,6 +71,13 @@ about a company is UNSUPPORTED when every cited excerpt is about a different
 company, even where the figure matches. A claim about a fiscal year is
 UNSUPPORTED when the excerpts cover a different year.
 
+A claim asserting that the excerpts do NOT contain something -- "none of these
+excerpts describe X", "neither company reports Y" -- is ABSENCE. Confirming it
+would require reading every excerpt not cited, and possibly the whole filing,
+which you cannot do. Do not force such a claim into SUPPORTED or UNSUPPORTED.
+This matters most on comparisons: contrasting two companies almost always means
+stating what one does and the other does not.
+
 Do not judge whether the claim is true in the world. Judge only whether these
 excerpts support it.
 
@@ -80,7 +87,11 @@ Reply with JSON and nothing else:
 
 or
 
-{"verdict": "UNSUPPORTED"}"""
+{"verdict": "UNSUPPORTED"}
+
+or
+
+{"verdict": "ABSENCE"}"""
 
 # Enough room that the model's own reasoning cannot consume the budget before a
 # verdict is emitted.
@@ -93,6 +104,13 @@ or
 JUDGE_MAX_TOKENS = 512
 
 JUDGE_ERROR = "judge_error"
+
+# A claim about what the excerpts do not contain. Reported apart from verdicts
+# and excluded from the rate, for the same reason judge failures are: an
+# unverifiable claim is not evidence of an unsupported one, and collapsing the
+# two moved eight of thirteen "unsupported" comparative claims into a category
+# they were never judged into.
+JUDGE_ABSENCE = "absence"
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -173,9 +191,13 @@ def judge_claim(provider, claim: str, excerpts: list[tuple[str, str]]
             return "supported", reply
         if v == "UNSUPPORTED":
             return "unsupported", reply
+        if v == "ABSENCE":
+            return JUDGE_ABSENCE, reply
         return JUDGE_ERROR, reply
 
     upper = reply.upper()
+    if "ABSENCE" in upper:
+        return JUDGE_ABSENCE, reply
     # UNSUPPORTED contains SUPPORTED, so order matters.
     if "UNSUPPORTED" in upper or "NOT SUPPORTED" in upper:
         return "unsupported", reply
@@ -407,8 +429,9 @@ def main() -> int:
         # that is not a property of the system being measured.
         decided = judged.get("supported", 0) + judged.get("unsupported", 0)
         errors = judged.get(JUDGE_ERROR, 0)
+        absence = judged.get(JUDGE_ABSENCE, 0)
         invalid = judged.get("invalid citation", 0)
-        attempts = decided + errors
+        attempts = decided + errors + absence
 
         print(f"\n{'groundedness':<28}{'n':>6}{'share of decided':>19}")
         print("-" * 53)
@@ -417,6 +440,8 @@ def main() -> int:
             print(f"{verdict:<28}{n:>6}{(n / decided if decided else 0):>18.1%}")
         print("-" * 53)
         print(f"{'claims judged':<28}{decided:>6}")
+        print(f"{'absence claims':<28}{absence:>6}"
+              f"{(absence / attempts if attempts else 0):>18.1%}  of attempts")
         print(f"{'judge failures':<28}{errors:>6}"
               f"{(errors / attempts if attempts else 0):>18.1%}  of attempts")
         if invalid:
