@@ -271,7 +271,11 @@ def main() -> int:
                 calls += 1
 
             cited, problems = G.verify_citations(text, len(hits))
-            refused = C.REFUSAL_MARKER in text
+            # G.is_refusal, not a substring test. The two disagreed and
+            # the metric used the weaker one: a response refusing in
+            # prose was counted as an answer, inflating the one figure
+            # that has to be zero.
+            refused = G.is_refusal(text)
 
             records.append({
                 "id": q["id"], "type": q["type"], "answerable": q["answerable"],

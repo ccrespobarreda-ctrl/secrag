@@ -167,6 +167,11 @@ _ANSWERING_FIGURE = re.compile(
 _SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+(?=[A-Z(\[]|[-*•]\s)|\n\s*(?=[-*•]\s)")
 
 
+_HEDGE = re.compile(
+    r"\b(?:approximately|appears to be|roughly|estimated at|around)\b",
+    re.IGNORECASE)
+
+
 def is_refusal(text: str) -> bool:
     """
     A refusal is a refusal when the limitation IS the answer, not when it is a
@@ -184,16 +189,28 @@ def is_refusal(text: str) -> bool:
     So the phrase counts only when the response is not also making cited claims.
     The exact marker always counts, because the prompt asks for it to stand alone.
     """
-    if C.REFUSAL_MARKER in text:
+    if text.lstrip().startswith(C.REFUSAL_MARKER):
         return True
+    if C.REFUSAL_MARKER in text:
+        return False
     if not _PROSE_REFUSAL.search(text):
         return False
+
+    # Where the negation sits decides what it is. A response opening with "the
+    # excerpts do not give a precise count" is refusing, and the citations that
+    # follow are its argument for why. A response closing with the same words
+    # after four paragraphs of cited answer is declaring scope. Measured on the
+    # Yeti country count against the Gap brand-performance question: both carry
+    # citations, both carry the phrase, and only the position separates them.
+    first = next((s for s in _SENTENCE_SPLIT.split(text.strip()) if s.strip()), "")
+    if _PROSE_REFUSAL.search(first):
+        return True
 
     # A cited factual claim before the limitation means an answer was given.
     for sentence in _SENTENCE_SPLIT.split(text):
         if _PROSE_REFUSAL.search(sentence):
             continue
-        if _CITATION.search(sentence) and _FIGURE.search(sentence):
+        if _CITATION.search(sentence):
             return False
     return True
 
@@ -211,10 +228,19 @@ def verify_citations(text: str, n_excerpts: int) -> tuple[list[int], list[str]]:
     if refused:
         # A refusal that also answers is worse than either: it reads as an
         # answer while scoring as a refusal.
-        stripped = text.replace(C.REFUSAL_MARKER, "").strip()
-        if _ANSWERING_FIGURE.search(stripped):
-            problems.append(
-                "refused and still stated a figure — the marker must stand alone")
+        # A figure inside a refusal is a problem only when offered as the
+        # answer. Cited, it is the model separating a nearby disclosure from
+        # the one asked for: given only the year-over-year increase in digital
+        # marketing spend, naming that increase and saying it is not the total
+        # is more useful than a bare refusal.
+        for s in _SENTENCE_SPLIT.split(text.replace(C.REFUSAL_MARKER, "")):
+            if _ANSWERING_FIGURE.search(s) and not _CITATION.search(s):
+                problems.append(
+                    "refused and stated an uncited figure - a figure in a "
+                    "refusal must cite the excerpt it came from")
+                break
+        if _HEDGE.search(text):
+            problems.append("hedged figure in a refusal")
         return sorted(set(cited)), problems
 
     if not cited:

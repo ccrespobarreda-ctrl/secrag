@@ -1,0 +1,288 @@
+# DERIVED FILE - do not edit by hand.
+# development split only, generated from questions_vnext.yaml and
+# vnext_splits.yaml. Used to compare the new questions against the
+# legacy set in isolation. Holdout is absent by construction.
+- id: Q076
+  question: Which company sells its products in more countries, Columbia Sportswear or Levi Strauss?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 407
+  - 1888
+  gold_answer: Levi Strauss. Its products are sold in approximately 120 countries, compared with Columbia Sportswear's 115 countries.
+  notes: vNext comparative dev. Gold evidence manually audited; compares company-level geographic sales reach.
+  gold_chunks:
+  - doc_id: COLM-10-K-2025
+    chunk_index: 5
+    contains: We sell our products in 115 countries
+  - doc_id: LEVI-10-K-2025
+    chunk_index: 1
+    contains: Our products are sold in approximately 120 countries
+- id: Q077
+  question: How do REVOLVE and FIGS use data-driven merchandising to manage inventory risk?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 2882
+  - 1245
+  gold_answer: REVOLVE uses a data-driven read-and-react merchandising model to identify trends, curate assortments, plan reorders and manage pricing while limiting
+    fashion and inventory risk. FIGS uses shallow initial buys and data-driven repurchasing decisions to test products and lower inventory risk.
+  notes: vNext comparative dev. Gold evidence manually audited; compares two distinct data-driven inventory-risk strategies.
+  gold_chunks:
+  - doc_id: RVLV-10-K-2025
+    chunk_index: 7
+    contains: read and react
+  - doc_id: FIGS-10-K-2025
+    chunk_index: 7
+    contains: data-driven repurchasing decisions to lower inventory risk
+- id: Q078
+  question: How do NIKE and Under Armour structure their outsourced manufacturing networks?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 2368
+  - 3119
+  gold_answer: NIKE outsources nearly all footwear and apparel production to independent contract manufacturers across a large multinational factory network, with
+    significant production concentration in countries including Vietnam, Indonesia and China. Under Armour similarly outsources substantially all production, using
+    40 primary contract manufacturers in 17 countries for apparel and accessories and seven primary contract manufacturers for footwear, with production concentrated
+    in several Asian countries.
+  notes: vNext comparative dev. Gold evidence manually audited; focuses on outsourced manufacturing network structure and concentration.
+  gold_chunks:
+  - doc_id: NKE-10-K-2026
+    chunk_index: 6
+    contains: 95 finished goods footwear factories
+  - doc_id: UAA-10-K-2026
+    chunk_index: 9
+    contains: 40 primary contract manufacturers
+- id: Q079
+  question: How do Peloton and Urban Outfitters use subscription-based business models?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 2584
+  - 3340
+  gold_answer: Peloton sells monthly or annual memberships that provide access to Connected Fitness and app-based fitness and wellness content. Urban Outfitters operates
+    Nuuly, primarily a monthly women's apparel rental subscription in which subscribers select products, wear them and swap into new products the following month.
+  notes: vNext comparative dev. Gold evidence manually audited; compares digital fitness memberships with apparel rental subscriptions.
+  gold_chunks:
+  - doc_id: PTON-10-K-2026
+    chunk_index: 5
+    contains: Membership billed on a monthly or annual basis
+  - doc_id: URBN-10-K-2026
+    chunk_index: 8
+    contains: subscription rental service
+- id: Q080
+  question: How do Abercrombie & Fitch and Urban Outfitters manage inventory risk from changing customer demand and fashion trends?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 8
+  - 3358
+  gold_answer: Abercrombie & Fitch uses an agile inventory model intended to optimize inventory levels, production volumes, speed and responsiveness to customer demand.
+    Urban Outfitters emphasizes predicting and responding to volatile customer tastes and fashion trends; forecasting errors can lead to unsold inventory and markdowns,
+    and it uses data analytics to obtain timely customer insights.
+  notes: vNext comparative dev. Gold evidence manually audited; compares operational inventory agility with fashion-demand forecasting risk.
+  gold_chunks:
+  - doc_id: ANF-10-K-2026
+    chunk_index: 7
+    contains: agile inventory model
+  - doc_id: URBN-10-K-2026
+    chunk_index: 26
+    contains: Customer tastes and fashion trends are volatile
+- id: Q081
+  question: How do Wayfair and Etsy differ in their approach to inventory and fulfillment?
+  type: comparative
+  answerable: true
+  gold_chunk_ids:
+  - 3521
+  - 994
+  - 1009
+  gold_answer: Wayfair relies primarily on supplier-direct shipping while also operating its own logistics capabilities, including CastleGate and the Wayfair Delivery
+    Network, and allows suppliers to forward-position inventory in CastleGate facilities. Etsy operates an asset-light marketplace and explicitly states that it does
+    not hold physical inventory; shipping to buyers is offered by sellers, while Etsy provides marketplace services including optional shipping labels.
+  notes: vNext comparative dev. Final evidence audit added Etsy's explicit no-physical-inventory statement and seller-provided shipping evidence.
+  gold_chunks:
+  - doc_id: W-10-K-2025
+    chunk_index: 2
+    contains: The majority of our products are shipped to customers directly from our suppliers
+  - doc_id: ETSY-10-K-2025
+    chunk_index: 4
+    contains: we do not hold physical inventory
+  - doc_id: ETSY-10-K-2025
+    chunk_index: 19
+    contains: shipping offered by sellers to buyers
+- id: Q056
+  question: How many active buyers and active sellers did the Etsy marketplace have as of December 31, 2025?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 996
+  gold_answer: 86.5 million active buyers and 5.6 million active sellers.
+  notes: vNext extractive dev. Gold evidence manually audited; asks for Etsy marketplace participant counts at year end.
+  gold_chunks:
+  - doc_id: ETSY-10-K-2025
+    chunk_index: 6
+    contains: 86.5 million active buyers and 5.6 million active sellers
+- id: Q057
+  question: Approximately how many new styles did REVOLVE launch per week on average in 2025?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 2876
+  gold_answer: Over 2,400 new styles per week on average.
+  notes: vNext extractive dev. Gold evidence manually audited; asks for REVOLVE's average weekly new-style launch rate.
+  gold_chunks:
+  - doc_id: RVLV-10-K-2025
+    chunk_index: 1
+    contains: over 2,400 new styles launched per week on average in 2025
+- id: Q058
+  question: What share of the U.S. population can Chewy reach with overnight and two-day shipping?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 208
+  gold_answer: Over 80% of the U.S. population overnight and almost 100% in two days.
+  notes: vNext extractive dev. Gold evidence manually audited; asks for Chewy's stated fulfillment-network delivery reach.
+  gold_chunks:
+  - doc_id: CHWY-10-K-2026
+    chunk_index: 6
+    contains: over 80% of the U.S. population overnight and almost 100% in two days
+- id: Q059
+  question: As of December 31, 2025, how many active customers did Wayfair have, and what percentage of orders came from repeat buyers during the year?
+  type: extractive
+  answerable: true
+  gold_chunk_ids:
+  - 3625
+  gold_answer: 21 million active customers, and 80.3% of orders came from repeat buyers.
+  notes: vNext extractive dev. Gold evidence manually audited; asks for Wayfair customer scale and repeat-order share.
+  gold_chunks:
+  - doc_id: W-10-K-2025
+    chunk_index: 106
+    contains: 21 million active customers and during the year ended December 31, 2025, 80.3% of orders came from repeat buyers
+- id: Q066
+  question: How do Peloton's Paid Connected Fitness and Paid App subscription offerings differ?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 2580
+  - 2585
+  gold_answer: A Paid Connected Fitness Subscription is tied to a Peloton Connected Fitness Product and may cover a person, household, or commercial property. Paid
+    App Subscriptions provide access through Peloton's apps, including standalone app memberships; App Memberships do not provide classes through Peloton-branded
+    Connected Fitness hardware and cannot track performance metrics using those devices.
+  notes: vNext multi_chunk dev. Gold evidence manually audited; requires combining Peloton's subscription definitions with app-access limitations.
+  gold_chunks:
+  - doc_id: PTON-10-K-2026
+    chunk_index: 1
+    contains: Paid Connected Fitness Subscription
+  - doc_id: PTON-10-K-2026
+    chunk_index: 6
+    contains: App Memberships do not have access to classes via a Peloton-branded Connected Fitness Product
+- id: Q067
+  question: How large was Columbia Sportswear's DTC brick-and-mortar footprint across the U.S., LAAP, and Europe-direct markets as of December 31, 2025?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 408
+  - 409
+  - 410
+  gold_answer: Columbia's U.S. DTC brick-and-mortar channel sold products in over 170 retail stores, its LAAP DTC channel in over 305 retail stores, and its Europe-direct
+    DTC channel in over 70 retail stores.
+  notes: vNext multi_chunk dev. Gold evidence manually audited; requires aggregating regional DTC store footprints from three separate chunks.
+  gold_chunks:
+  - doc_id: COLM-10-K-2025
+    chunk_index: 6
+    contains: over 170 retail stores
+  - doc_id: COLM-10-K-2025
+    chunk_index: 7
+    contains: over 305 retail stores
+  - doc_id: COLM-10-K-2025
+    chunk_index: 8
+    contains: over 70 retail stores
+- id: Q068
+  question: What reportable segments does Urban Outfitters operate, and what was the store footprint of Anthropologie, Free People, and FP Movement as of January
+    31, 2026?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 3332
+  - 3336
+  - 3337
+  gold_answer: 'Urban Outfitters reports three segments: Retail, Subscription, and Wholesale. As of January 31, 2026, it operated 254 Anthropologie stores, 180 Free
+    People brand stores, and 88 FP Movement brand stores.'
+  notes: vNext multi_chunk dev. Gold evidence manually audited; combines segment structure with physical-store counts disclosed across separate brand chunks.
+  gold_chunks:
+  - doc_id: URBN-10-K-2026
+    chunk_index: 0
+    contains: Retail, Subscription and Wholesale
+  - doc_id: URBN-10-K-2026
+    chunk_index: 4
+    contains: 254 Anthropologie stores
+  - doc_id: URBN-10-K-2026
+    chunk_index: 5
+    contains: we operated 180 Free People brand stores, of which 167 were located in North America and 13 were located in Europe, and 88 FP Movement brand stores
+      all located in North America
+- id: Q069
+  question: How many Brand and Factory House stores did Under Armour operate as of March 31, 2026, and what specific actions does it describe to improve inventory
+    performance?
+  type: multi_chunk
+  answerable: true
+  gold_chunk_ids:
+  - 3115
+  - 3120
+  gold_answer: As of March 31, 2026, Under Armour had 443 Brand and Factory House stores, including 198 in North America and 245 in international markets. It describes
+    improving inventory performance through disciplined product purchasing, reduced production lead times, and enhanced planning and execution of selling excess inventory
+    through its Factory House stores and other liquidation channels.
+  notes: vNext multi_chunk dev. Gold evidence manually audited; the store count and the specific inventory-performance levers are disclosed in separate chunks, so
+    neither alone answers the question.
+  gold_chunks:
+  - doc_id: UAA-10-K-2026
+    chunk_index: 5
+    contains: 443 Brand and Factory House stores, including 198 stores in North America and 245 stores in our international markets
+  - doc_id: UAA-10-K-2026
+    chunk_index: 10
+    contains: disciplined product purchasing, reduced production lead times and enhanced planning and execution of selling excess inventory through our Factory House
+      stores and other liquidation channels
+- id: Q091
+  question: What was Gap's average manufacturing cost per unit of denim in fiscal 2025?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_absent dev. Cost of goods sold is reported in aggregate; per-unit manufacturing cost is never disclosed.
+- id: Q092
+  question: What royalty rate does Under Armour pay its endorsers under its sponsorship agreements?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_absent dev. The filing states that royalty payments to endorsers are based on a predetermined percentage of sales, but never discloses
+    the percentage itself.
+- id: Q093
+  question: How is Levi Strauss's workforce distributed across its business functions?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_absent dev. Total headcount is disclosed; a breakdown by department or function is not.
+- id: Q094
+  question: What is the conversion rate of Skechers' e-commerce websites?
+  type: unanswerable_absent
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_absent dev. An internal e-commerce metric rather than a disclosure; the term does not appear anywhere in the filing.
+- id: Q101
+  question: What percentage of Columbia Sportswear's total orders were placed through mobile devices in 2025?
+  type: unanswerable_adversarial
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_adversarial dev. Columbia never mentions mobile orders. REVOLVE discloses that 77.2% of its total orders were placed through mobile devices,
+    so retrieval is likely to surface the right figure for the wrong company.
+- id: Q102
+  question: How did Skechers' acquisition of Vans affect its fiscal 2026 revenues?
+  type: unanswerable_adversarial
+  answerable: false
+  gold_chunk_ids: []
+  gold_answer: null
+  notes: vNext unanswerable_adversarial dev. Presupposes an acquisition that never took place; the premise is false rather than the data merely missing.
