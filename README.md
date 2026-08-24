@@ -3,7 +3,7 @@
 **Cristina Crespo Barreda** · data analytics, data science, ML engineering
 · [c.crespobarreda@gmail.com](mailto:c.crespobarreda@gmail.com)
 
-**[See the results and every question →](https://cristinacrespo.github.io/secrag/)**
+**[See the results and every question →](https://ccrespobarreda-ctrl.github.io/secrag/)**
 
 ---
 
