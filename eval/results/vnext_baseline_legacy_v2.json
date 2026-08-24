@@ -1,0 +1,2360 @@
+{
+ "generated": "2026-08-24T13:55:06",
+ "k": 16,
+ "rrf_k": 40,
+ "answerable": 34,
+ "unanswerable": 16,
+ "strategies": {
+  "semantic": {
+   "recall_at_k": 0.5,
+   "mean_rr": 0.22840623428858722,
+   "coverage": 0.39362745098039215,
+   "n": 34,
+   "recall_by_type": {
+    "extractive": 0.5263157894736842,
+    "multi_chunk": 0.6,
+    "comparative": 0.2
+   },
+   "coverage_by_type": {
+    "extractive": 0.5087719298245613,
+    "multi_chunk": 0.32166666666666666,
+    "comparative": 0.1
+   },
+   "per_question": [
+    {
+     "id": "Q001",
+     "type": "extractive",
+     "gold": [
+      3453
+     ],
+     "found": [
+      3453
+     ],
+     "first_gold_rank": 15,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q002",
+     "type": "extractive",
+     "gold": [
+      3236
+     ],
+     "found": [
+      3236
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q003",
+     "type": "extractive",
+     "gold": [
+      2315
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q004",
+     "type": "extractive",
+     "gold": [
+      2447
+     ],
+     "found": [
+      2447
+     ],
+     "first_gold_rank": 3,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q005",
+     "type": "extractive",
+     "gold": [
+      736
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q006",
+     "type": "extractive",
+     "gold": [
+      2362
+     ],
+     "found": [
+      2362
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q007",
+     "type": "extractive",
+     "gold": [
+      320
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q008",
+     "type": "extractive",
+     "gold": [
+      813
+     ],
+     "found": [
+      813
+     ],
+     "first_gold_rank": 13,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q009",
+     "type": "extractive",
+     "gold": [
+      3903
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q010",
+     "type": "extractive",
+     "gold": [
+      3670
+     ],
+     "found": [
+      3670
+     ],
+     "first_gold_rank": 4,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q011",
+     "type": "extractive",
+     "gold": [
+      2717,
+      2724
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q012",
+     "type": "extractive",
+     "gold": [
+      2297
+     ],
+     "found": [
+      2297
+     ],
+     "first_gold_rank": 6,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q013",
+     "type": "extractive",
+     "gold": [
+      1491
+     ],
+     "found": [
+      1491
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q014",
+     "type": "extractive",
+     "gold": [
+      3451
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q015",
+     "type": "extractive",
+     "gold": [
+      736
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q017",
+     "type": "extractive",
+     "gold": [
+      2002,
+      2003
+     ],
+     "found": [
+      2002,
+      2003
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q018",
+     "type": "extractive",
+     "gold": [
+      3327
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q019",
+     "type": "extractive",
+     "gold": [
+      500,
+      501,
+      502
+     ],
+     "found": [
+      500,
+      502
+     ],
+     "first_gold_rank": 2,
+     "hit": 1.0,
+     "coverage": 0.6666666666666666
+    },
+    {
+     "id": "Q020",
+     "type": "extractive",
+     "gold": [
+      1239
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q021",
+     "type": "multi_chunk",
+     "gold": [
+      236,
+      237,
+      238,
+      257,
+      258
+     ],
+     "found": [
+      237,
+      238
+     ],
+     "first_gold_rank": 5,
+     "hit": 1.0,
+     "coverage": 0.4
+    },
+    {
+     "id": "Q022",
+     "type": "multi_chunk",
+     "gold": [
+      2000,
+      2018,
+      2019
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q023",
+     "type": "multi_chunk",
+     "gold": [
+      2431
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q024",
+     "type": "multi_chunk",
+     "gold": [
+      2227,
+      2233
+     ],
+     "found": [
+      2233
+     ],
+     "first_gold_rank": 4,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q025",
+     "type": "multi_chunk",
+     "gold": [
+      3196,
+      3197
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q026",
+     "type": "multi_chunk",
+     "gold": [
+      1039,
+      1042,
+      1080
+     ],
+     "found": [
+      1039,
+      1080
+     ],
+     "first_gold_rank": 9,
+     "hit": 1.0,
+     "coverage": 0.6666666666666666
+    },
+    {
+     "id": "Q027",
+     "type": "multi_chunk",
+     "gold": [
+      1548,
+      1593
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q028",
+     "type": "multi_chunk",
+     "gold": [
+      3521,
+      3524,
+      3526,
+      3529,
+      3684
+     ],
+     "found": [
+      3521,
+      3529
+     ],
+     "first_gold_rank": 5,
+     "hit": 1.0,
+     "coverage": 0.4
+    },
+    {
+     "id": "Q029",
+     "type": "multi_chunk",
+     "gold": [
+      54,
+      56,
+      57,
+      84
+     ],
+     "found": [
+      56,
+      57,
+      84
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 0.75
+    },
+    {
+     "id": "Q030",
+     "type": "multi_chunk",
+     "gold": [
+      1623,
+      1795
+     ],
+     "found": [
+      1623
+     ],
+     "first_gold_rank": 2,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q031",
+     "type": "comparative",
+     "gold": [
+      2389,
+      3165
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q032",
+     "type": "comparative",
+     "gold": [
+      2314,
+      2362
+     ],
+     "found": [
+      2362
+     ],
+     "first_gold_rank": 9,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q033",
+     "type": "comparative",
+     "gold": [
+      230,
+      3541
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q034",
+     "type": "comparative",
+     "gold": [
+      54,
+      1508
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q035",
+     "type": "comparative",
+     "gold": [
+      736,
+      916
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    }
+   ]
+  },
+  "keyword": {
+   "recall_at_k": 0.4117647058823529,
+   "mean_rr": 0.15859042917866448,
+   "coverage": 0.30294117647058827,
+   "n": 34,
+   "recall_by_type": {
+    "extractive": 0.3157894736842105,
+    "multi_chunk": 0.7,
+    "comparative": 0.2
+   },
+   "coverage_by_type": {
+    "extractive": 0.3157894736842105,
+    "multi_chunk": 0.38,
+    "comparative": 0.1
+   },
+   "per_question": [
+    {
+     "id": "Q001",
+     "type": "extractive",
+     "gold": [
+      3453
+     ],
+     "found": [
+      3453
+     ],
+     "first_gold_rank": 6,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q002",
+     "type": "extractive",
+     "gold": [
+      3236
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q003",
+     "type": "extractive",
+     "gold": [
+      2315
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q004",
+     "type": "extractive",
+     "gold": [
+      2447
+     ],
+     "found": [
+      2447
+     ],
+     "first_gold_rank": 11,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q005",
+     "type": "extractive",
+     "gold": [
+      736
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q006",
+     "type": "extractive",
+     "gold": [
+      2362
+     ],
+     "found": [
+      2362
+     ],
+     "first_gold_rank": 5,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q007",
+     "type": "extractive",
+     "gold": [
+      320
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q008",
+     "type": "extractive",
+     "gold": [
+      813
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q009",
+     "type": "extractive",
+     "gold": [
+      3903
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q010",
+     "type": "extractive",
+     "gold": [
+      3670
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q011",
+     "type": "extractive",
+     "gold": [
+      2717,
+      2724
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q012",
+     "type": "extractive",
+     "gold": [
+      2297
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q013",
+     "type": "extractive",
+     "gold": [
+      1491
+     ],
+     "found": [
+      1491
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q014",
+     "type": "extractive",
+     "gold": [
+      3451
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q015",
+     "type": "extractive",
+     "gold": [
+      736
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q017",
+     "type": "extractive",
+     "gold": [
+      2002,
+      2003
+     ],
+     "found": [
+      2002,
+      2003
+     ],
+     "first_gold_rank": 13,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q018",
+     "type": "extractive",
+     "gold": [
+      3327
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q019",
+     "type": "extractive",
+     "gold": [
+      500,
+      501,
+      502
+     ],
+     "found": [
+      500,
+      501,
+      502
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q020",
+     "type": "extractive",
+     "gold": [
+      1239
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q021",
+     "type": "multi_chunk",
+     "gold": [
+      236,
+      237,
+      238,
+      257,
+      258
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q022",
+     "type": "multi_chunk",
+     "gold": [
+      2000,
+      2018,
+      2019
+     ],
+     "found": [
+      2000
+     ],
+     "first_gold_rank": 4,
+     "hit": 1.0,
+     "coverage": 0.3333333333333333
+    },
+    {
+     "id": "Q023",
+     "type": "multi_chunk",
+     "gold": [
+      2431
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q024",
+     "type": "multi_chunk",
+     "gold": [
+      2227,
+      2233
+     ],
+     "found": [
+      2233
+     ],
+     "first_gold_rank": 8,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q025",
+     "type": "multi_chunk",
+     "gold": [
+      3196,
+      3197
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q026",
+     "type": "multi_chunk",
+     "gold": [
+      1039,
+      1042,
+      1080
+     ],
+     "found": [
+      1039,
+      1080
+     ],
+     "first_gold_rank": 6,
+     "hit": 1.0,
+     "coverage": 0.6666666666666666
+    },
+    {
+     "id": "Q027",
+     "type": "multi_chunk",
+     "gold": [
+      1548,
+      1593
+     ],
+     "found": [
+      1548
+     ],
+     "first_gold_rank": 10,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q028",
+     "type": "multi_chunk",
+     "gold": [
+      3521,
+      3524,
+      3526,
+      3529,
+      3684
+     ],
+     "found": [
+      3521,
+      3524,
+      3526,
+      3529
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 0.8
+    },
+    {
+     "id": "Q029",
+     "type": "multi_chunk",
+     "gold": [
+      54,
+      56,
+      57,
+      84
+     ],
+     "found": [
+      56,
+      84
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q030",
+     "type": "multi_chunk",
+     "gold": [
+      1623,
+      1795
+     ],
+     "found": [
+      1623
+     ],
+     "first_gold_rank": 8,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q031",
+     "type": "comparative",
+     "gold": [
+      2389,
+      3165
+     ],
+     "found": [
+      3165
+     ],
+     "first_gold_rank": 11,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q032",
+     "type": "comparative",
+     "gold": [
+      2314,
+      2362
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q033",
+     "type": "comparative",
+     "gold": [
+      230,
+      3541
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q034",
+     "type": "comparative",
+     "gold": [
+      54,
+      1508
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q035",
+     "type": "comparative",
+     "gold": [
+      736,
+      916
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    }
+   ]
+  },
+  "keyword+company": {
+   "recall_at_k": 0.7352941176470589,
+   "mean_rr": 0.2795941803294745,
+   "coverage": 0.6279411764705882,
+   "n": 34,
+   "recall_by_type": {
+    "extractive": 0.6842105263157895,
+    "multi_chunk": 0.9,
+    "comparative": 0.6
+   },
+   "coverage_by_type": {
+    "extractive": 0.6578947368421053,
+    "multi_chunk": 0.6849999999999999,
+    "comparative": 0.4
+   },
+   "per_question": [
+    {
+     "id": "Q001",
+     "type": "extractive",
+     "gold": [
+      3453
+     ],
+     "found": [
+      3453
+     ],
+     "first_gold_rank": 6,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q002",
+     "type": "extractive",
+     "gold": [
+      3236
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q003",
+     "type": "extractive",
+     "gold": [
+      2315
+     ],
+     "found": [
+      2315
+     ],
+     "first_gold_rank": 2,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q004",
+     "type": "extractive",
+     "gold": [
+      2447
+     ],
+     "found": [
+      2447
+     ],
+     "first_gold_rank": 2,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q005",
+     "type": "extractive",
+     "gold": [
+      736
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q006",
+     "type": "extractive",
+     "gold": [
+      2362
+     ],
+     "found": [
+      2362
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q007",
+     "type": "extractive",
+     "gold": [
+      320
+     ],
+     "found": [
+      320
+     ],
+     "first_gold_rank": 13,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q008",
+     "type": "extractive",
+     "gold": [
+      813
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q009",
+     "type": "extractive",
+     "gold": [
+      3903
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q010",
+     "type": "extractive",
+     "gold": [
+      3670
+     ],
+     "found": [
+      3670
+     ],
+     "first_gold_rank": 13,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q011",
+     "type": "extractive",
+     "gold": [
+      2717,
+      2724
+     ],
+     "found": [
+      2717
+     ],
+     "first_gold_rank": 9,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q012",
+     "type": "extractive",
+     "gold": [
+      2297
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q013",
+     "type": "extractive",
+     "gold": [
+      1491
+     ],
+     "found": [
+      1491
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q014",
+     "type": "extractive",
+     "gold": [
+      3451
+     ],
+     "found": [
+      3451
+     ],
+     "first_gold_rank": 9,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q015",
+     "type": "extractive",
+     "gold": [
+      736
+     ],
+     "found": [
+      736
+     ],
+     "first_gold_rank": 3,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q017",
+     "type": "extractive",
+     "gold": [
+      2002,
+      2003
+     ],
+     "found": [
+      2002,
+      2003
+     ],
+     "first_gold_rank": 13,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q018",
+     "type": "extractive",
+     "gold": [
+      3327
+     ],
+     "found": [
+      3327
+     ],
+     "first_gold_rank": 7,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q019",
+     "type": "extractive",
+     "gold": [
+      500,
+      501,
+      502
+     ],
+     "found": [
+      500,
+      501,
+      502
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q020",
+     "type": "extractive",
+     "gold": [
+      1239
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q021",
+     "type": "multi_chunk",
+     "gold": [
+      236,
+      237,
+      238,
+      257,
+      258
+     ],
+     "found": [
+      237,
+      238,
+      257,
+      258
+     ],
+     "first_gold_rank": 3,
+     "hit": 1.0,
+     "coverage": 0.8
+    },
+    {
+     "id": "Q022",
+     "type": "multi_chunk",
+     "gold": [
+      2000,
+      2018,
+      2019
+     ],
+     "found": [
+      2000
+     ],
+     "first_gold_rank": 4,
+     "hit": 1.0,
+     "coverage": 0.3333333333333333
+    },
+    {
+     "id": "Q023",
+     "type": "multi_chunk",
+     "gold": [
+      2431
+     ],
+     "found": [
+      2431
+     ],
+     "first_gold_rank": 8,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q024",
+     "type": "multi_chunk",
+     "gold": [
+      2227,
+      2233
+     ],
+     "found": [
+      2233
+     ],
+     "first_gold_rank": 2,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q025",
+     "type": "multi_chunk",
+     "gold": [
+      3196,
+      3197
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q026",
+     "type": "multi_chunk",
+     "gold": [
+      1039,
+      1042,
+      1080
+     ],
+     "found": [
+      1039,
+      1080
+     ],
+     "first_gold_rank": 6,
+     "hit": 1.0,
+     "coverage": 0.6666666666666666
+    },
+    {
+     "id": "Q027",
+     "type": "multi_chunk",
+     "gold": [
+      1548,
+      1593
+     ],
+     "found": [
+      1548,
+      1593
+     ],
+     "first_gold_rank": 3,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q028",
+     "type": "multi_chunk",
+     "gold": [
+      3521,
+      3524,
+      3526,
+      3529,
+      3684
+     ],
+     "found": [
+      3521,
+      3524,
+      3526,
+      3529
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 0.8
+    },
+    {
+     "id": "Q029",
+     "type": "multi_chunk",
+     "gold": [
+      54,
+      56,
+      57,
+      84
+     ],
+     "found": [
+      56,
+      57,
+      84
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 0.75
+    },
+    {
+     "id": "Q030",
+     "type": "multi_chunk",
+     "gold": [
+      1623,
+      1795
+     ],
+     "found": [
+      1623,
+      1795
+     ],
+     "first_gold_rank": 4,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q031",
+     "type": "comparative",
+     "gold": [
+      2389,
+      3165
+     ],
+     "found": [
+      3165
+     ],
+     "first_gold_rank": 4,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q032",
+     "type": "comparative",
+     "gold": [
+      2314,
+      2362
+     ],
+     "found": [
+      2314,
+      2362
+     ],
+     "first_gold_rank": 9,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q033",
+     "type": "comparative",
+     "gold": [
+      230,
+      3541
+     ],
+     "found": [
+      230
+     ],
+     "first_gold_rank": 11,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q034",
+     "type": "comparative",
+     "gold": [
+      54,
+      1508
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q035",
+     "type": "comparative",
+     "gold": [
+      736,
+      916
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    }
+   ]
+  },
+  "hybrid": {
+   "recall_at_k": 0.5588235294117647,
+   "mean_rr": 0.2869613229907348,
+   "coverage": 0.432843137254902,
+   "n": 34,
+   "recall_by_type": {
+    "extractive": 0.5263157894736842,
+    "multi_chunk": 0.7,
+    "comparative": 0.4
+   },
+   "coverage_by_type": {
+    "extractive": 0.5087719298245613,
+    "multi_chunk": 0.40499999999999997,
+    "comparative": 0.2
+   },
+   "per_question": [
+    {
+     "id": "Q001",
+     "type": "extractive",
+     "gold": [
+      3453
+     ],
+     "found": [
+      3453
+     ],
+     "first_gold_rank": 4,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q002",
+     "type": "extractive",
+     "gold": [
+      3236
+     ],
+     "found": [
+      3236
+     ],
+     "first_gold_rank": 2,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q003",
+     "type": "extractive",
+     "gold": [
+      2315
+     ],
+     "found": [
+      2315
+     ],
+     "first_gold_rank": 13,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q004",
+     "type": "extractive",
+     "gold": [
+      2447
+     ],
+     "found": [
+      2447
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q005",
+     "type": "extractive",
+     "gold": [
+      736
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q006",
+     "type": "extractive",
+     "gold": [
+      2362
+     ],
+     "found": [
+      2362
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q007",
+     "type": "extractive",
+     "gold": [
+      320
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q008",
+     "type": "extractive",
+     "gold": [
+      813
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q009",
+     "type": "extractive",
+     "gold": [
+      3903
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q010",
+     "type": "extractive",
+     "gold": [
+      3670
+     ],
+     "found": [
+      3670
+     ],
+     "first_gold_rank": 6,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q011",
+     "type": "extractive",
+     "gold": [
+      2717,
+      2724
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q012",
+     "type": "extractive",
+     "gold": [
+      2297
+     ],
+     "found": [
+      2297
+     ],
+     "first_gold_rank": 15,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q013",
+     "type": "extractive",
+     "gold": [
+      1491
+     ],
+     "found": [
+      1491
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q014",
+     "type": "extractive",
+     "gold": [
+      3451
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q015",
+     "type": "extractive",
+     "gold": [
+      736
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q017",
+     "type": "extractive",
+     "gold": [
+      2002,
+      2003
+     ],
+     "found": [
+      2002,
+      2003
+     ],
+     "first_gold_rank": 4,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q018",
+     "type": "extractive",
+     "gold": [
+      3327
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q019",
+     "type": "extractive",
+     "gold": [
+      500,
+      501,
+      502
+     ],
+     "found": [
+      500,
+      502
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 0.6666666666666666
+    },
+    {
+     "id": "Q020",
+     "type": "extractive",
+     "gold": [
+      1239
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q021",
+     "type": "multi_chunk",
+     "gold": [
+      236,
+      237,
+      238,
+      257,
+      258
+     ],
+     "found": [
+      258
+     ],
+     "first_gold_rank": 8,
+     "hit": 1.0,
+     "coverage": 0.2
+    },
+    {
+     "id": "Q022",
+     "type": "multi_chunk",
+     "gold": [
+      2000,
+      2018,
+      2019
+     ],
+     "found": [
+      2000
+     ],
+     "first_gold_rank": 3,
+     "hit": 1.0,
+     "coverage": 0.3333333333333333
+    },
+    {
+     "id": "Q023",
+     "type": "multi_chunk",
+     "gold": [
+      2431
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q024",
+     "type": "multi_chunk",
+     "gold": [
+      2227,
+      2233
+     ],
+     "found": [
+      2233
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q025",
+     "type": "multi_chunk",
+     "gold": [
+      3196,
+      3197
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q026",
+     "type": "multi_chunk",
+     "gold": [
+      1039,
+      1042,
+      1080
+     ],
+     "found": [
+      1039,
+      1080
+     ],
+     "first_gold_rank": 4,
+     "hit": 1.0,
+     "coverage": 0.6666666666666666
+    },
+    {
+     "id": "Q027",
+     "type": "multi_chunk",
+     "gold": [
+      1548,
+      1593
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q028",
+     "type": "multi_chunk",
+     "gold": [
+      3521,
+      3524,
+      3526,
+      3529,
+      3684
+     ],
+     "found": [
+      3521,
+      3526,
+      3529
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 0.6
+    },
+    {
+     "id": "Q029",
+     "type": "multi_chunk",
+     "gold": [
+      54,
+      56,
+      57,
+      84
+     ],
+     "found": [
+      56,
+      57,
+      84
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 0.75
+    },
+    {
+     "id": "Q030",
+     "type": "multi_chunk",
+     "gold": [
+      1623,
+      1795
+     ],
+     "found": [
+      1623,
+      1795
+     ],
+     "first_gold_rank": 2,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q031",
+     "type": "comparative",
+     "gold": [
+      2389,
+      3165
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q032",
+     "type": "comparative",
+     "gold": [
+      2314,
+      2362
+     ],
+     "found": [
+      2362
+     ],
+     "first_gold_rank": 6,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q033",
+     "type": "comparative",
+     "gold": [
+      230,
+      3541
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q034",
+     "type": "comparative",
+     "gold": [
+      54,
+      1508
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q035",
+     "type": "comparative",
+     "gold": [
+      736,
+      916
+     ],
+     "found": [
+      916
+     ],
+     "first_gold_rank": 14,
+     "hit": 1.0,
+     "coverage": 0.5
+    }
+   ]
+  },
+  "hybrid+company": {
+   "recall_at_k": 0.7352941176470589,
+   "mean_rr": 0.309527849601379,
+   "coverage": 0.5887254901960784,
+   "n": 34,
+   "recall_by_type": {
+    "extractive": 0.631578947368421,
+    "multi_chunk": 1.0,
+    "comparative": 0.6
+   },
+   "coverage_by_type": {
+    "extractive": 0.587719298245614,
+    "multi_chunk": 0.735,
+    "comparative": 0.3
+   },
+   "per_question": [
+    {
+     "id": "Q001",
+     "type": "extractive",
+     "gold": [
+      3453
+     ],
+     "found": [
+      3453
+     ],
+     "first_gold_rank": 4,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q002",
+     "type": "extractive",
+     "gold": [
+      3236
+     ],
+     "found": [
+      3236
+     ],
+     "first_gold_rank": 3,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q003",
+     "type": "extractive",
+     "gold": [
+      2315
+     ],
+     "found": [
+      2315
+     ],
+     "first_gold_rank": 2,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q004",
+     "type": "extractive",
+     "gold": [
+      2447
+     ],
+     "found": [
+      2447
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q005",
+     "type": "extractive",
+     "gold": [
+      736
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q006",
+     "type": "extractive",
+     "gold": [
+      2362
+     ],
+     "found": [
+      2362
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q007",
+     "type": "extractive",
+     "gold": [
+      320
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q008",
+     "type": "extractive",
+     "gold": [
+      813
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q009",
+     "type": "extractive",
+     "gold": [
+      3903
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q010",
+     "type": "extractive",
+     "gold": [
+      3670
+     ],
+     "found": [
+      3670
+     ],
+     "first_gold_rank": 5,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q011",
+     "type": "extractive",
+     "gold": [
+      2717,
+      2724
+     ],
+     "found": [
+      2717
+     ],
+     "first_gold_rank": 14,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q012",
+     "type": "extractive",
+     "gold": [
+      2297
+     ],
+     "found": [
+      2297
+     ],
+     "first_gold_rank": 10,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q013",
+     "type": "extractive",
+     "gold": [
+      1491
+     ],
+     "found": [
+      1491
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q014",
+     "type": "extractive",
+     "gold": [
+      3451
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q015",
+     "type": "extractive",
+     "gold": [
+      736
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q017",
+     "type": "extractive",
+     "gold": [
+      2002,
+      2003
+     ],
+     "found": [
+      2002,
+      2003
+     ],
+     "first_gold_rank": 4,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q018",
+     "type": "extractive",
+     "gold": [
+      3327
+     ],
+     "found": [
+      3327
+     ],
+     "first_gold_rank": 5,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q019",
+     "type": "extractive",
+     "gold": [
+      500,
+      501,
+      502
+     ],
+     "found": [
+      500,
+      502
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 0.6666666666666666
+    },
+    {
+     "id": "Q020",
+     "type": "extractive",
+     "gold": [
+      1239
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q021",
+     "type": "multi_chunk",
+     "gold": [
+      236,
+      237,
+      238,
+      257,
+      258
+     ],
+     "found": [
+      237,
+      238,
+      257,
+      258
+     ],
+     "first_gold_rank": 4,
+     "hit": 1.0,
+     "coverage": 0.8
+    },
+    {
+     "id": "Q022",
+     "type": "multi_chunk",
+     "gold": [
+      2000,
+      2018,
+      2019
+     ],
+     "found": [
+      2000
+     ],
+     "first_gold_rank": 3,
+     "hit": 1.0,
+     "coverage": 0.3333333333333333
+    },
+    {
+     "id": "Q023",
+     "type": "multi_chunk",
+     "gold": [
+      2431
+     ],
+     "found": [
+      2431
+     ],
+     "first_gold_rank": 5,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q024",
+     "type": "multi_chunk",
+     "gold": [
+      2227,
+      2233
+     ],
+     "found": [
+      2233
+     ],
+     "first_gold_rank": 2,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q025",
+     "type": "multi_chunk",
+     "gold": [
+      3196,
+      3197
+     ],
+     "found": [
+      3196
+     ],
+     "first_gold_rank": 16,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q026",
+     "type": "multi_chunk",
+     "gold": [
+      1039,
+      1042,
+      1080
+     ],
+     "found": [
+      1039,
+      1080
+     ],
+     "first_gold_rank": 4,
+     "hit": 1.0,
+     "coverage": 0.6666666666666666
+    },
+    {
+     "id": "Q027",
+     "type": "multi_chunk",
+     "gold": [
+      1548,
+      1593
+     ],
+     "found": [
+      1548,
+      1593
+     ],
+     "first_gold_rank": 14,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q028",
+     "type": "multi_chunk",
+     "gold": [
+      3521,
+      3524,
+      3526,
+      3529,
+      3684
+     ],
+     "found": [
+      3521,
+      3524,
+      3526,
+      3529
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 0.8
+    },
+    {
+     "id": "Q029",
+     "type": "multi_chunk",
+     "gold": [
+      54,
+      56,
+      57,
+      84
+     ],
+     "found": [
+      56,
+      57,
+      84
+     ],
+     "first_gold_rank": 1,
+     "hit": 1.0,
+     "coverage": 0.75
+    },
+    {
+     "id": "Q030",
+     "type": "multi_chunk",
+     "gold": [
+      1623,
+      1795
+     ],
+     "found": [
+      1623,
+      1795
+     ],
+     "first_gold_rank": 2,
+     "hit": 1.0,
+     "coverage": 1.0
+    },
+    {
+     "id": "Q031",
+     "type": "comparative",
+     "gold": [
+      2389,
+      3165
+     ],
+     "found": [
+      3165
+     ],
+     "first_gold_rank": 4,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q032",
+     "type": "comparative",
+     "gold": [
+      2314,
+      2362
+     ],
+     "found": [
+      2362
+     ],
+     "first_gold_rank": 8,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q033",
+     "type": "comparative",
+     "gold": [
+      230,
+      3541
+     ],
+     "found": [
+      230
+     ],
+     "first_gold_rank": 13,
+     "hit": 1.0,
+     "coverage": 0.5
+    },
+    {
+     "id": "Q034",
+     "type": "comparative",
+     "gold": [
+      54,
+      1508
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    },
+    {
+     "id": "Q035",
+     "type": "comparative",
+     "gold": [
+      736,
+      916
+     ],
+     "found": [],
+     "first_gold_rank": null,
+     "hit": 0.0,
+     "coverage": 0.0
+    }
+   ]
+  }
+ }
+}

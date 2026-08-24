@@ -102,13 +102,45 @@ def score_one(hits, gold: set[int], k: int) -> tuple[float, float, float]:
     return hit, rr, coverage
 
 
+def keyword_with_company(cur, query: str, top_k: int) -> list:
+    """
+    Keyword search with the same company constraint the full system applies.
+
+    The plain keyword row is not a fair baseline for measuring what fusion
+    contributes: it is denied the company filter and the per-company quota, so
+    its deficit mixes two separate things. This row isolates them. Whatever
+    remains between it and hybrid+company is what dense retrieval and rank
+    fusion actually add.
+
+    The quota logic mirrors R.search exactly rather than approximating it. A
+    baseline that splits its budget differently would be a different system, and
+    the comparison would again measure two things at once.
+    """
+    tickers = R.detect_companies(query)
+    if len(tickers) <= 1:
+        return R.search_keyword(cur, query, top_k=top_k,
+                                tickers=tickers or None)
+
+    per_company = max(1, top_k // len(tickers))
+    buckets = [R.search_keyword(cur, query, top_k=per_company, tickers=[t])
+               for t in tickers]
+
+    out, seen = [], set()
+    for i in range(per_company):
+        for bucket in buckets:
+            if i < len(bucket) and bucket[i].chunk_id not in seen:
+                seen.add(bucket[i].chunk_id)
+                out.append(bucket[i])
+    return out[:top_k]
+
+
 def evaluate(cur, questions, embed, strategies, k: int) -> dict:
     answerable = [q for q in questions
                   if q.get("answerable") and q.get("gold_chunk_ids")]
     unanswerable = [q for q in questions if not q.get("answerable")]
 
     results = {name: {"recall": [], "mrr": [], "coverage": [], "by_type": {},
-                      "cov_by_type": {}}
+                      "cov_by_type": {}, "per_question": []}
                for name in strategies}
 
     for q in answerable:
@@ -122,6 +154,25 @@ def evaluate(cur, questions, embed, strategies, k: int) -> dict:
             results[name]["coverage"].append(cov)
             results[name]["by_type"].setdefault(q["type"], []).append(recall)
             results[name]["cov_by_type"].setdefault(q["type"], []).append(cov)
+
+            # The per-question record, so an aggregate can be audited rather
+            # than trusted. Two things are impossible without it: a bootstrap
+            # interval on coverage, which is a mean of fractions and not a
+            # proportion, and asking whether two strategies with the same recall
+            # missed the same questions -- an identical score over different
+            # questions is not the same finding as an identical score over the
+            # same ones.
+            ids = [h.chunk_id for h in hits[:k]]
+            results[name]["per_question"].append({
+                "id": q["id"],
+                "type": q["type"],
+                "gold": sorted(gold),
+                "found": sorted({i for i in ids if i in gold}),
+                "first_gold_rank": next(
+                    (r for r, c in enumerate(ids, 1) if c in gold), None),
+                "hit": recall,
+                "coverage": cov,
+            })
 
     for name in strategies:
         r = results[name]
@@ -162,6 +213,10 @@ def main() -> int:
     strategies = {
         "semantic": lambda c, q, v: R.search_semantic(c, v, top_k=args.k),
         "keyword":  lambda c, q, v: R.search_keyword(c, q, top_k=args.k),
+        # The fair lexical baseline: same company constraint, same quota, no
+        # embeddings and no fusion. The gap to hybrid+company is what dense
+        # retrieval adds once the filtering is held constant.
+        "keyword+company": lambda c, q, v: keyword_with_company(c, q, args.k),
         "hybrid":   lambda c, q, v: R.search_hybrid(c, q, v, top_k=args.k),
         # What the system actually does: hybrid plus the company constraint.
         "hybrid+company": lambda c, q, v: R.search(c, q, v, top_k=args.k),
@@ -271,6 +326,7 @@ def main() -> int:
                         t: sum(v) / len(v)
                         for t, v in results[name]["cov_by_type"].items() if v
                     },
+                    "per_question": results[name]["per_question"],
                 }
                 for name in strategies
             },
