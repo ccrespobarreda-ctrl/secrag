@@ -38,3 +38,7 @@ eval/results/retrieval_rrf_sweep_*.json
 eval/results/retrieve_functions.txt
 
 src/config_before_rrf40.py
+
+eval/questions.yaml.bak
+
+eval/questions.yaml.bak

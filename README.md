@@ -1,185 +1,217 @@
-# SEC Filings RAG - measured retrieval, grounded answers, and refusal behavior
+# SEC filings RAG — measured retrieval, cited answers, and a system that declines
 
-**Cristina Crespo Barreda** - data analytics, data science, ML engineering
+**Cristina Crespo Barreda** · data analytics, data science, ML engineering
+· [c.crespobarreda@gmail.com](mailto:c.crespobarreda@gmail.com)
 
-RAG system over SEC 10-K filings with hybrid retrieval, company-aware search,
-inline citations, refusal handling, and an evaluation harness covering retrieval,
-groundedness, answer correctness, and hallucination behavior.
+**[See the results and every question →](https://cristinacrespo.github.io/secrag/)**
 
-**Final frozen release:** `SECRAG-RRF40-2026-08-17`
+---
 
-See `FINAL_RELEASE_MANIFEST.md` for the authoritative release definition and
-`docs/handoff-final-es.md` for the full technical handoff.
+If you put a language model in front of your documents, the risk is not that it
+answers badly. It is that it answers confidently when the document does not say
+what it claims, and nobody notices until the number is in a report.
 
-## Final evaluated configuration
+This system answers questions about SEC 10-K annual reports, cites the passage
+behind every figure, verifies those citations in code, and declines when the
+documents do not support an answer. The evaluation measures all three.
 
-- Corpus: **4,169 chunks**
-- Embeddings: `BAAI/bge-small-en-v1.5`
-- Retrieval candidate pool: **50**
-- Final top-k: **16**
-- RRF k: **40**
-- Generation model: `claude-sonnet-5`
-- Generation provider used for final evaluation: **Anthropic**
+## The numbers
 
-## Canonical benchmark
+Measured over 100 questions, 3 runs each, on 19 filings and 4,169 passages.
 
-The canonical benchmark is:
+| | Result | 95% CI |
+|---|---:|---|
+| Questions with no answer in the corpus, correctly declined | **31 / 31** | [89.0%, 100%] |
+| Answers invented on those questions | **0** | [0%, 11.0%] |
+| Answerable questions wrongly refused, retrieval-adjusted | **0 / 69** | [0%, 5.3%] |
+| Refusal decision changed between runs | **0 / 100** | — |
+| Claims grounded in a cited passage | 97.4% | 680 claims, model-judged |
+| Retrieval Recall@16 on the original 50 questions | 0.735 | [0.569, 0.854] |
 
-`eval/questions_canonical.yaml`
+Ten of the 31 unanswerable questions are written to bait an invention: a fiscal
+year the filings do not reach, a business segment that does not exist, an
+acquisition that never happened. None produced an answer in any run.
 
-It contains:
+**Why the intervals are there.** Zero inventions out of 31 questions is not the
+same claim as zero inventions out of a thousand. The interval says how much the
+sample supports, and a system evaluated this way should not overclaim in the act
+of measuring overclaiming.
 
-- **50 questions**
-- **34 answerable**
-- **16 unanswerable**
-- **62 canonical gold labels**
+## What was found while building it
 
-Final label validation:
+These are the results of auditing my own work. They are here rather than buried
+because a benchmark you cannot criticise is a benchmark you have not checked.
 
-- **62 resolved**
-- **0 without anchor**
-- **0 failed**
+**1 — The benchmark was inflating its own scores.** Half the questions were
+labeled by searching the corpus for the answer string, and questions whose
+evidence could not be found that way were dropped. That selects for questions a
+plain keyword search already handles. Measured: a bare full-text search scores
+0.412 on the questions written first and 0.929 on those added later. The
+published retrieval figure is the lower one.
 
-Every canonical label resolves and every anchor remains present in its chunk.
+**2 — My baseline was unfair, and fixing it cost me the result.** The first
+version of that analysis compared the full system against keyword search without
+the company filter, and credited a 32-point gap to retrieval quality. Holding the
+filtering constant, the dense retriever and the lexical baseline tie on
+Recall@16 across four splits, and the baseline leads on coverage. The embeddings
+contribute ordering, not reach. Full account in
+[`docs/measurement-honesty.md`](docs/measurement-honesty.md).
 
-## Final retrieval results
+**3 — Two parts of the evaluation contradicted each other.** One check counted a
+response as a refusal; another flagged that same response for stating figures
+inside a refusal. Both were describing a partial answer with its scope declared,
+which is the correct response when the evidence was not retrieved. Fixing the
+detection moved the apparent false-refusal rate from 2.9% to 0% without touching
+the model — the earlier figure was measuring the evaluator.
 
-| Strategy | Recall@16 | MRR | Coverage |
-|---|---:|---:|---:|
-| Semantic | 0.500 | 0.228 | 0.394 |
-| Keyword | 0.412 | 0.159 | 0.303 |
-| Hybrid | 0.559 | 0.287 | 0.433 |
-| Hybrid + company | **0.735** | **0.310** | **0.589** |
+**4 — The groundedness judge is as noisy as the thing it measures.** Asked the
+same claims twice, it agreed with itself 97.2% of the time. The groundedness it
+reports is 97.4%. The instrument's error is the size of the signal, so that
+figure is never quoted alone.
 
-Hybrid + company by question type:
+**5 — `--no-cache` deleted the cache instead of bypassing it.** It started from
+an empty dictionary and saved it at the end, overwriting 300 real entries with
+no warning. Found by reading the harness while planning an unrelated run.
 
-| Type | Recall | Coverage |
+**6 — The frozen release reproduces exactly.** Seven days later, from a question
+file rebuilt by a script, with the evaluation harness modified, on a reloaded
+environment: all twelve retrieval figures identical to the manifest of 17 August.
+
+## How the system works
+
+```text
+SEC EDGAR filings
+    │
+    ├─ HTML parsing, section-aware chunking (420 tokens, 60 overlap)
+    ├─ local sentence-transformer embeddings (bge-small-en-v1.5)
+    └─ PostgreSQL + pgvector + full-text search
+              │
+              ├─ semantic retrieval          ─┐
+              ├─ lexical retrieval            ├─ reciprocal rank fusion, k=40
+              └─ company detection and quota ─┘
+                        │
+                        └─ top-16 numbered excerpts
+                                  │
+                                  ├─ generation with per-claim citations
+                                  ├─ citation verification in code
+                                  └─ refusal when the excerpts fall short
+```
+
+Embeddings are computed locally. Only the generation call leaves the machine, and
+it sits behind a provider interface so it can be pointed at a locally served
+model without changing anything else.
+
+**Why refusal is measurable rather than judged.** The prompt permits refusal
+explicitly, with an exact marker, so a refusal can be counted instead of
+interpreted. A model told only to "answer from the context" will produce
+something for a question the context cannot answer, because producing text is
+what it does. Given a named way out, declining becomes an available move.
+
+**What the code checks, before any judge is involved.** Every cited excerpt
+number exists in what was actually sent. Every sentence carrying a figure has a
+citation. A refusal stands alone rather than decorating an answer given anyway.
+
+## What a question costs, and how long it takes
+
+Measured over four question types × 3 runs, medians rather than means because a
+cold connection makes the first call of each type an outlier.
+
+| | Median | Range |
 |---|---:|---:|
-| Comparative | 0.600 | 0.300 |
-| Extractive | 0.632 | 0.588 |
-| Multi-chunk | **1.000** | 0.735 |
+| Retrieval — local, no API call | **0.21 s** | 0.14 – 0.46 s |
+| Generation — one API call | 3.09 s | 2.37 – 7.85 s |
+| **Total, question to cited answer** | **3.40 s** | 2.52 – 8.32 s |
 
-`Recall@16 = 0.735` is recall against the canonical labeled chunks.
-
-Eight questions whose canonical gold chunk was not retrieved were manually
-inspected and contained explicit alternative supporting evidence in the
-retrieved top-16:
-
-- Q007
-- Q008
-- Q009
-- Q014
-- Q015
-- Q020
-- Q034
-- Q035
-
-Canonical-gold recall therefore should not be interpreted as the percentage of
-questions for which useful evidence was available.
-
-Q005 was the clear operational retrieval miss identified during manual review.
-
-## Final generation results
-
-The canonical generation evaluation used:
-
-- **50 questions**
-- **3 runs**
-- **150 responses**
-- top-k **16**
-- `claude-sonnet-5`
-
-Results:
-
-- Unanswerable refusal rate: **100.0%**
-- False-refusal rate on answerable responses: **2.9%**
-- Refusal-decision flips across runs: **0**
-- Automatic hallucination rate: **0.0%**
-- Same-family model-judged groundedness: **97.9%**
-- Supported claims: **319 / 326**
-- Unsupported claims: **7**
-- Groundedness judge failures: **1**
-- Citation-verifier problem responses: **6**
-
-Zero refusal-decision flips means the answer-vs-refuse decision was stable
-across runs. It does not mean the generated answer content was identical.
-
-## Answer correctness
-
-Correctness was evaluated on **generation run 0**.
-
-Q022's first judge call returned an empty response, so it was retried
-separately. Its reconciled verdict is `PARTIALLY_CORRECT`.
-
-| Verdict | Count |
+| | Median tokens |
 |---|---:|
-| Correct | **31** |
-| Partially correct | **2** |
-| Incorrect | **0** |
-| Refused | **1** |
-| Judge error | **0** |
+| Input — the sixteen excerpts and the prompt | **11,150** |
+| Output — the answer | 132 |
 
-- Fully correct: **91.2%**
-- Correct or partially correct: **97.1%**
-- Incorrect: **0.0%**
+**Cost is dominated by what is sent, not by what is written**, at a ratio of 84
+to 1. That makes `top_k` the only real cost lever: it was raised from 8 to 16 to
+lift coverage on comparison and multi-passage questions, and this is what that
+decision costs — roughly double the input tokens per query. Convert the token
+counts above at current rates; they are measured from the API response rather
+than estimated from prompt size.
 
-Correctness and claim-level groundedness should be interpreted together. For
-example, Q027 correctly answered the benchmark question but added an ancillary
-store-count statement with an inverted sign.
+**Declining is cheaper than answering.** An unanswerable question consumes 10,270
+input and 75 output tokens; a multi-passage answer, 10,952 and 577.
+
+Retrieval never leaves the machine and never costs anything. Only the generation
+call does, which is also the half that can be pointed at a locally served model.
+
+## Reading the retrieval numbers
+
+Retrieval is reported on the original 50 questions and never as a single average
+across splits, for the reason in finding 1. The three splits were defined on 18
+August, before the questions they assign were written and two days before any
+score existed — the commit history shows it.
+
+| Question set | n | Recall@16 | Coverage |
+|---|---:|---:|---:|
+| Original 50, written before the system | 34 | 0.735 | 0.589 |
+| Sealed holdout | 21 | 0.952 | 0.833 |
+| Added later, labeled by literal match | 14 | 0.929 | 0.857 |
+
+The holdout is sealed but not clean: it was built the same way as the third row,
+and its bare-keyword score of 0.810 sits far above the first row's 0.412. What
+sealing bought is that no parameter was ever chosen with it in view.
 
 ## Known limitations
 
-- **Q005:** operational retrieval miss. The canonical answer evidence was not
-  present in the top-16, and the model appropriately refused.
+- **Q064** is the one answerable question in the sealed set the system declined.
+  The evidence exists in the filings; retrieval did not surface it, and a simpler
+  lexical baseline does. The refusal was correct, the retrieval failure was not.
+- Groundedness is judged by the same model family that wrote the answers. It is
+  not independent external validation, and the self-agreement figure above is the
+  reason to treat it as approximate.
+- **Comparison questions cannot yet decide anything.** At n=5 on the original
+  set, the metric moves in steps of 0.2. No retrieval change will be accepted or
+  rejected against it until that type is expanded under the corrected labeling
+  rule.
+- Two question types in the development split sit at 1.000 and are blind: they
+  cannot register an improvement or a regression.
+- Whether better ordering produces better answers has not been measured. The
+  generation evaluation ran on one retrieval configuration only.
 
-- **Q022:** the response gave correct segment revenue amounts but did not fully
-  provide the requested revenue growth rates and added operating-income growth
-  instead.
+## Reproducing it
 
-- **Q027:** the core answer was correct, but an ancillary statement said Old
-  Navy North America had net openings when the source showed seven net closures.
+```powershell
+docker compose up -d                              # Postgres with pgvector
+$env:DATABASE_URL = "postgresql://secrag:secrag@localhost:5433/secrag"
+psql $env:DATABASE_URL -f sql/schema.sql
 
-- **Q033:** Wayfair-specific customer-acquisition evidence was not retrieved,
-  resulting in a partially correct comparative answer.
+python src/edgar.py                               # fetch filings from EDGAR
+python src/parse.py; python src/chunk.py; python src/embed.py; python src/load.py
 
-- **Q044:** the refusal decision was correct in all three runs, but the response
-  mentioned a `$49.0M` figure and violated the strict refusal-format rule.
+python src/verify_labels.py --questions eval/questions_vnext.yaml
+python src/evaluate_retrieval.py --questions eval/questions_vnext_regression.yaml
+```
 
-- Correctness was evaluated on run 0 rather than independently on all three
-  generation runs.
+Retrieval costs nothing to run: no model is called. `LLM_PROVIDER=echo` exercises
+the whole generation path — prompt building, citation parsing, refusal detection
+— without spending a token.
 
-- Groundedness was judged by the same model family used for generation, so the
-  97.9% figure is model-judged groundedness rather than independent external
-  validation.
+Continuous integration runs the tests, and separately stands up Postgres and
+confirms all 127 gold labels still resolve. A label is a claim about the corpus,
+and a re-chunk can falsify it silently.
 
-## Architecture
+## Repository
 
-```text
-SEC filings
-    |
-    v
-HTML parsing + section-aware chunking
-    |
-    v
-Local sentence-transformer embeddings
-    |
-    v
-PostgreSQL + pgvector + full-text search
-    |
-    v
-Semantic + keyword retrieval
-    |
-    v
-RRF fusion + company-aware retrieval
-    |
-    v
-Top-16 numbered excerpts
-    |
-    v
-Claude generation with citations
-    |
-    v
-Citation verification + refusal checks
-    |
-    v
-Retrieval / groundedness / correctness evaluation
+| | |
+|---|---|
+| `src/retrieve.py` | fusion, company detection, per-company quotas |
+| `src/generate.py` | prompt, citation verification, refusal detection |
+| `src/evaluate_*.py` | retrieval, groundedness, correctness harnesses |
+| `src/compare_splits.py` | cross-split comparison and construction-bias diagnostic |
+| `src/report_intervals.py` | confidence intervals, one observation per question |
+| `src/derive_split.py` | derives split files from the master benchmark |
+| `docs/measurement-honesty.md` | the two measurement problems, in full |
+| `eval/questions_vnext.yaml` | 100 questions, 127 audited gold labels |
+
+## Licence
+
+Apache 2.0. The filings are public and fetched from EDGAR by `src/edgar.py`; they
+are not redistributed here. The labels are mine, assigned by reading the filings,
+and the criterion is stated because a recall figure without its labeling
+criterion is uninterpretable.

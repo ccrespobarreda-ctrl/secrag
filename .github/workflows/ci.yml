@@ -1,0 +1,109 @@
+# Continuous integration.
+#
+# WHAT IS CHECKED, AND WHY IT IS NOT JUST THE TESTS
+#
+# The unit tests confirm the code behaves. They cannot confirm the benchmark
+# still describes the corpus, and that is the failure this project is most
+# exposed to: a reload or a re-chunk silently repoints every gold label, no
+# error is raised, and every Recall@k figure afterwards is measured against text
+# that is not the answer.
+#
+# So the job does two things. It runs the tests, and it stands up a real
+# Postgres with pgvector, loads the corpus, and confirms all 127 gold labels
+# still resolve and every anchor is still inside its chunk. A green build here
+# means the measurements can be trusted, not merely that the imports work.
+#
+# No model is ever called. Nothing in this workflow costs anything, and no API
+# key is needed: LLM_PROVIDER stays at the default, which returns a fixed
+# refusal without a network call.
+
+name: tests and benchmark integrity
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run the tests
+        run: |
+          for t in tests/test_*.py; do
+            echo "── $t"
+            python "$t"
+          done
+
+  benchmark-integrity:
+    name: gold labels still hold
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: secrag
+          POSTGRES_PASSWORD: secrag
+          POSTGRES_DB: secrag
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U secrag"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://secrag:secrag@localhost:5432/secrag
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create the schema
+        run: psql "$DATABASE_URL" -f sql/schema.sql
+
+      # The corpus is not in the repository -- the filings belong to the
+      # companies that wrote them, and src/edgar.py fetches them from EDGAR.
+      # Skip the label check rather than fail it when the corpus is absent, so
+      # the workflow stays useful on a fresh clone.
+      - name: Load the corpus, if one is available
+        id: corpus
+        run: |
+          if [ -f data/chunks.json ]; then
+            python src/load.py
+            echo "loaded=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "No data/chunks.json; skipping the label check."
+            echo "loaded=no" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Every gold label resolves and every anchor is still in place
+        if: steps.corpus.outputs.loaded == 'yes'
+        run: python src/verify_labels.py --questions eval/questions_vnext.yaml
+
+      - name: The split files still match the master benchmark
+        run: python src/derive_split.py --verify

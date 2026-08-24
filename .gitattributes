@@ -1,0 +1,30 @@
+# Line endings, settled once.
+#
+# Files authored on Windows and files authored elsewhere have been mixing in
+# this repository, and every `git add` printed a warning about it. The warnings
+# were harmless; the noise was not, because a real warning arriving in the
+# middle of them would have been missed.
+#
+# Text is stored with LF in the repository and checked out however the platform
+# wants it. Binary files are marked so git never rewrites their bytes.
+
+* text=auto
+
+*.py    text diff=python
+*.md    text diff=markdown
+*.yaml  text
+*.yml   text
+*.json  text
+*.sql   text
+*.html  text
+*.css   text
+*.txt   text
+
+# PowerShell is happier with CRLF, and these are only ever run on Windows.
+*.ps1   text eol=crlf
+
+# Never touched.
+*.png   binary
+*.jpg   binary
+*.pdf   binary
+*.pyc   binary

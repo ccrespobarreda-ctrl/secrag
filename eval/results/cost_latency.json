@@ -1,0 +1,145 @@
+{
+ "generated": "2026-08-24T15:36:21",
+ "model": "claude-sonnet-5",
+ "top_k": 16,
+ "repeats": 3,
+ "median_retrieval_s": 0.20538724999642,
+ "median_generation_s": 3.0928151000407524,
+ "median_total_s": 3.398541450034827,
+ "median_input_tokens": 11150.0,
+ "median_output_tokens": 132.5,
+ "runs": [
+  {
+   "retrieval_s": 0.46227799996268004,
+   "generation_s": 7.854504200047813,
+   "total_s": 8.316782200010493,
+   "input_tokens": 11348,
+   "output_tokens": 92,
+   "excerpts": 16,
+   "refused": false,
+   "type": "extractive",
+   "question": "What were Under Armour's net revenues in fiscal 2026?"
+  },
+  {
+   "retrieval_s": 0.1449249000288546,
+   "generation_s": 2.763373799971305,
+   "total_s": 2.9082987000001594,
+   "input_tokens": 11348,
+   "output_tokens": 90,
+   "excerpts": 16,
+   "refused": false,
+   "type": "extractive",
+   "question": "What were Under Armour's net revenues in fiscal 2026?"
+  },
+  {
+   "retrieval_s": 0.15127160004340112,
+   "generation_s": 2.372239499934949,
+   "total_s": 2.52351109997835,
+   "input_tokens": 11348,
+   "output_tokens": 91,
+   "excerpts": 16,
+   "refused": false,
+   "type": "extractive",
+   "question": "What were Under Armour's net revenues in fiscal 2026?"
+  },
+  {
+   "retrieval_s": 0.37669019994791597,
+   "generation_s": 6.298542500007898,
+   "total_s": 6.675232699955814,
+   "input_tokens": 10952,
+   "output_tokens": 492,
+   "excerpts": 16,
+   "refused": false,
+   "type": "multi_chunk",
+   "question": "What segments does Levi Strauss report, and how did each perform?"
+  },
+  {
+   "retrieval_s": 0.15178630000445992,
+   "generation_s": 6.933225699933246,
+   "total_s": 7.085011999937706,
+   "input_tokens": 10952,
+   "output_tokens": 577,
+   "excerpts": 16,
+   "refused": false,
+   "type": "multi_chunk",
+   "question": "What segments does Levi Strauss report, and how did each perform?"
+  },
+  {
+   "retrieval_s": 0.19375470001250505,
+   "generation_s": 6.397689700010233,
+   "total_s": 6.591444400022738,
+   "input_tokens": 10952,
+   "output_tokens": 593,
+   "excerpts": 16,
+   "refused": false,
+   "type": "multi_chunk",
+   "question": "What segments does Levi Strauss report, and how did each perform?"
+  },
+  {
+   "retrieval_s": 0.4085462000221014,
+   "generation_s": 2.9652149999747053,
+   "total_s": 3.3737611999968067,
+   "input_tokens": 11408,
+   "output_tokens": 156,
+   "excerpts": 16,
+   "refused": false,
+   "type": "comparative",
+   "question": "Which reports higher net revenues, Crocs or Deckers Outdoor?"
+  },
+  {
+   "retrieval_s": 0.21701979998033494,
+   "generation_s": 3.2063019000925124,
+   "total_s": 3.4233217000728473,
+   "input_tokens": 11408,
+   "output_tokens": 166,
+   "excerpts": 16,
+   "refused": false,
+   "type": "comparative",
+   "question": "Which reports higher net revenues, Crocs or Deckers Outdoor?"
+  },
+  {
+   "retrieval_s": 0.22538989991880953,
+   "generation_s": 4.098792799981311,
+   "total_s": 4.3241826999001205,
+   "input_tokens": 11408,
+   "output_tokens": 161,
+   "excerpts": 16,
+   "refused": false,
+   "type": "comparative",
+   "question": "Which reports higher net revenues, Crocs or Deckers Outdoor?"
+  },
+  {
+   "retrieval_s": 0.25162100000306964,
+   "generation_s": 2.480536699993536,
+   "total_s": 2.7321576999966055,
+   "input_tokens": 10270,
+   "output_tokens": 75,
+   "excerpts": 16,
+   "refused": true,
+   "type": "unanswerable",
+   "question": "What were Wayfair's net revenues for fiscal 2030?"
+  },
+  {
+   "retrieval_s": 0.14371900004334748,
+   "generation_s": 2.9793282999889925,
+   "total_s": 3.12304730003234,
+   "input_tokens": 10270,
+   "output_tokens": 94,
+   "excerpts": 16,
+   "refused": true,
+   "type": "unanswerable",
+   "question": "What were Wayfair's net revenues for fiscal 2030?"
+  },
+  {
+   "retrieval_s": 0.14918100007344037,
+   "generation_s": 2.6494377999333665,
+   "total_s": 2.798618800006807,
+   "input_tokens": 10270,
+   "output_tokens": 109,
+   "excerpts": 16,
+   "refused": true,
+   "type": "unanswerable",
+   "question": "What were Wayfair's net revenues for fiscal 2030?"
+  }
+ ]
+}
