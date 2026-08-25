@@ -56,11 +56,21 @@ h2{font-size:clamp(1.15rem,2.6vw,1.5rem);color:var(--ink);margin:0 0 .3rem;
 h2+.sub{color:var(--ink-3);font-size:.94rem;margin:0 0 1.4rem;max-width:66ch}
 h3{font-size:.98rem;color:var(--ink);margin:2rem 0 .6rem}
 .filters{display:flex;flex-wrap:wrap;gap:.4rem;margin:0 0 1.6rem}
-.filters button{font-family:var(--mono);font-size:.7rem;letter-spacing:.05em;
-  text-transform:uppercase;padding:.45rem .8rem;border:1px solid var(--rule);
-  background:var(--panel);color:var(--ink-3);border-radius:2px;cursor:pointer}
+/* These read as labels unless they are made to look pressable. On a phone
+   there is no hover to discover it with, so the affordance has to be in the
+   resting state: a real border, ink-coloured text, and a caret. */
+.filters button{font-family:var(--mono);font-size:.72rem;letter-spacing:.05em;
+  text-transform:uppercase;padding:.55rem .9rem;border:1px solid var(--ink-3);
+  background:var(--bg);color:var(--ink);border-radius:3px;cursor:pointer;
+  box-shadow:0 1px 0 var(--rule);transition:background .12s,color .12s}
+.filters button::before{content:"▸ ";color:var(--ink-3)}
+.filters button:hover{background:var(--rule-2)}
+.filters button:active{transform:translateY(1px);box-shadow:none}
 .filters button[aria-pressed="true"]{background:var(--ink);color:#fff;
-  border-color:var(--ink)}
+  border-color:var(--ink);box-shadow:none}
+.filters button[aria-pressed="true"]::before{content:"● ";color:#fff}
+.filters-hint{font-family:var(--mono);font-size:.7rem;color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.05em;margin:0 0 .5rem}
 .grouphead{margin:2.2rem 0 .2rem;font-size:1rem;color:var(--ink);font-weight:600}
 .groupsub{color:var(--ink-3);font-size:.9rem;margin:.15rem 0 1rem;max-width:68ch}
 .why{background:var(--rule-2);border-left:2px solid var(--ink-3);
@@ -510,6 +520,7 @@ def gallery_section(g: dict, questions: list[dict], limit: int) -> str:
   grouped by what each one demonstrates. A live chat demo proves a system works on
   whatever a visitor types; this shows it against answers established by reading
   the filings, including where it fails.</p>
+  <p class="filters-hint">Tap to filter</p>
   <div class="filters">{filters}<button data-filter="all" aria-pressed="true">Show all</button></div>
   {blocks}
 </div></section>
@@ -630,7 +641,7 @@ def main() -> int:
   not — they were assigned by reading the filings, and the criterion is stated in
   the repository, because a recall figure without its labeling criterion is
   uninterpretable.</p>
-  <p>Method, splits and the two measurement problems found while building this
+  <p>Method, splits and the three measurement problems found while building this
   are documented in <code>docs/measurement-honesty.md</code>, including one where
   a simpler lexical baseline matches this system on coverage.</p>
   <p>Retrieval: {r["k"]} chunks per query, hybrid dense and lexical with

@@ -77,6 +77,32 @@ no warning. Found by reading the harness while planning an unrelated run.
 file rebuilt by a script, with the evaluation harness modified, on a reloaded
 environment: all twelve retrieval figures identical to the manifest of 17 August.
 
+**7 — The verifier that checks the benchmark could not fail.** Every gold label
+carries an anchor — a phrase that must still be inside the chunk it points at —
+and after each reload all 127 were reported as holding. Nothing checked whether
+an anchor identified *one* chunk. `'2025'` matches 148 chunks of the Abercrombie
+filing; `'Wayfair'` matches 108 chunks written by Wayfair. **35% of anchors match
+five or more chunks and would stay satisfied wherever their label drifted.**
+Anchor uniqueness is now a gate in continuous integration, with a threshold that
+only ratchets down.
+
+**8 — Chunking cuts risk factors away from their content.** A 10-K risk factor
+opens with a one-sentence heading and develops over paragraphs. **243 of 4,169
+chunks (5.8%) end just after such a heading, and 230 of those are in Item 1A** —
+the section every risk and comparison question asks about. Abercrombie's tariff
+risk is labelled on the chunk that ends *"Changes in tariff policy ... could
+adversely affect our business."*; the discussion that answers the question is in
+the chunk after it.
+
+**9 — Half the retrieval failures were not failures.** Of 24 missed gold chunks,
+**11 had an adjacent chunk from the same document retrieved instead**, and
+several of those answer the question better than the labelled chunk does. Crocs'
+gross profit appears in three chunks because the 60-token overlap duplicates it
+across two boundaries — labelling one and scoring the other two as misses
+measures an arbitrary choice. The gap between Recall@16 of 0.735 and measured
+answer correctness of 91.2% is not a curiosity: it is the size of this artefact,
+and it now has three independent measurements behind it.
+
 ## How the system works
 
 ```text
@@ -96,6 +122,10 @@ SEC EDGAR filings
                                   ├─ citation verification in code
                                   └─ refusal when the excerpts fall short
 ```
+
+Every component in the pipeline has a measured contribution, including the ones
+whose contribution is zero. [`docs/measurement-honesty.md`](docs/measurement-honesty.md)
+records what each was worth and what it cost.
 
 Embeddings are computed locally. Only the generation call leaves the machine, and
 it sits behind a provider interface so it can be pointed at a locally served
@@ -157,6 +187,30 @@ The holdout is sealed but not clean: it was built the same way as the third row,
 and its bare-keyword score of 0.810 sits far above the first row's 0.412. What
 sealing bought is that no parameter was ever chosen with it in view.
 
+### What each component is worth
+
+| Capability removed | Recall@16 | What it was worth |
+|---|---:|---:|
+| Nothing — the full system | 0.735 | — |
+| The company filter and quota | 0.559 | −0.176 |
+| The excerpt budget, 16 down to 1 | 0.147 | −0.588 |
+| **The dense retriever entirely** | **0.735** | **0.000** |
+
+Measured on the 34 answerable questions of the original 50. The first two are
+degradation runs; the third is a lexical baseline holding the company filter
+constant.
+
+**The company filter and the excerpt budget do the work. The embeddings and the
+rank fusion contribute ordering — MRR 0.310 against 0.280 — and no additional
+coverage.** Two further attempts confirmed it rather than reversing it: rewriting
+each comparison into per-company sub-queries moved four gold chunks up and one
+down, and a cross-encoder reranker over the same candidates left Recall@16
+unchanged, cost 0.012 coverage, and added 1.86s to a 3.40s query.
+
+Three neural components, three negative results, on a corpus of financial filings
+dense with exact figures and proper nouns. That is a defensible finding about
+this domain, and it is not the finding this project set out to make.
+
 ## Known limitations
 
 - **Q064** is the one answerable question in the sealed set the system declined.
@@ -173,6 +227,17 @@ sealing bought is that no parameter was ever chosen with it in view.
   cannot register an improvement or a regression.
 - Whether better ordering produces better answers has not been measured. The
   generation evaluation ran on one retrieval configuration only.
+
+- **Recall@16 understates operational retrieval.** It is measured against
+  canonical labels; 46% of its misses retrieved an adjacent chunk from the same
+  document. The figure to compare across systems is 0.735; the figure that
+  describes what reaches the model is higher, and answer correctness of 91.2% is
+  the closer proxy. Both are published rather than the more flattering one.
+
+- **Chunk boundaries are a known defect and have not been changed.** Fixing them
+  means re-chunking, which reissues every `chunk_id` and invalidates all 127
+  labels and every published figure. It is the right next change and it is a
+  release of its own, not a patch.
 
 ## Reproducing it
 
@@ -206,7 +271,9 @@ and a re-chunk can falsify it silently.
 | `src/compare_splits.py` | cross-split comparison and construction-bias diagnostic |
 | `src/report_intervals.py` | confidence intervals, one observation per question |
 | `src/derive_split.py` | derives split files from the master benchmark |
-| `docs/measurement-honesty.md` | the two measurement problems, in full |
+| `src/audit_anchors.py` | anchor uniqueness audit, with proposed replacements |
+| `src/check_neighbours.py` | what arrived when a labelled chunk did not |
+| `docs/measurement-honesty.md` | the three measurement problems, in full |
 | `eval/questions_vnext.yaml` | 100 questions, 127 audited gold labels |
 
 ## Licence

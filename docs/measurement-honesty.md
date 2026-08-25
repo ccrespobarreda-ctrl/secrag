@@ -4,16 +4,18 @@ Any retrieval system can be handed a benchmark that flatters it, and any
 component can be credited with work it did not do. The usual route is not fraud,
 it is convenience: you write the test questions after the system exists, keep the
 ones whose answers you can locate, and compare your system against a baseline
-that is denied one of its advantages. Nothing looks wrong and the score rises.
+that is denied one of its advantages. A third failure is quieter still: the tool
+that verifies the labels can be satisfied by an anchor so common that it proves
+nothing. In each case nothing looks wrong and the score rises.
 
-Both happened here. This section is how each was caught, how large it is, which
-figures survive, and what changed as a result.
+All three happened here. This document is how each was caught, how large it is,
+which figures survive, and what changed as a result.
 
 **Provenance.** Every figure below comes from release `SECRAG-RRF40-2026-08-17`
 against a corpus of 4,169 chunks, embeddings `BAAI/bge-small-en-v1.5`, top-16
-retrieval, RRF k=40. All five retrieval strategies were measured in a single
-process against the same index, so no column reflects a different build; the
-`generated` timestamp in each results file records when.
+retrieval, RRF k=40. All retrieval strategies were measured in a single process
+against the same index, so no column reflects a different build; the `generated`
+timestamp in each results file records when.
 
 ## What the metrics mean
 
@@ -109,15 +111,23 @@ advantage on multi-passage questions in the original set — 1.000 against 0.900
 recall, 0.735 against 0.685 on coverage — where evidence is distributed and no
 single lexical match captures it.
 
-That is a defensible result rather than a comfortable one. A 10-K is dense with
-exact figures and proper nouns, which is the terrain lexical search has always
-owned. It is also not the result this project set out to find.
+Two later attempts confirmed this rather than reversing it. Rewriting each
+comparison into per-company sub-queries, so that Under Armour's filing is not
+searched with the word "Nike" in the query, moved four gold chunks up and one
+down. A cross-encoder reranker over the same candidate pool, with the per-company
+quota preserved, left Recall@16 unchanged, cost 0.012 coverage, and added 1.86s
+to a 3.40s query.
+
+Three neural components, three negative results. A 10-K is dense with exact
+figures and proper nouns, which is the terrain lexical search has always owned.
+That is a defensible finding about this domain, and it is not the finding this
+project set out to make.
 
 **What has not been measured:** whether better ordering produces better answers.
-MRR is a proxy. The generation evaluation was run on hybrid+company only, so the
-comparison that would settle it — the same 100 questions generated from the
-lexical baseline, judged the same way — has not been done. It is the next
-measurement and it is not in this release.
+MRR is a proxy. The generation evaluation ran on hybrid+company only, so the
+comparison that would settle it — the same questions generated from the lexical
+baseline, judged the same way — has not been done. It is the next measurement and
+it is not in this release.
 
 ## The control, and its limit
 
@@ -161,6 +171,100 @@ baseline and missed by the full system** — the only question where the fusion
 loses something the simpler path found. It is also the one question in the sealed
 set the system declined to answer.
 
+## The third problem: the labels themselves
+
+The two problems above are about how questions were selected and what they were
+compared against. This one is about whether a label points where it claims to,
+and it was found by auditing the tool built to check exactly that.
+
+### The verifier could not fail
+
+`verify_labels.py` treats a label as a falsifiable claim: *the answer to Q014 is
+in URBN-10-K-2026, chunk 119, and that chunk contains "Deloitte"*. After every
+reload it confirms the anchor is still inside the chunk. It reported all 127
+labels as holding.
+
+It had no way to confirm the anchor identified that chunk rather than a hundred
+others. Counting each anchor against its own document:
+
+| Anchor matches | Count | Share |
+|---|---:|---:|
+| One chunk — what a label should mean | 40 | 31% |
+| Two or three chunks | 39 | 31% |
+| Four chunks | 4 | 3% |
+| **Five or more — cannot detect drift** | **44** | **35%** |
+
+The worst are not close calls. `'2025'` matches 148 chunks of the Abercrombie
+filing. `'Etsy'` matches 132 chunks of Etsy's. `'Wayfair'` matches 108 chunks
+written by Wayfair. An anchor like that stays satisfied wherever its label ends
+up, which is precisely the drift the check exists to catch.
+
+The middle band is different and mostly benign: chunks carry a 60-token overlap,
+so text near a boundary legitimately appears in two or three of them.
+
+**The fix is a gate rather than a note.** `verify_labels.py` now counts anchor
+matches, and `--max-anchor-matches` turns the count into a failure. Continuous
+integration runs it at 4 — high enough to allow the overlap, low enough to block
+anchors that identify nothing. The threshold is a ratchet: it comes down as
+anchors are strengthened and never goes up to make a build pass.
+
+### Chunk boundaries cut risk factors from their headings
+
+Section-aware chunking splits on section boundaries but not on the structure
+inside a section. A 10-K risk factor opens with a one-sentence heading and
+develops over several paragraphs, and a chunk that ends just after the heading
+carries the topic without any of its content.
+
+**243 of 4,169 chunks (5.8%) end that way, and 230 of them are in Item 1A** —
+the section every risk and comparison question is about.
+
+Abercrombie's tariff risk is the clearest case. Chunk 53 ends on *"Changes in
+tariff policy ... could continue to adversely affect our business."* and nothing
+else; chunk 54 contains the entire discussion — the IEEPA, the Supreme Court
+ruling, the 10% global tariff, retaliatory measures. The label points at the
+heading.
+
+### Half of the retrieval "misses" retrieved a neighbour instead
+
+Of 24 missed gold chunks on the original 50 questions, **11 had an adjacent chunk
+from the same document retrieved in its place**. Read individually, several of
+those neighbours answer the question at least as well as the labelled chunk.
+
+Sometimes better. Q011 asks what Peloton's primary sources of revenue are; the
+labelled chunk defines subscription churn, and the chunk retrieved instead is
+headed *Components of our Results of Operations — Revenue*. Q014 asks which firm
+audited Urban Outfitters; the labelled chunk describes audit procedures, and the
+chunk retrieved instead carries the signature.
+
+And sometimes the distinction is not meaningful at all. Crocs' gross profit,
+`2,357,055`, appears in three chunks because the overlap duplicates it across two
+boundaries. Labelling one of the three and scoring the other two as misses
+measures an arbitrary choice.
+
+### What this does and does not change
+
+**No figure is being restated and nothing is being relabelled.** Relabelling to
+accommodate what the retriever found is the failure this document exists to
+describe, and it would break comparability with the frozen release.
+
+What changes is how the retrieval figure should be read:
+
+> Recall@16 of 0.735 is measured against canonical labels. Of the misses, 46%
+> retrieved an adjacent chunk from the same document, and 5.8% of the corpus
+> cuts a risk factor from its heading. Operational retrieval — evidence
+> sufficient to answer arriving in the excerpts — sits above the canonical
+> figure. Measured answer correctness on the same questions is 91.2%.
+
+That gap between 0.735 and 91.2% was visible in the frozen release and treated
+as a curiosity. It is not: it is the size of the labelling artefact, and it now
+has three independent measurements behind it.
+
+**Anchors are being strengthened**, because that changes nothing measured.
+Anchors take no part in recall or coverage; they only decide whether the verifier
+can fail. Replacing `'Wayfair'` with a span that appears once improves the
+benchmark's future integrity without touching a single published number, which
+makes it the rare change with no reason to distrust it.
+
 ## The figures that survive
 
 | | Value | 95% CI | n |
@@ -187,6 +291,9 @@ anything.
 **Baselines.** Every comparison holds filtering constant. A baseline denied a
 capability the system has measures the capability, not the comparison.
 
+**Verification.** Anchor uniqueness is checked and gated in continuous
+integration. A verifier that cannot fail is not a verifier.
+
 **Reporting.** Every figure carries its split, its n and an interval. Saturated
 types are marked as blind rather than quoted as strengths.
 
@@ -197,24 +304,31 @@ smallest observable difference, and nothing finer can be distinguished from
 noise. No retrieval change will be accepted or rejected on that figure until the
 comparison type is expanded under the corrected labeling rule. Publishing a
 decision metric that cannot resolve the decisions made against it would repeat
-the error this section documents.
+the error this document describes.
 
-**Re-labeling.** The 14 development questions are not being re-labeled. Their
-bias is now measured, and a measured bias is more useful than a silent
-re-labeling that would invalidate the comparison against the frozen release.
+**Re-labeling.** The 14 development questions are not being re-labeled, and
+neither are the labels sitting on the wrong side of a chunk boundary. The bias is
+now measured, and a measured bias is more useful than a silent re-labeling that
+would invalidate the comparison against the frozen release.
+
+**Not yet fixed.** The chunk boundaries themselves. Re-chunking reissues every
+`chunk_id` and invalidates all 127 labels and every published figure, so it is
+the next release rather than a patch to this one.
 
 ## Why publish this
 
-Every retrieval benchmark built this way carries the first bias, and most
-system-versus-baseline comparisons carry the second. Neither is usually measured,
-because measuring them can only make your own numbers worse.
+Every retrieval benchmark built this way carries the first bias, most
+system-versus-baseline comparisons carry the second, and almost nobody audits the
+third — because a verifier that always passes looks exactly like a benchmark in
+good health.
 
 The reason to publish anyway is that a recall figure without its labeling
-criterion is uninterpretable, and a comparison against a handicapped baseline is
-not a comparison. A supplier who cannot separate their contribution from their
-benchmark's is not measuring anything. The 0.735 is smaller than the 0.952, and
-the honest account of what the dense retriever adds is narrower than the original
-claim. They are the numbers that mean something.
+criterion is uninterpretable, a comparison against a handicapped baseline is not
+a comparison, and a label nobody can falsify is not evidence. A supplier who
+cannot separate their contribution from their benchmark's is not measuring
+anything. The 0.735 is smaller than the 0.952, and the honest account of what the
+dense retriever adds is narrower than the original claim. They are the numbers
+that mean something.
 
 ---
 
