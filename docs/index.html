@@ -29,11 +29,21 @@ h2{font-size:clamp(1.15rem,2.6vw,1.5rem);color:var(--ink);margin:0 0 .3rem;
 h2+.sub{color:var(--ink-3);font-size:.94rem;margin:0 0 1.4rem;max-width:66ch}
 h3{font-size:.98rem;color:var(--ink);margin:2rem 0 .6rem}
 .filters{display:flex;flex-wrap:wrap;gap:.4rem;margin:0 0 1.6rem}
-.filters button{font-family:var(--mono);font-size:.7rem;letter-spacing:.05em;
-  text-transform:uppercase;padding:.45rem .8rem;border:1px solid var(--rule);
-  background:var(--panel);color:var(--ink-3);border-radius:2px;cursor:pointer}
+/* These read as labels unless they are made to look pressable. On a phone
+   there is no hover to discover it with, so the affordance has to be in the
+   resting state: a real border, ink-coloured text, and a caret. */
+.filters button{font-family:var(--mono);font-size:.72rem;letter-spacing:.05em;
+  text-transform:uppercase;padding:.55rem .9rem;border:1px solid var(--ink-3);
+  background:var(--bg);color:var(--ink);border-radius:3px;cursor:pointer;
+  box-shadow:0 1px 0 var(--rule);transition:background .12s,color .12s}
+.filters button::before{content:"▸ ";color:var(--ink-3)}
+.filters button:hover{background:var(--rule-2)}
+.filters button:active{transform:translateY(1px);box-shadow:none}
 .filters button[aria-pressed="true"]{background:var(--ink);color:#fff;
-  border-color:var(--ink)}
+  border-color:var(--ink);box-shadow:none}
+.filters button[aria-pressed="true"]::before{content:"● ";color:#fff}
+.filters-hint{font-family:var(--mono);font-size:.7rem;color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.05em;margin:0 0 .5rem}
 .grouphead{margin:2.2rem 0 .2rem;font-size:1rem;color:var(--ink);font-weight:600}
 .groupsub{color:var(--ink-3);font-size:.9rem;margin:.15rem 0 1rem;max-width:68ch}
 .why{background:var(--rule-2);border-left:2px solid var(--ink-3);
@@ -127,8 +137,8 @@ footer a{color:var(--ink-2)}
 
   <table>
     <thead><tr><th>strategy</th><th>Recall@16</th><th>MRR</th><th>Coverage</th></tr></thead>
-    <tbody><tr class=""><td>semantic</td><td>0.500</td><td>0.228</td><td>0.394</td></tr><tr class=""><td>keyword</td><td>0.412</td><td>0.159</td><td>0.303</td></tr><tr class="best"><td>keyword+company</td><td>0.735</td><td>0.280</td><td>0.628</td></tr><tr class=""><td>hybrid</td><td>0.559</td><td>0.287</td><td>0.433</td></tr><tr class=""><td>hybrid+company</td><td>0.735</td><td>0.310</td><td>0.589</td></tr></tbody>
-    <caption>Degradation checks are not in this run. Build with --sabotage to include them: they disable one capability each and confirm the metric falls, because a check that only ever passes cannot distinguish a working system from a broken one.</caption>
+    <tbody><tr class=""><td>semantic</td><td>0.500</td><td>0.228</td><td>0.394</td></tr><tr class=""><td>keyword</td><td>0.412</td><td>0.159</td><td>0.303</td></tr><tr class="best"><td>keyword+company</td><td>0.735</td><td>0.280</td><td>0.628</td></tr><tr class=""><td>hybrid</td><td>0.559</td><td>0.287</td><td>0.433</td></tr><tr class=""><td>hybrid+company</td><td>0.735</td><td>0.310</td><td>0.589</td></tr><tr class="sab"><td>sabotage · starved</td><td>0.147</td><td>0.147</td><td>0.110</td></tr><tr class="sab"><td>sabotage · no-keyword</td><td>0.500</td><td>0.228</td><td>0.394</td></tr><tr class="sab"><td>sabotage · no-semantic</td><td>0.412</td><td>0.159</td><td>0.303</td></tr><tr class="sab"><td>sabotage · or-keyword</td><td>0.412</td><td>0.163</td><td>0.303</td></tr><tr class="sab"><td>sabotage · no-company</td><td>0.559</td><td>0.287</td><td>0.433</td></tr></tbody>
+    <caption>5 degradations, each disabling one capability. 5 of 5 move the metric down, which is what makes the harness worth trusting: a check that only ever passes cannot distinguish a working system from a broken one.</caption>
   </table>
   <p class="groupsub">The lexical baseline — Postgres full-text search with the same company filter, no embeddings and no fusion — ties on Recall@16 and leads on coverage (0.628 against 0.589). The dense half contributes ordering (0.310 MRR against 0.280), not reach. That was not the expected result; it is documented in <code>docs/measurement-honesty.md</code>.</p>
 
@@ -213,6 +223,7 @@ footer a{color:var(--ink-2)}
   grouped by what each one demonstrates. A live chat demo proves a system works on
   whatever a visitor types; this shows it against answers established by reading
   the filings, including where it fails.</p>
+  <p class="filters-hint">Tap to filter</p>
   <div class="filters"><button data-filter="trap" aria-pressed="false">Written to bait an invention (10)</button><button data-filter="miss" aria-pressed="false">Where the search failed and it stayed quiet (1)</button><button data-filter="absent" aria-pressed="false">Questions the filings simply do not answer (21)</button><button data-filter="answered" aria-pressed="false">Answered from the filings (68)</button><button data-filter="all" aria-pressed="true">Show all</button></div>
   
 <h3 class="grouphead">Written to bait an invention</h3><p class="groupsub">Each of these contains a trap: a fiscal year the filings do not reach, a business segment that does not exist, an acquisition that never happened. A system built to be helpful will produce something. Watch what this one does instead.</p>
@@ -1544,7 +1555,7 @@ On the manufacturing side, the production of Deckers&#x27; finished goods is ent
   not — they were assigned by reading the filings, and the criterion is stated in
   the repository, because a recall figure without its labeling criterion is
   uninterpretable.</p>
-  <p>Method, splits and the two measurement problems found while building this
+  <p>Method, splits and the three measurement problems found while building this
   are documented in <code>docs/measurement-honesty.md</code>, including one where
   a simpler lexical baseline matches this system on coverage.</p>
   <p>Retrieval: 16 chunks per query, hybrid dense and lexical with
