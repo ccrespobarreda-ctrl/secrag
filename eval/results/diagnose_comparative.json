@@ -1,0 +1,80 @@
+{
+ "type": "comparative",
+ "k": 16,
+ "deep": 200,
+ "delivered": 3,
+ "reachable": 3,
+ "unreachable": 4,
+ "chunks": [
+  {
+   "id": "Q031",
+   "chunk_id": 2389,
+   "ticker": "NKE",
+   "rank": 79,
+   "delivered": false
+  },
+  {
+   "id": "Q031",
+   "chunk_id": 3165,
+   "ticker": "UAA",
+   "rank": 4,
+   "delivered": true
+  },
+  {
+   "id": "Q032",
+   "chunk_id": 2314,
+   "ticker": "LULU",
+   "rank": 29,
+   "delivered": false
+  },
+  {
+   "id": "Q032",
+   "chunk_id": 2362,
+   "ticker": "NKE",
+   "rank": 8,
+   "delivered": true
+  },
+  {
+   "id": "Q033",
+   "chunk_id": 230,
+   "ticker": "CHWY",
+   "rank": 13,
+   "delivered": true
+  },
+  {
+   "id": "Q033",
+   "chunk_id": 3541,
+   "ticker": "W",
+   "rank": 50,
+   "delivered": false
+  },
+  {
+   "id": "Q034",
+   "chunk_id": 1508,
+   "ticker": "GAP",
+   "rank": 17,
+   "delivered": false
+  },
+  {
+   "id": "Q034",
+   "chunk_id": 54,
+   "ticker": "ANF",
+   "rank": null,
+   "delivered": false
+  },
+  {
+   "id": "Q035",
+   "chunk_id": 916,
+   "ticker": "DECK",
+   "rank": 30,
+   "delivered": false
+  },
+  {
+   "id": "Q035",
+   "chunk_id": 736,
+   "ticker": "CROX",
+   "rank": null,
+   "delivered": false
+  }
+ ]
+}

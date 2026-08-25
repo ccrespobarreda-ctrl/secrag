@@ -101,9 +101,17 @@ jobs:
             echo "loaded=no" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Every gold label resolves and every anchor is still in place
+      # The threshold is a ratchet, not a target. The corpus uses a 60-token
+      # overlap, so text near a chunk boundary legitimately appears in two or
+      # three chunks; 4 allows that and blocks the anchors that identify
+      # nothing. It comes down as anchors are strengthened, and it must never
+      # go up to make a build pass.
+      - name: Every gold label resolves, and every anchor identifies its chunk
         if: steps.corpus.outputs.loaded == 'yes'
-        run: python src/verify_labels.py --questions eval/questions_vnext.yaml
+        run: |
+          python src/verify_labels.py \
+            --questions eval/questions_vnext.yaml \
+            --max-anchor-matches 4
 
       - name: The split files still match the master benchmark
         run: python src/derive_split.py --verify

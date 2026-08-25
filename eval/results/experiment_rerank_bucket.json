@@ -1,0 +1,273 @@
+{
+ "model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+ "k": 16,
+ "pool": 32,
+ "n": 34,
+ "mode": "bucket",
+ "baseline": {
+  "recall": 0.7352941176470589,
+  "coverage": 0.5887254901960784,
+  "recall_by_type": {
+   "extractive": 0.631578947368421,
+   "multi_chunk": 1.0,
+   "comparative": 0.6
+  },
+  "coverage_by_type": {
+   "extractive": 0.587719298245614,
+   "multi_chunk": 0.735,
+   "comparative": 0.3
+  }
+ },
+ "reranked": {
+  "recall": 0.7352941176470589,
+  "coverage": 0.5769607843137255,
+  "recall_by_type": {
+   "extractive": 0.631578947368421,
+   "multi_chunk": 0.9,
+   "comparative": 0.8
+  },
+  "coverage_by_type": {
+   "extractive": 0.587719298245614,
+   "multi_chunk": 0.645,
+   "comparative": 0.4
+  }
+ },
+ "median_retrieval_s": 0.267458499991335,
+ "median_rerank_s": 1.8569316000211984,
+ "moved": [
+  {
+   "id": "Q001",
+   "chunk_id": 3453,
+   "before": 4,
+   "after": 32
+  },
+  {
+   "id": "Q002",
+   "chunk_id": 3236,
+   "before": 3,
+   "after": 1
+  },
+  {
+   "id": "Q003",
+   "chunk_id": 2315,
+   "before": 2,
+   "after": 3
+  },
+  {
+   "id": "Q004",
+   "chunk_id": 2447,
+   "before": 1,
+   "after": 9
+  },
+  {
+   "id": "Q005",
+   "chunk_id": 736,
+   "before": 21,
+   "after": 10
+  },
+  {
+   "id": "Q006",
+   "chunk_id": 2362,
+   "before": 1,
+   "after": 4
+  },
+  {
+   "id": "Q008",
+   "chunk_id": 813,
+   "before": 17,
+   "after": 16
+  },
+  {
+   "id": "Q011",
+   "chunk_id": 2717,
+   "before": 14,
+   "after": 5
+  },
+  {
+   "id": "Q012",
+   "chunk_id": 2297,
+   "before": 10,
+   "after": 8
+  },
+  {
+   "id": "Q014",
+   "chunk_id": 3451,
+   "before": 19,
+   "after": 26
+  },
+  {
+   "id": "Q017",
+   "chunk_id": 2002,
+   "before": 5,
+   "after": 10
+  },
+  {
+   "id": "Q017",
+   "chunk_id": 2003,
+   "before": 4,
+   "after": 2
+  },
+  {
+   "id": "Q018",
+   "chunk_id": 3327,
+   "before": 5,
+   "after": 18
+  },
+  {
+   "id": "Q020",
+   "chunk_id": 1239,
+   "before": 30,
+   "after": 27
+  },
+  {
+   "id": "Q021",
+   "chunk_id": 257,
+   "before": 7,
+   "after": 12
+  },
+  {
+   "id": "Q021",
+   "chunk_id": 258,
+   "before": 4,
+   "after": 1
+  },
+  {
+   "id": "Q021",
+   "chunk_id": 236,
+   "before": 18,
+   "after": 24
+  },
+  {
+   "id": "Q021",
+   "chunk_id": 237,
+   "before": 9,
+   "after": 6
+  },
+  {
+   "id": "Q021",
+   "chunk_id": 238,
+   "before": 8,
+   "after": 16
+  },
+  {
+   "id": "Q022",
+   "chunk_id": 2000,
+   "before": 3,
+   "after": 1
+  },
+  {
+   "id": "Q022",
+   "chunk_id": 2018,
+   "before": 31,
+   "after": 19
+  },
+  {
+   "id": "Q023",
+   "chunk_id": 2431,
+   "before": 5,
+   "after": 9
+  },
+  {
+   "id": "Q024",
+   "chunk_id": 2233,
+   "before": 2,
+   "after": 12
+  },
+  {
+   "id": "Q025",
+   "chunk_id": 3196,
+   "before": 16,
+   "after": 22
+  },
+  {
+   "id": "Q026",
+   "chunk_id": 1080,
+   "before": 4,
+   "after": 1
+  },
+  {
+   "id": "Q026",
+   "chunk_id": 1039,
+   "before": 8,
+   "after": 3
+  },
+  {
+   "id": "Q027",
+   "chunk_id": 1548,
+   "before": 14,
+   "after": 11
+  },
+  {
+   "id": "Q028",
+   "chunk_id": 3521,
+   "before": 4,
+   "after": 3
+  },
+  {
+   "id": "Q028",
+   "chunk_id": 3524,
+   "before": 13,
+   "after": 25
+  },
+  {
+   "id": "Q028",
+   "chunk_id": 3526,
+   "before": 7,
+   "after": 23
+  },
+  {
+   "id": "Q028",
+   "chunk_id": 3529,
+   "before": 1,
+   "after": 6
+  },
+  {
+   "id": "Q029",
+   "chunk_id": 57,
+   "before": 6,
+   "after": 14
+  },
+  {
+   "id": "Q029",
+   "chunk_id": 84,
+   "before": 2,
+   "after": 3
+  },
+  {
+   "id": "Q030",
+   "chunk_id": 1795,
+   "before": 11,
+   "after": 10
+  },
+  {
+   "id": "Q031",
+   "chunk_id": 3165,
+   "before": 4,
+   "after": 12
+  },
+  {
+   "id": "Q032",
+   "chunk_id": 2314,
+   "before": 29,
+   "after": 27
+  },
+  {
+   "id": "Q032",
+   "chunk_id": 2362,
+   "before": 8,
+   "after": 16
+  },
+  {
+   "id": "Q033",
+   "chunk_id": 230,
+   "before": 13,
+   "after": 3
+  },
+  {
+   "id": "Q034",
+   "chunk_id": 1508,
+   "before": 17,
+   "after": 11
+  }
+ ]
+}
