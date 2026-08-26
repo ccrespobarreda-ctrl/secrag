@@ -89,6 +89,34 @@ def _answer_words(gold_answer: str | None) -> set[str]:
     return out
 
 
+_DOC_CACHE: dict[str, list[str]] = {}
+
+
+def _flat(text: str) -> str:
+    return " ".join(text.split())
+
+
+def _count_in_document(cur, doc_id: str, needle: str) -> int:
+    """
+    How many chunks of the document contain this anchor.
+
+    Counted in Python over flattened text rather than with ILIKE, for two
+    reasons found the hard way. ILIKE reads % as a wildcard, so "45%" was never
+    searched for as written. And the stored text keeps the line breaks of a
+    filing's tables, so a multi-word anchor read off a printed chunk matched
+    nothing at all while sitting plainly inside it.
+
+    Both failures produced a number that looked reasonable and meant nothing,
+    and every anchor decision rests on this number.
+    """
+    if doc_id not in _DOC_CACHE:
+        cur.execute("select content from chunks where doc_id = %s",
+                    (doc_id,))
+        _DOC_CACHE[doc_id] = [_flat(r[0]).lower() for r in cur.fetchall()]
+    n = _flat(needle).lower()
+    return sum(1 for c in _DOC_CACHE[doc_id] if n in c) if n else 0
+
+
 def company_mismatches(cur, questions: list[dict]) -> list[dict]:
     """
     The company named in the question against the ticker the chunks belong to.
@@ -161,10 +189,7 @@ def main() -> int:
             anchor = g.get("contains")
             if not anchor:
                 continue
-            cur.execute("""select count(*) from chunks
-                           where doc_id = %s and content ilike %s""",
-                        (g["doc_id"], f"%{anchor}%"))
-            n = cur.fetchone()[0]
+            n = _count_in_document(cur, g["doc_id"], anchor)
             carried = len({_norm(w) for w in anchor.split()} & answer)
             anchor_counts.append((q["id"], g["doc_id"], anchor, n, carried))
     conn.close()

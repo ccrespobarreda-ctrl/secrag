@@ -16,21 +16,24 @@ anchor unique in its document fails if the label drifts. Either is enough, and
 "6,165,376" cannot be unique because the same total appears in the income
 statement, the segment note and the MD&A of one filing.
 
-WHAT THIS DOES NOT DO ANY MORE
+WHAT IS PROPOSED, AND WHY IT IS AN EXTENSION
 
-An earlier version searched each chunk for a unique span and proposed it as a
-replacement. On the fourteen hardest anchors it got fourteen out of fourteen
-wrong: text that was unique and irrelevant, offering the auditor's signature as
-the anchor for a question about gross profit. Uniqueness is easy to optimise for
-and is not what an anchor is for.
+An earlier version searched the chunk for any unique span and offered that. It
+was wrong on every hard case, because uniqueness is easy to optimise for and is
+not what an anchor is for: it proposed the auditor's signature as the anchor for
+a question about gross profit.
 
-The proposals are gone. Phase one writes the question, the labelled answer and
-the text of the chunk, and leaves the anchor blank. There are 127 labels here;
-reading the handful that need attention is an afternoon, and it is the part no
-tool should be doing.
+The anchors flagged here are not wrong. They are incomplete. "4,966,370" is the
+answer; "Wayfair" sits inside the right passage; "2025" is a fragment of the
+right sentence. What each needs is its own surroundings, not a replacement.
 
-Phase two checks what was written — present in the chunk, and either unique or
-carrying the answer — and applies it.
+So the proposal grows the existing anchor outward inside its chunk, one word at
+a time, keeping whatever was already chosen and stopping as soon as the result
+matches a single chunk. The reviewer reads an extension of their own text rather
+than a stranger's suggestion, which is a much shorter thing to check.
+
+Extensions are still proposals. Nothing is written until `accept: true`, and
+what is written is re-checked against the corpus first.
 
 WHY THE YAML IS EDITED AS TEXT
 
@@ -70,11 +73,42 @@ _CONTAINS = re.compile(r"^(\s+)contains:\s*(.*)$")
 _KEY = re.compile(r"^\s*-?\s*\w[\w_]*:")
 
 
+_DOC_CACHE: dict[str, list[str]] = {}
+
+
+def _flat(text: str) -> str:
+    """Collapse every run of whitespace, the way a reader sees the text."""
+    return " ".join(text.split())
+
+
+def document_chunks(cur, doc_id: str) -> list[str]:
+    """
+    Every chunk of a document, whitespace-flattened, loaded once.
+
+    Two reasons, and the first is correctness. The raw text carries the line
+    breaks of a filing's tables: "Old Navy Global 3 %" is stored with newlines
+    between the cells. Anything read off a printed chunk has single spaces, so
+    comparing it against the raw column finds nothing, and reports an anchor
+    that is plainly there as matching zero chunks. Both sides are flattened
+    before comparing.
+
+    The second is speed. Growing an anchor word by word asked the database once
+    per step; a document is four hundred kilobytes and fits in memory, so the
+    whole search now runs without a round trip.
+    """
+    if doc_id not in _DOC_CACHE:
+        cur.execute("select content from chunks where doc_id = %s "
+                    "order by chunk_index", (doc_id,))
+        _DOC_CACHE[doc_id] = [_flat(r[0]) for r in cur.fetchall()]
+    return _DOC_CACHE[doc_id]
+
+
 def count_in_document(cur, doc_id: str, needle: str) -> int:
-    cur.execute("""select count(*) from chunks
-                   where doc_id = %s and content ilike %s""",
-                (doc_id, f"%{needle}%"))
-    return cur.fetchone()[0]
+    """How many chunks contain this text, comparing flattened to flattened."""
+    n = _flat(needle).lower()
+    if not n:
+        return 0
+    return sum(1 for c in document_chunks(cur, doc_id) if n in c.lower())
 
 
 def chunk_text(cur, doc_id: str, idx: int) -> str | None:
@@ -108,6 +142,77 @@ def answer_words(gold_answer: str | None) -> set[str]:
     return out
 
 
+def _grow_from(cur, doc_id: str, body: str, starts: list[int], pos: int,
+               anchor: str, max_words: int) -> tuple[str, int]:
+    """Grow one occurrence outward, taking whichever side narrows it faster."""
+    left = max([i for i in starts if i <= pos], default=0)
+    right = pos + len(anchor)
+    best = body[left:right]
+    n = count_in_document(cur, doc_id, best)
+
+    for _ in range(max_words):
+        if n <= 1:
+            break
+        cands = []
+        prev = max([i for i in starts if i < left], default=None)
+        if prev is not None:
+            cands.append((body[prev:right], prev, right))
+        nxt = next((i for i in starts if i > right), None)
+        if nxt is not None:
+            grown = body[left:nxt].rstrip()
+            cands.append((grown, left, left + len(grown)))
+        if not cands:
+            break
+        scored = sorted((count_in_document(cur, doc_id, c[0]), c)
+                        for c in cands)
+        n, (best, left, right) = scored[0]
+
+    return best.strip(), n
+
+
+def extend_anchor(cur, doc_id: str, idx: int, anchor: str,
+                  max_words: int = 20, max_occurrences: int = 6):
+    """
+    Grow an anchor outward inside its chunk until it identifies one chunk.
+
+    Both directions are tried at each step and the better one kept. Growing
+    only rightward would fail on a bare figure whose distinguishing row label
+    sits to its left.
+
+    Several starting points, not one. An anchor like "2025" occurs dozens of
+    times inside a single chunk, and the first occurrence is usually the least
+    distinctive — a page header or a column heading. An earlier version grew
+    from that one and reported the anchor as unfixable when a later occurrence
+    would have narrowed in two words.
+
+    Returns the best result found, with its match count. A count that stays
+    high means no window of this size around any occurrence is unique; why is a
+    question about the chunk, and reading it is the way to answer that rather
+    than assuming.
+    """
+    body = " ".join((chunk_text(cur, doc_id, idx) or "").split())
+    if not body:
+        return anchor, 0
+    low, needle = body.lower(), anchor.lower()
+    starts = [0] + [m.end() for m in re.finditer(r"\s", body)]
+
+    positions, at = [], low.find(needle)
+    while at >= 0 and len(positions) < max_occurrences:
+        positions.append(at)
+        at = low.find(needle, at + 1)
+    if not positions:
+        return anchor, 0
+
+    best, best_n = anchor, 10 ** 6
+    for pos in positions:
+        span, n = _grow_from(cur, doc_id, body, starts, pos, anchor, max_words)
+        if n and n < best_n:
+            best, best_n = span, n
+        if best_n <= 1:
+            break
+    return best, best_n
+
+
 def yaml_scalar(value: str) -> str:
     """
     Quote the way PyYAML would, so the file stays loadable.
@@ -139,16 +244,16 @@ def do_review(cur, questions_path: Path, out: Path, threshold: int) -> int:
             n = count_in_document(cur, g["doc_id"], anchor)
             if n <= threshold:
                 continue        # narrow enough to say which chunk it means
-            body = " ".join((chunk_text(cur, g["doc_id"], g["chunk_index"])
-                             or "").split())
+            grown, grown_n = extend_anchor(cur, g["doc_id"],
+                                           g["chunk_index"], anchor)
             entries.append({
                 "id": q["id"], "doc_id": g["doc_id"],
                 "chunk_index": g["chunk_index"],
                 "question": q["question"],
                 "gold_answer": q.get("gold_answer") or "",
                 "current": anchor, "current_matches": n,
-                "chunk_text": body,
-                "proposed": "",
+                "proposed": grown if grown_n and grown_n <= n else "",
+                "proposed_matches": grown_n,
                 "accept": False,
             })
 
@@ -162,23 +267,35 @@ def do_review(cur, questions_path: Path, out: Path, threshold: int) -> int:
         "# Read `question`, `gold_answer` and `chunk_text`, then write an\n"
         "# anchor into `proposed` and set `accept: true`.\n"
         "#\n"
-        "# A good anchor matches one chunk, or few. Prefer text that also\n"
-        "# carries the answer, so it fails if the chunk loses the figure too.\n"
+        "# `proposed` is your own anchor with its surroundings added, grown\n"
+        "# word by word inside the same chunk until it matches one. Read it,\n"
+        "# and set `accept: true` if it still marks the right passage.\n"
         "#\n"
-        "# Anything written here is checked before it is applied.\n"
+        "# Edit it freely. Anything written here is re-checked against the\n"
+        "# corpus before it is applied: it must be present in the chunk it\n"
+        "# labels, and match no more than eight chunks of the document.\n"
         "#\n"
         "# Entries left at accept: false are ignored.\n")
     out.write_text(header + yaml.safe_dump(entries, sort_keys=False,
                                            allow_unicode=True, width=200),
                    encoding="utf-8")
     print(f"{len(entries)} anchors matching more than {threshold} chunks"
-          f"\nwrote {out}")
-    for e in entries:
-        print(f"  {e['id']:<7} {e['doc_id']:<18} {e['current'][:30]!r} "
-              f"in {e['current_matches']} chunks")
-    if entries:
-        print("\nEach needs an anchor written by hand. They are few on "
-              "purpose: an anchor\nchosen by a tool is an anchor nobody read.")
+          f"\nwrote {out}\n")
+    fixed = sum(1 for e in entries if e["proposed"]
+                and e["proposed_matches"] <= 1)
+    partial = sum(1 for e in entries if e["proposed"]
+                  and 1 < e["proposed_matches"] <= 8)
+    stuck = [e for e in entries if not e["proposed"]
+             or e["proposed_matches"] > 8]
+    print(f"  {fixed:>3} extend to a single chunk")
+    print(f"  {partial:>3} extend to within the threshold")
+    print(f"  {len(stuck):>3} do not narrow enough. No window of up to twenty "
+          f"words around any\n      occurrence is distinctive; read the chunk "
+          f"before assuming why")
+    for e in stuck:
+        print(f"      {e['id']:<7} {e['doc_id']:<18} {e['current'][:28]!r}")
+    print("\nRead each proposal before accepting it. An extension is short to "
+          "check\nbecause it still contains the anchor you chose.")
     return 0
 
 
@@ -201,14 +318,17 @@ def do_apply(cur, questions_path: Path, review: Path, dry_run: bool) -> int:
         text = chunk_text(cur, e["doc_id"], e["chunk_index"])
         if text is None:
             refused.append((e, "chunk not found"))
-        elif span.lower() not in " ".join(text.split()).lower():
+        elif _flat(span).lower() not in _flat(text).lower():
             refused.append((e, "not present in the chunk it labels"))
         else:
             n = count_in_document(cur, e["doc_id"], span)
-            if n <= 8:
+            if n == 0:
+                refused.append((e, "matches no chunk of the document — the "
+                                   "text is not there as written"))
+            elif n <= 8:
                 ok.append(e)
             else:
-                refused.append((e, f"matches {n} chunks — still too many to "
+                refused.append((e, f"matches {n} chunks, still too many to "
                                    f"identify one"))
 
     for e, why in refused:
