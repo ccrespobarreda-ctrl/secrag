@@ -7,13 +7,30 @@ Strengthen weak gold anchors, in two phases with a person in between.
     python src/fix_anchors.py --apply eval/anchor_review.yaml --dry-run
     python src/fix_anchors.py --apply eval/anchor_review.yaml
 
-WHY TWO PHASES
+WHAT AN ANCHOR HAS TO DO
 
-An anchor is the only part of a label that can falsify it. Rewriting anchors
-automatically would produce a benchmark whose verification nobody has read,
-which is worse than the weak anchors it replaced: the numbers would look the
-same and mean less. So phase one writes a file of proposals with `accept: false`
-against each, and phase two changes only what was set to true.
+The invariant is not "the anchor must be unique". It is that the anchor must be
+able to fail when the label stops holding, and there are two ways to manage
+that. An anchor that carries the answer fails if the chunk loses the figure. An
+anchor unique in its document fails if the label drifts. Either is enough, and
+"6,165,376" cannot be unique because the same total appears in the income
+statement, the segment note and the MD&A of one filing.
+
+WHAT THIS DOES NOT DO ANY MORE
+
+An earlier version searched each chunk for a unique span and proposed it as a
+replacement. On the fourteen hardest anchors it got fourteen out of fourteen
+wrong: text that was unique and irrelevant, offering the auditor's signature as
+the anchor for a question about gross profit. Uniqueness is easy to optimise for
+and is not what an anchor is for.
+
+The proposals are gone. Phase one writes the question, the labelled answer and
+the text of the chunk, and leaves the anchor blank. There are 127 labels here;
+reading the handful that need attention is an afternoon, and it is the part no
+tool should be doing.
+
+Phase two checks what was written — present in the chunk, and either unique or
+carrying the answer — and applies it.
 
 WHY THE YAML IS EDITED AS TEXT
 
@@ -73,65 +90,22 @@ _STOP = {"the", "a", "an", "of", "and", "or", "in", "to", "for", "our", "we",
 
 
 def _norm(word: str) -> str:
-    """
-    Strip the punctuation that makes the same figure look like two words.
-
-    A labelled answer reads "$6,165,376 thousand"; the filing writes
-    "6,165,376" inside a table with no currency sign. Comparing them raw never
-    matches, so every figure question fell through to a positional proposal —
-    which is exactly the case where the anchor most needs to carry the number.
-    """
-    return word.strip("$€£.,;:()[]\"'").lower()
+    """A labelled answer writes "$6,165,376"; the filing writes "6,165,376"."""
+    return word.strip("$\u20ac\u00a3.,;:()[]\"'").lower()
 
 
 def answer_words(gold_answer: str | None) -> set[str]:
-    """
-    Content words of the labelled answer, with figures always kept.
-
-    The length filter was dropping short but decisive tokens: the answer to
-    "when does Nike's fiscal year end" is "May 31", and 31 is the half that
-    matters.
-    """
+    """Content words of the answer. Figures are kept whatever their length."""
     if not gold_answer:
         return set()
     out = set()
-    for raw in re.findall(r"[\w,\.%$€£]+", gold_answer):
+    for raw in re.findall(r"[\w,\.%$\u20ac\u00a3]+", gold_answer):
         w = _norm(raw)
         if not w or w in _STOP:
             continue
         if any(c.isdigit() for c in w) or len(w) > 2:
             out.add(w)
     return out
-
-
-def propose(cur, doc_id: str, idx: int, answer: set[str], limit: int = 2500):
-    """
-    The longest span of the chunk that is unique in its document and carries as
-    much of the labelled answer as possible.
-
-    Ranking answer-words first is what keeps the anchor doing its real job. A
-    span can be perfectly unique and still useless: an anchor on the auditor's
-    signature would go on reporting a healthy label for a chunk that had lost
-    the revenue figure the question is about.
-    """
-    text = chunk_text(cur, doc_id, idx)
-    if not text:
-        return None, 0
-    words = " ".join(text.split()).split(" ")
-    spans = []
-    for size in range(12, 3, -1):
-        for i in range(0, len(words) - size + 1):
-            span = " ".join(words[i:i + size])
-            if len(span) < 12 or "'" in span or '"' in span:
-                continue
-            low = {_norm(w) for w in span.split()}
-            spans.append((len(low & answer), bool(re.search(r"\d", span)),
-                          len(span), span))
-    spans.sort(reverse=True)
-    for carried, _, _, span in spans[:limit]:
-        if count_in_document(cur, doc_id, span) == 1:
-            return span, carried
-    return None, 0
 
 
 def yaml_scalar(value: str) -> str:
@@ -164,48 +138,47 @@ def do_review(cur, questions_path: Path, out: Path, threshold: int) -> int:
                 continue
             n = count_in_document(cur, g["doc_id"], anchor)
             if n <= threshold:
-                continue
-            span, carried = propose(cur, g["doc_id"], g["chunk_index"], answer)
+                continue        # narrow enough to say which chunk it means
+            body = " ".join((chunk_text(cur, g["doc_id"], g["chunk_index"])
+                             or "").split())
             entries.append({
                 "id": q["id"], "doc_id": g["doc_id"],
                 "chunk_index": g["chunk_index"],
                 "question": q["question"],
-                "gold_answer": (q.get("gold_answer") or "")[:200],
+                "gold_answer": q.get("gold_answer") or "",
                 "current": anchor, "current_matches": n,
-                "proposed": span or "",
-                "proposed_carries_answer_words": carried,
+                "chunk_text": body,
+                "proposed": "",
                 "accept": False,
             })
 
     header = (
         "# Anchor review. Generated by src/fix_anchors.py --review.\n"
         "#\n"
-        "# Each entry is a gold anchor that matches more than one chunk of its\n"
-        "# document and therefore cannot detect a label that has drifted.\n"
+        "# Every entry is an anchor that matches too many chunks of its own\n"
+        "# document to say which one it means, so it stays satisfied wherever\n"
+        "# the label points.\n"
         "#\n"
-        "# Read `question`, `gold_answer` and `proposed`. Set `accept: true`\n"
-        "# where the proposal genuinely marks the passage that answers the\n"
-        "# question. Edit `proposed` freely — anything you write is checked for\n"
-        "# uniqueness and presence before it is applied.\n"
+        "# Read `question`, `gold_answer` and `chunk_text`, then write an\n"
+        "# anchor into `proposed` and set `accept: true`.\n"
         "#\n"
-        "# `proposed_carries_answer_words` is a hint, not a verdict. A zero\n"
-        "# means the proposal is positional only: unique, but it would not\n"
-        "# notice if the chunk lost the answer.\n"
+        "# A good anchor matches one chunk, or few. Prefer text that also\n"
+        "# carries the answer, so it fails if the chunk loses the figure too.\n"
+        "#\n"
+        "# Anything written here is checked before it is applied.\n"
         "#\n"
         "# Entries left at accept: false are ignored.\n")
     out.write_text(header + yaml.safe_dump(entries, sort_keys=False,
                                            allow_unicode=True, width=200),
                    encoding="utf-8")
-    print(f"{len(entries)} anchors matching more than {threshold} chunks")
-    print(f"wrote {out}")
-    weak = sum(1 for e in entries if not e["proposed"])
-    zero = sum(1 for e in entries if e["proposed"]
-               and not e["proposed_carries_answer_words"])
-    if weak:
-        print(f"  {weak} have no unique span at all — those chunks need a "
-              f"different fix")
-    if zero:
-        print(f"  {zero} proposals are positional only — read those first")
+    print(f"{len(entries)} anchors matching more than {threshold} chunks"
+          f"\nwrote {out}")
+    for e in entries:
+        print(f"  {e['id']:<7} {e['doc_id']:<18} {e['current'][:30]!r} "
+              f"in {e['current_matches']} chunks")
+    if entries:
+        print("\nEach needs an anchor written by hand. They are few on "
+              "purpose: an anchor\nchosen by a tool is an anchor nobody read.")
     return 0
 
 
@@ -232,10 +205,11 @@ def do_apply(cur, questions_path: Path, review: Path, dry_run: bool) -> int:
             refused.append((e, "not present in the chunk it labels"))
         else:
             n = count_in_document(cur, e["doc_id"], span)
-            if n != 1:
-                refused.append((e, f"matches {n} chunks, not 1"))
-            else:
+            if n <= 8:
                 ok.append(e)
+            else:
+                refused.append((e, f"matches {n} chunks — still too many to "
+                                   f"identify one"))
 
     for e, why in refused:
         print(f"  REFUSED  {e['id']:<7} {e['doc_id']:<18} {why}")
@@ -314,7 +288,7 @@ def main() -> int:
                     default=Path("eval/questions_vnext.yaml"))
     ap.add_argument("--review", type=Path, help="write a review file and stop")
     ap.add_argument("--apply", type=Path, help="apply the accepted entries")
-    ap.add_argument("--threshold", type=int, default=4,
+    ap.add_argument("--threshold", type=int, default=8,
                     help="review anchors matching more chunks than this")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()

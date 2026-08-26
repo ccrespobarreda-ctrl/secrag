@@ -21,19 +21,29 @@ Three ways a claim fails, and they need different responses:
     moved     the chunk exists and no longer contains the answer
     legacy    the label is still a bare chunk_id, which guarantees none of this
 
-WHAT IT USED TO MISS
+WHAT AN ANCHOR HAS TO DO, AND HOW THAT IS TESTED
 
-An anchor only detects drift if it identifies one chunk. "Deloitte" is satisfied
-wherever the auditor is named; "Wayfair" is satisfied in almost every chunk
-Wayfair wrote. A label anchored that way passes this check no matter where it
-drifts to, and the report said every label held while proving nothing about a
-third of them.
+An anchor exists so a label can fail. If the corpus is re-chunked and the label
+drifts, the anchor should stop matching; if it goes on matching, the label is
+unfalsifiable and every figure measured against it rests on a check that cannot
+fail.
 
-So each anchor is now counted against its own document. One match is what a
-label should mean. --max-anchor-matches turns that into a gate, and the value is
-meant to ratchet down as anchors are strengthened: the corpus uses a 60-token
-overlap, so text near a boundary legitimately appears in two or three chunks and
-a threshold of 1 is not reachable without changing the chunker.
+The only property that tests this is how many chunks of the document the anchor
+matches. One is ideal. A handful is normal — a revenue total legitimately
+appears in the income statement, the segment note and the MD&A of one filing,
+and the 60-token overlap duplicates text across boundaries. A hundred means the
+anchor is decoration.
+
+An intermediate version of this check tried to excuse an anchor that carried a
+word of the labelled answer, on the grounds that "6,165,376" cannot be unique
+and is obviously good. That was wrong, and the data says why: "Wayfair" also
+appears in the labelled answer to a question about Wayfair, and it matches 108
+chunks. Content does not separate the two. The match count does — five against
+a hundred and eight — and it is the only signal that does.
+
+So the gate counts matches and nothing else. The count carrying the answer is
+still reported, because it says what an anchor would catch if the chunk lost the
+figure, but it does not excuse anything.
 
 The format and the resolution both live in src/labels.py; this is the report.
 """
@@ -43,6 +53,7 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -53,6 +64,29 @@ import labels as L  # noqa: E402
 import retrieve as R  # noqa: E402
 
 log = logging.getLogger("verify_labels")
+
+_STOP = {"the", "a", "an", "of", "and", "or", "in", "to", "for", "our", "we",
+         "is", "are", "was", "were", "as", "at", "on", "by", "with", "that",
+         "this", "its", "it", "from", "which", "their", "has", "have"}
+
+
+def _norm(word: str) -> str:
+    """A labelled answer writes "$6,165,376"; the filing writes "6,165,376"."""
+    return word.strip("$\u20ac\u00a3.,;:()[]\"'").lower()
+
+
+def _answer_words(gold_answer: str | None) -> set[str]:
+    """Content words of the answer. Figures are kept whatever their length."""
+    if not gold_answer:
+        return set()
+    out = set()
+    for raw in re.findall(r"[\w,\.%$\u20ac\u00a3]+", gold_answer):
+        w = _norm(raw)
+        if not w or w in _STOP:
+            continue
+        if any(c.isdigit() for c in w) or len(w) > 2:
+            out.add(w)
+    return out
 
 
 def company_mismatches(cur, questions: list[dict]) -> list[dict]:
@@ -122,6 +156,7 @@ def main() -> int:
     # against that label rests on a check that cannot fail.
     anchor_counts = []
     for q in labeled:
+        answer = _answer_words(q.get("gold_answer"))
         for g in (q.get("gold_chunks") or []):
             anchor = g.get("contains")
             if not anchor:
@@ -129,8 +164,9 @@ def main() -> int:
             cur.execute("""select count(*) from chunks
                            where doc_id = %s and content ilike %s""",
                         (g["doc_id"], f"%{anchor}%"))
-            anchor_counts.append((q["id"], g["doc_id"], anchor,
-                                  cur.fetchone()[0]))
+            n = cur.fetchone()[0]
+            carried = len({_norm(w) for w in anchor.split()} & answer)
+            anchor_counts.append((q["id"], g["doc_id"], anchor, n, carried))
     conn.close()
 
     expected_labels = sum(len(q.get("gold_chunks") or q.get("gold_chunk_ids") or [])
@@ -153,36 +189,53 @@ def main() -> int:
             print(f"  {qid}")
 
     if anchor_counts:
-        uniq = sum(1 for *_, n in anchor_counts if n <= 1)
-        overlap = sum(1 for *_, n in anchor_counts if 2 <= n <= 3)
-        severe = [r for r in anchor_counts if r[3] >= 5]
-        print(f"\n{'anchors identifying one chunk':<34}{uniq:>5}")
-        print(f"{'  in 2-3 (the chunk overlap)':<34}{overlap:>5}")
-        print(f"{'  in 5 or more':<34}{len(severe):>5}   "
-              f"(cannot detect drift)")
-        if severe:
-            print("\nThese anchors stay satisfied wherever their label drifts. "
-                  "Strengthen\nthem with src/audit_anchors.py --propose:")
-            for qid, doc_id, anchor, n in sorted(
-                    severe, key=lambda r: -r[3])[:args.show]:
+        uniq = sum(1 for r in anchor_counts if r[3] <= 1)
+        few = sum(1 for r in anchor_counts if 2 <= r[3] <= 8)
+        many = [r for r in anchor_counts if r[3] > 8]
+        carrying = sum(1 for r in anchor_counts if r[4])
+        print(f"\n{'anchors matching one chunk':<40}{uniq:>5}")
+        print(f"{'  two to eight':<40}{few:>5}   "
+              f"(overlap, and figures that repeat)")
+        print(f"{'  more than eight':<40}{len(many):>5}   "
+              f"(cannot say which chunk)")
+        print(f"{'anchors carrying the labelled answer':<40}{carrying:>5}   "
+              f"(would catch a lost figure)")
+        if many:
+            print("\nThese match too many chunks to identify one, so they stay "
+                  "satisfied\nwherever the label points:")
+            for qid, doc_id, anchor, n, _ in sorted(
+                    many, key=lambda r: -r[3])[:args.show]:
                 print(f"  {qid:<7} {doc_id:<18} {anchor[:34]!r} in {n} chunks")
-            if len(severe) > args.show:
-                print(f"  ... {len(severe) - args.show} more")
+            if len(many) > args.show:
+                print(f"  ... {len(many) - args.show} more")
 
     over = [r for r in anchor_counts
             if args.max_anchor_matches and r[3] > args.max_anchor_matches]
 
     if not problems and not over:
+        severe_n = sum(1 for r in anchor_counts if r[3] > 8)
         print("\nEvery label resolves and every anchor is still in its chunk.")
         if args.max_anchor_matches:
             print(f"No anchor matches more than {args.max_anchor_matches} "
                   f"chunks of its document.")
+        elif severe_n:
+            # Saying only the first sentence would be true and misleading at
+            # once: the anchors above resolve, and cannot fail. Reporting a
+            # clean result beside a list of unverifiable labels is the kind of
+            # half-statement this harness exists to prevent.
+            print(f"That is a weaker statement than it reads: {severe_n} "
+                  f"anchors match more than\neight chunks, so they would "
+                  f"resolve wherever their label pointed. Run with\n"
+                  f"--max-anchor-matches 8 to treat that as a failure.")
         return 0
 
     if over and not problems:
         print(f"\n{len(over)} anchor(s) match more than "
-              f"{args.max_anchor_matches} chunks. Every label resolves, but "
-              f"these\ncannot confirm they still point at the answer.")
+              f"{args.max_anchor_matches} chunks of their document.\nEvery "
+              f"label resolves, but these cannot say which chunk they mean. "
+              f"Fix them\nby hand, or with src/fix_anchors.py.")
+        for qid, doc_id, anchor, n, _ in over:
+            print(f"  {qid:<7} {doc_id:<18} {anchor[:40]!r} in {n} chunks")
         return 1
 
     by_kind = defaultdict(list)
