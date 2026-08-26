@@ -103,6 +103,18 @@ measures an arbitrary choice. The gap between Recall@16 of 0.735 and measured
 answer correctness of 91.2% is not a curiosity: it is the size of this artefact,
 and it now has three independent measurements behind it.
 
+**10 — Reproducibility rested on a setting nobody had declared.** Vector search
+here is approximate: HNSW walks a graph rather than scanning all 4,169 vectors,
+and `hnsw.ef_search` decides how wide it walks. It is a database setting, not a
+property of the index, so anyone cloning this repository inherited whatever
+their pgvector build defaults to and could measure different numbers with
+nothing raising an error. It is now fixed at 40 in `sql/schema.sql` — the value
+every published figure was measured under. Raising it to 200 was tried on 14
+August and changed nothing: two runs seven minutes apart agree to six decimal
+places, because four thousand vectors is too small an index for the setting to
+matter. **This is the one finding whose fix moves no number: it turns an
+assumption into a declaration.**
+
 ## How the system works
 
 ```text
@@ -211,6 +223,28 @@ Three neural components, three negative results, on a corpus of financial filing
 dense with exact figures and proper nouns. That is a defensible finding about
 this domain, and it is not the finding this project set out to make.
 
+### Where the headline figure came from
+
+Retrieval on this corpus was measured seven times between 14 and 17 August. The
+figure fell from 0.882 to 0.735 over that period, and every run is kept so the
+drop can be attributed rather than assumed.
+
+| Change | Recall@16 | Effect |
+|---|---:|---|
+| 14 August, RRF k=60 | 0.882 | starting point |
+| `hnsw.ef_search` 40 → 200 | 0.882 | **none, to six decimal places** |
+| Re-parse and company detection fix | 0.912 | +0.029 |
+| **Canonical re-labelling** | **0.735** | **−0.176** |
+| RRF k 60 → 40 | 0.735 | recall unchanged, coverage +0.015 |
+
+**The system did not get worse. The labelling got honest.** The single largest
+movement in this project's headline metric was reading the filings again and
+marking the passage that actually answers each question, and it cost seventeen
+points.
+
+A figure that only ever rises is a figure nobody has audited. This one fell,
+once, by a documented amount, for a documented reason.
+
 ## Known limitations
 
 - **Q064** is the one answerable question in the sealed set the system declined.
@@ -270,6 +304,8 @@ and a re-chunk can falsify it silently.
 | `src/evaluate_*.py` | retrieval, groundedness, correctness harnesses |
 | `src/compare_splits.py` | cross-split comparison and construction-bias diagnostic |
 | `src/report_intervals.py` | confidence intervals, one observation per question |
+| `src/check_db_settings.py` | the database settings retrieval depends on |
+| `src/fix_anchors.py` | two-phase anchor strengthening, reviewed by a person |
 | `src/derive_split.py` | derives split files from the master benchmark |
 | `src/audit_anchors.py` | anchor uniqueness audit, with proposed replacements |
 | `src/check_neighbours.py` | what arrived when a labelled chunk did not |
