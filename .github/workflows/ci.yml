@@ -83,23 +83,32 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # ON_ERROR_STOP so a failing statement fails the build rather than
+      # leaving a half-built schema and a green tick. The ef_search block in
+      # schema.sql catches its own permission error and only raises a notice,
+      # which is why that one does not stop this.
       - name: Create the schema
-        run: psql "$DATABASE_URL" -f sql/schema.sql
+        run: psql -v ON_ERROR_STOP=1 "$DATABASE_URL" -f sql/schema.sql
 
-      # The corpus is not in the repository -- the filings belong to the
+      # The corpus is not in the repository: the filings belong to the
       # companies that wrote them, and src/edgar.py fetches them from EDGAR.
-      # Skip the label check rather than fail it when the corpus is absent, so
-      # the workflow stays useful on a fresh clone.
-      - name: Load the corpus, if one is available
-        id: corpus
-        run: |
-          if [ -f data/chunks.json ]; then
-            python src/load.py
-            echo "loaded=yes" >> "$GITHUB_OUTPUT"
-          else
-            echo "No data/chunks.json; skipping the label check."
-            echo "loaded=no" >> "$GITHUB_OUTPUT"
-          fi
+      # An earlier version of this workflow therefore skipped the label check
+      # whenever the corpus was absent, which was always — the step printed a
+      # notice, the build went green, and the guarantee the README claims was
+      # never actually made.
+      #
+      # tests/fixture_corpus.json is the minimum extract that makes the check
+      # real: every chunk a gold label points at, plus its neighbours. Labels
+      # resolve by document and index rather than by serial id, so all 127 are
+      # verified against it, not a sample. Rebuild it with
+      # `python tests/fixture.py --build` whenever the labels change.
+      # Decidable from the file alone, and two minutes earlier than the
+      # database would say the same thing.
+      - name: The fixture supports every label
+        run: python tests/fixture.py --check
+
+      - name: Load the label fixture
+        run: python tests/fixture.py --load
 
       # An anchor is checked on one property: how many chunks of its own
       # document it matches. Eight allows the 60-token overlap and the two or
@@ -113,7 +122,6 @@ jobs:
       #
       # The threshold ratchets down as anchors are rewritten. Never up.
       - name: Every gold label resolves, and every anchor identifies its chunk
-        if: steps.corpus.outputs.loaded == 'yes'
         run: |
           python src/verify_labels.py \
             --questions eval/questions_vnext.yaml \
