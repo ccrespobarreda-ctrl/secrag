@@ -134,7 +134,21 @@ def load_cache() -> dict:
     return {}
 
 
-def save_cache(cache: dict) -> None:
+def save_cache(cache: dict, enabled: bool = True) -> None:
+    """
+    Write the cache, unless caching was turned off.
+
+    --no-cache used to start from an empty dictionary and save it anyway. The
+    flag read as "do not use the cache" and behaved as "delete the cache": a
+    single run with it would replace three hundred real entries with its own
+    handful, silently and irreversibly. Found by reading this file while
+    planning an unrelated run, not by anything failing.
+
+    The guard lives here rather than at each call site so a future caller cannot
+    reintroduce it by forgetting.
+    """
+    if not enabled:
+        return
     CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
     CACHE_PATH.write_text(json.dumps(cache, indent=1), encoding="utf-8")
 
@@ -251,6 +265,8 @@ def main() -> int:
         for p in label_problems[:8]:
             log.error("  %-7s %s  %s", p["id"], p["kind"], p["detail"])
 
+    # With --no-cache nothing is read and nothing is written: the run neither
+    # benefits from earlier answers nor disturbs them.
     cache = {} if args.no_cache else load_cache()
     cache_hits = calls = 0
     records = []
@@ -319,9 +335,9 @@ def main() -> int:
         # Saved after every question rather than every tenth call. A run that
         # dies at question 47 should lose one question's work, not ten.
         if calls:
-            save_cache(cache)
+            save_cache(cache, enabled=not args.no_cache)
 
-    save_cache(cache)
+    save_cache(cache, enabled=not args.no_cache)
 
     # ── Groundedness, on answers only ────────────────────────────────
     judged = defaultdict(int)
