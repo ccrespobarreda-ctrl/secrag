@@ -395,7 +395,7 @@ def do_apply(cur, questions_path: Path, review: Path, dry_run: bool) -> int:
     print("\nNow regenerate the derived splits and re-verify:")
     print("  python src/derive_split.py --verify")
     print("  python src/verify_labels.py --questions eval/questions_vnext.yaml "
-          "--max-anchor-matches 4")
+          "--max-anchor-matches 8")
     print("\nThe derived files carry copies of these anchors, so delete and "
           "rebuild them:\n  eval/questions_vnext_{regression,dev,tuning,"
           "holdout}.yaml")
