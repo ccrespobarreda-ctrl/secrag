@@ -187,26 +187,65 @@ labels as holding.
 It had no way to confirm the anchor identified that chunk rather than a hundred
 others. Counting each anchor against its own document:
 
-| Anchor matches | Count | Share |
+| Anchor matches | Before | After |
 |---|---:|---:|
-| One chunk — what a label should mean | 40 | 31% |
-| Two or three chunks | 39 | 31% |
-| Four chunks | 4 | 3% |
-| **Five or more — cannot detect drift** | **44** | **35%** |
+| One chunk — what a label should mean | 40 | 56 |
+| Two to eight — the overlap, and figures that repeat | 58 | 66 |
+| **More than eight — cannot say which chunk** | **29** | **5** |
 
-The worst are not close calls. `'2025'` matches 148 chunks of the Abercrombie
-filing. `'Etsy'` matches 132 chunks of Etsy's. `'Wayfair'` matches 108 chunks
-written by Wayfair. An anchor like that stays satisfied wherever its label ends
-up, which is precisely the drift the check exists to catch.
+The worst were not close calls. `'Wayfair'` matched 108 chunks written by
+Wayfair; `'Etsy'`, 132 of Etsy's; `'2025'`, 148 of Abercrombie's. An anchor like
+that stays satisfied wherever its label ends up, which is precisely the drift
+the check exists to catch.
 
-The middle band is different and mostly benign: chunks carry a 60-token overlap,
-so text near a boundary legitimately appears in two or three of them.
+### The count itself was wrong, twice
 
-**The fix is a gate rather than a note.** `verify_labels.py` now counts anchor
-matches, and `--max-anchor-matches` turns the count into a failure. Continuous
-integration runs it at 4 — high enough to allow the overlap, low enough to block
-anchors that identify nothing. The threshold is a ratchet: it comes down as
-anchors are strengthened and never goes up to make a build pass.
+Adding the check was not enough, and the first three attempts at it produced 44,
+31 and 29 for the same property.
+
+`LIKE` reads `%` as a wildcard, so `'45%'` was never searched for as written and
+its count meant nothing. And the stored text keeps the line breaks of a filing's
+tables, so a multi-word anchor copied from a printed chunk — where the display
+had already collapsed the whitespace — matched no chunk at all while sitting
+plainly inside one. The symptom that exposed it was a report stating, four lines
+apart, that an anchor sat at character 905 of a chunk and that it matched zero
+chunks of that document.
+
+**Neither defect raised an error. Both returned a plausible number.** Matches are
+now counted in Python over whitespace-flattened text, on both sides.
+
+**The fix is a gate rather than a note.** `verify_labels.py` counts anchor
+matches and `--max-anchor-matches` turns the count into a failure. Continuous
+integration runs it at 8 — high enough for the overlap and for a revenue total
+that legitimately appears in the income statement, the segment note and the
+MD&A, low enough to block anchors that identify nothing. The threshold is a
+ratchet: it comes down as anchors are strengthened and never goes up to make a
+build pass.
+
+### What was rewritten, and what was left
+
+Twenty-four anchors were extended to name their passage rather than a word
+appearing throughout the filing. `'Wayfair'` became `'of CastleGate and the
+Wayfair'`; `'4,966,370'` became `'(Note 10) $ 4,966,370'`; `'North'` became
+`'North America EMEA Asia-Pacific Latin America Total Reportable Segments'`.
+
+Every rewrite was read before it was applied. The tool proposes an extension of
+the existing anchor and writes nothing until a person accepts it, because an
+anchor chosen by a tool is an anchor nobody read. Two proposals were rejected by
+the checker for not being present in the chunk as written, which is what that
+check is for.
+
+**No published figure changed.** Recall, coverage and MRR were re-measured after
+the rewrite and are identical to three decimal places across all five strategies
+and all twelve per-type cells. That is the test that this was verification
+rather than tuning: anchors take no part in retrieval, and if a figure had
+moved, something other than an anchor had been edited.
+
+Five anchors were deliberately left. Three belong to Q029, whose labelled chunk
+sits on the wrong side of the boundary described below — rewriting its anchor
+would conceal that. Two others have no available extension carrying any of the
+labelled answer, and buying position at the cost of content is not an
+improvement.
 
 ### Chunk boundaries cut risk factors from their headings
 

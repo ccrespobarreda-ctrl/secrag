@@ -77,14 +77,28 @@ no warning. Found by reading the harness while planning an unrelated run.
 file rebuilt by a script, with the evaluation harness modified, on a reloaded
 environment: all twelve retrieval figures identical to the manifest of 17 August.
 
-**7 — The verifier that checks the benchmark could not fail.** Every gold label
-carries an anchor — a phrase that must still be inside the chunk it points at —
-and after each reload all 127 were reported as holding. Nothing checked whether
-an anchor identified *one* chunk. `'2025'` matches 148 chunks of the Abercrombie
-filing; `'Wayfair'` matches 108 chunks written by Wayfair. **35% of anchors match
-five or more chunks and would stay satisfied wherever their label drifted.**
-Anchor uniqueness is now a gate in continuous integration, with a threshold that
-only ratchets down.
+**7 — The verifier that checks the benchmark could not fail, twice over.** Every
+gold label carries an anchor — a phrase that must still be inside the chunk it
+points at — and after each reload all 127 were reported as holding. Two separate
+defects made that guarantee empty.
+
+Nothing checked whether an anchor identified *one* chunk. `'Wayfair'` matched 108
+chunks written by Wayfair, and stayed satisfied wherever its label drifted. And
+when that check was added, its counting was wrong in two ways at once: `LIKE`
+reads the `%` of a percentage as a wildcard, so `'45%'` was never searched for as
+written, and the stored text keeps the line breaks of a filing's tables, so a
+multi-word anchor read off a printed chunk matched nothing while sitting plainly
+inside it. Three successive counts of the same property returned 44, 31 and 29.
+**Neither defect ever raised an error. Both produced a plausible number.**
+
+Anchor matches are now counted over whitespace-flattened text and gated in
+continuous integration, at a threshold that only ratchets down. Twenty-four
+anchors were rewritten to name their passage rather than a word that appears
+throughout the filing — `'Wayfair'` became `'of CastleGate and the Wayfair'`,
+`'4,966,370'` became `'(Note 10) $ 4,966,370'`. Anchors that cannot identify
+their chunk fell from 29 to 5, and **not one published figure changed**, which
+is the test that this was verification and not tuning. The five that remain are
+listed under limitations with the reason each was left.
 
 **8 — Chunking cuts risk factors away from their content.** A 10-K risk factor
 opens with a one-sentence heading and develops over paragraphs. **243 of 4,169
@@ -267,6 +281,14 @@ once, by a documented amount, for a documented reason.
   document. The figure to compare across systems is 0.735; the figure that
   describes what reaches the model is higher, and answer correctness of 91.2% is
   the closer proxy. Both are published rather than the more flattering one.
+
+- **Five gold anchors still cannot identify their chunk, deliberately.** Three
+  belong to Q029, whose labelled chunk sits on the wrong side of the boundary
+  described in finding 8 — rewriting its anchor would hide that. The other two,
+  on Q022 and Q082, have no available extension that carries any of the labelled
+  answer, so the change would buy position at the cost of content. The
+  continuous-integration threshold stays at 8 until those are resolved, and it
+  never rises to make a build pass.
 
 - **Chunk boundaries are a known defect and have not been changed.** Fixing them
   means re-chunking, which reissues every `chunk_id` and invalidates all 127
