@@ -21,6 +21,55 @@
 
 create extension if not exists vector;
 
+-- HOW WIDE THE APPROXIMATE SEARCH RUNS, DECLARED RATHER THAN INHERITED
+--
+-- HNSW is approximate: it walks a graph instead of scanning all 4,169 vectors,
+-- and hnsw.ef_search decides how many candidates it keeps alive while walking.
+-- It is a session or database setting, not a property of the index, so a fresh
+-- clone inherits whatever the local pgvector build defaults to. Two people
+-- running the same evaluation against the same corpus could then get different
+-- numbers with nothing in the harness noticing.
+--
+-- Every published figure was measured at 40, which is pgvector's default. That
+-- is stated here rather than assumed.
+--
+-- 200 was tried on 14 August and changed nothing: eval/results/retrieval.json
+-- and eval/results/retrieval_ef200.json, seven minutes apart, agree on every
+-- semantic figure to six decimal places. The reason is the size of the index —
+-- with four thousand vectors the graph is small enough that a width of 40
+-- already returns what an exact search would. The setting starts to matter at
+-- hundreds of thousands of vectors, not thousands.
+--
+-- Raising it later is not a tuning knob. It is a new measurement, and every
+-- published retrieval figure would have to be reissued with it.
+--
+-- Applied to whatever database this file is run against, rather than to a name
+-- written here. docker-compose.yml creates `secrag`; the managed instance this
+-- was measured on is `neondb`; hardcoding either one makes the file fail on the
+-- other, quietly leaving the setting inherited on whichever path was not named.
+--
+-- ALTER DATABASE takes effect on new connections, not the one running this, so
+-- reconnect before measuring. src/check_db_settings.py reports the live value.
+do $$
+begin
+    execute format('alter database %I set hnsw.ef_search = 40',
+                   current_database());
+exception
+    when insufficient_privilege then
+        raise notice 'Could not set hnsw.ef_search: not the database owner. '
+                     'Set it per session instead: SET hnsw.ef_search = 40;';
+end
+$$;
+
+-- A note on the text search dictionary, for the same reason.
+--
+-- The generated column below names 'english' explicitly, and so do both tsquery
+-- expressions in src/retrieve.py. That is deliberate: the managed Postgres this
+-- runs on sets default_text_search_config to 'simple', which does no stemming
+-- and strips no stopwords. Relying on the server default would have indexed
+-- with one dictionary and queried with another — "revenues" would stop matching
+-- "revenue" — and nothing would have raised an error.
+
 create table if not exists documents (
     doc_id        text primary key,       -- e.g. NKE-10-K-2026
     ticker        text not null,
