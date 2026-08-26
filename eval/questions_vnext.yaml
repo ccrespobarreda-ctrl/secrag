@@ -23,7 +23,7 @@
   gold_chunks:
   - doc_id: UAA-10-K-2026
     chunk_index: 126
-    contains: 4,966,370
+    contains: (Note 10) $ 4,966,370
 - id: Q003
   question: How does Lululemon recognize revenue from product sales?
   type: extractive
@@ -76,7 +76,7 @@
   gold_chunks:
   - doc_id: NKE-10-K-2026
     chunk_index: 0
-    contains: May 31
+    contains: Inc.'s fiscal years ended May 31
 - id: Q007
   question: What were Chewy's net sales for fiscal 2025?
   type: extractive
@@ -102,7 +102,7 @@
   gold_chunks:
   - doc_id: DECK-10-K-2026
     chunk_index: 0
-    contains: HOKA
+    contains: Brands The HOKA
 - id: Q009
   question: How many retail stores did Warby Parker operate at the end of the fiscal year?
   type: extractive
@@ -114,7 +114,7 @@
   gold_chunks:
   - doc_id: WRBY-10-K-2025
     chunk_index: 155
-    contains: '2025'
+    contains: Store Count(1) 323 276 237
 - id: Q010
   question: What were Wayfair's total net revenues for the year ended December 31, 2025?
   type: extractive
@@ -127,7 +127,7 @@
   gold_chunks:
   - doc_id: W-10-K-2025
     chunk_index: 151
-    contains: 12,457
+    contains: data) Net revenue $ 12,457
 - id: Q011
   question: What are Peloton's primary sources of revenue?
   type: extractive
@@ -141,10 +141,10 @@
   gold_chunks:
   - doc_id: PTON-10-K-2026
     chunk_index: 138
-    contains: Connected
+    contains: (collectively, the “Connected
   - doc_id: PTON-10-K-2026
     chunk_index: 145
-    contains: Connected
+    contains: of Ending Paid Connected
 - id: Q012
   question: What was Lululemon's inventory balance at fiscal year end?
   type: extractive
@@ -170,7 +170,7 @@
   gold_chunks:
   - doc_id: GAP-10-K-2026
     chunk_index: 0
-    contains: Navy
+    contains: Banana Republic, and Athleta brands
 - id: Q014
   question: Which independent registered public accounting firm audited Urban Outfitters?
   type: extractive
@@ -236,7 +236,7 @@
   gold_chunks:
   - doc_id: UAA-10-K-2026
     chunk_index: 217
-    contains: North
+    contains: North America EMEA Asia-Pacific Latin America Total Reportable Segments
 - id: Q019
   question: What was Columbia Sportswear's dividend per share?
   type: extractive
@@ -322,7 +322,7 @@
     contains: 3,297.0
   - doc_id: LEVI-10-K-2025
     chunk_index: 132
-    contains: Americas
+    contains: 2025. Americas
 - id: Q023
   question: What risks does Nike identify relating to counterfeit products and intellectual property?
   type: multi_chunk
@@ -335,7 +335,7 @@
   gold_chunks:
   - doc_id: NKE-10-K-2026
     chunk_index: 69
-    contains: Failure
+    contains: counterfeit reproductions
 - id: Q024
   question: What supply chain and manufacturing risks does Lululemon disclose?
   type: multi_chunk
@@ -354,7 +354,7 @@
     contains: Taiwan
   - doc_id: LULU-10-K-2026
     chunk_index: 30
-    contains: Trade
+    contains: Trade restrictions, tariffs, and customs changes could disrupt
 - id: Q025
   question: How did each of Under Armour's segments perform in fiscal 2026?
   type: multi_chunk
@@ -390,13 +390,13 @@
   gold_chunks:
   - doc_id: ETSY-10-K-2025
     chunk_index: 90
-    contains: Etsy
+    contains: arbitrary, unfair, unclear, offensive, objectionable, or inconsistent
   - doc_id: ETSY-10-K-2025
     chunk_index: 52
     contains: fraudulent transactions
   - doc_id: ETSY-10-K-2025
     chunk_index: 49
-    contains: Etsy
+    contains: engagement. Etsy
 - id: Q027
   gold_chunk_ids:
   - 1548
@@ -411,10 +411,10 @@
   gold_chunks:
   - doc_id: GAP-10-K-2026
     chunk_index: 57
-    contains: '2025'
+    contains: 'follows: Fiscal Year 2025'
   - doc_id: GAP-10-K-2026
     chunk_index: 102
-    contains: '2025'
+    contains: channel for fiscal 2025,
 - id: Q028
   gold_chunk_ids:
   - 3529
@@ -439,13 +439,13 @@
     contains: CastleGate
   - doc_id: W-10-K-2025
     chunk_index: 2
-    contains: Wayfair
+    contains: of CastleGate and the Wayfair
   - doc_id: W-10-K-2025
     chunk_index: 7
-    contains: Wayfair
+    contains: provided by Wayfair
   - doc_id: W-10-K-2025
     chunk_index: 165
-    contains: Wayfair
+    contains: 'Costs: Wayfair'
   - doc_id: W-10-K-2025
     chunk_index: 5
     contains: CastleGate
@@ -492,10 +492,10 @@
   gold_chunks:
   - doc_id: HNST-10-K-2025
     chunk_index: 0
-    contains: Honest
+    contains: categories across wipes, personal care, diapers, and beauty
   - doc_id: HNST-10-K-2025
     chunk_index: 172
-    contains: '2025'
+    contains: third-party ecommerce sites and, prior to December 31, 2025, Honest.com
 - id: Q031
   question: Do both Nike and Under Armour cite foreign currency exchange rates as a risk factor?
   type: comparative
@@ -529,10 +529,10 @@
   gold_chunks:
   - doc_id: LULU-10-K-2026
     chunk_index: 117
-    contains: Lululemon
+    contains: locations, and lululemon
   - doc_id: NKE-10-K-2026
     chunk_index: 0
-    contains: Nike
+    contains: NIKE Direct operations, which are comprised of both NIKE-owned retail stores
 - id: Q033
   question: Do both Chewy and Wayfair describe risks related to acquiring new customers?
   type: comparative
@@ -1082,7 +1082,7 @@
   gold_chunks:
   - doc_id: PTON-10-K-2026
     chunk_index: 1
-    contains: Paid Connected Fitness Subscription
+    contains: class. We define a “Paid Connected Fitness Subscription
   - doc_id: PTON-10-K-2026
     chunk_index: 6
     contains: App Memberships do not have access to classes via a Peloton-branded Connected Fitness Product
