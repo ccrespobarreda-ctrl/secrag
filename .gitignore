@@ -42,3 +42,4 @@ src/config_before_rrf40.py
 eval/questions.yaml.bak
 
 eval/questions.yaml.bak
+eval/cache.json
