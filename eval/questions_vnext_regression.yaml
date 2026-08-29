@@ -1,5 +1,7 @@
 # DERIVED FILE - do not edit by hand.
-# regression split only, generated from questions_vnext.yaml and vnext_splits.yaml.
+# regression split only, generated from questions_vnext.yaml and
+# vnext_splits.yaml. The original 50 questions, written before the
+# system existed; the published retrieval figure is measured here.
 - id: Q001
   question: What were Urban Outfitters' total net sales for the fiscal year ended January 31, 2026?
   type: extractive

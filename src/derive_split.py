@@ -16,9 +16,26 @@ WHY A SCRIPT AND NOT A HAND-EDITED FILE
 The two derived files already in the repository were produced this way and say
 so in their headers. A hand-edited third one would be a fourth place where the
 benchmark is defined, free to drift from the other three with nothing to catch
-it. --verify exists for that reason: it regenerates the two existing derived
-files and compares them against what is on disk, so the deriving rule is
-checked against its own past output before it is trusted with a new split.
+it. --verify exists for that reason: it regenerates every derived file and compares
+it against what is on disk, so the deriving rule is checked against its own past
+output before it is trusted with a new split.
+
+WHAT --verify CHECKS, AND WHY EACH PART IS THERE
+
+It used to cover two of the four files and to print "skipped, not on disk" for a
+file that was absent, then exit 0. A check that passes because there was nothing
+to check is the failure this repository exists to document, and it was sitting
+inside the tool that guards the benchmark. An absent derived file is now a
+failure: the split it defines is measured somewhere, and a missing file means
+that measurement is reading something else or nothing at all.
+
+The header is compared too, and a file that will not parse is reported rather
+than raised. One of these files was found with a shell command pasted onto its
+first line, which left it unreadable as YAML. Nothing noticed, and the reason is
+worth stating plainly: the damage was not subtle, it was that no check looked at
+that file. Two of the four were covered and the holdout had not been executed
+since. From the outside a corrupt file and an unchecked file look the same, which
+is the whole argument for checking all of them.
 
 ORDER
 
@@ -36,26 +53,61 @@ from pathlib import Path
 
 import yaml
 
-HEADERS = {
-    "holdout": (
+# One place where a split's name, its file and its header live together. They
+# used to be apart, and the file this script wrote (questions_vnext_development)
+# was not the file --verify looked for (questions_vnext_dev), so every
+# regeneration ended in a manual rename -- which is a step where a file gets
+# renamed onto the wrong one.
+DERIVED = {
+    "regression": ("questions_vnext_regression.yaml",
+        "# DERIVED FILE - do not edit by hand.\n"
+        "# regression split only, generated from questions_vnext.yaml and\n"
+        "# vnext_splits.yaml. The original 50 questions, written before the\n"
+        "# system existed; the published retrieval figure is measured here.\n"
+    ),
+    "holdout": ("questions_vnext_holdout.yaml",
         "# DERIVED FILE - do not edit by hand.\n"
         "# holdout split only, generated from questions_vnext.yaml and\n"
         "# vnext_splits.yaml. Sealed until the final evaluation: run once,\n"
         "# report, and do not tune against it afterwards.\n"
     ),
-    "development": (
+    "development": ("questions_vnext_dev.yaml",
         "# DERIVED FILE - do not edit by hand.\n"
         "# development split only, generated from questions_vnext.yaml and\n"
         "# vnext_splits.yaml. Used to compare the new questions against the\n"
         "# legacy set in isolation. Holdout is absent by construction.\n"
     ),
-    "regression+development": (
+    "regression+development": ("questions_vnext_tuning.yaml",
         "# DERIVED FILE - do not edit by hand.\n"
         "# regression + development only, generated from questions_vnext.yaml\n"
         "# and vnext_splits.yaml. The 30 holdout questions are deliberately\n"
         "# absent so they are never executed during tuning.\n"
     ),
 }
+
+
+def header_for(split: str, master: Path, splits: Path) -> str:
+    if split in DERIVED:
+        return DERIVED[split][1]
+    return ("# DERIVED FILE - do not edit by hand.\n"
+            f"# {split} split only, generated from {master.name} and "
+            f"{splits.name}.\n")
+
+
+def path_for(split: str, base: Path, master: Path) -> Path:
+    if split in DERIVED:
+        return base / DERIVED[split][0]
+    return base / f"questions_vnext_{split.replace('+', '_')}.yaml"
+
+
+def header_of(text: str) -> str:
+    """The leading comment block of a derived file, as written."""
+    out = []
+    for line in text.splitlines():
+        if not line.startswith("#"):
+            break
+        out.append(line)
+    return "\n".join(out) + ("\n" if out else "")
 
 
 def load(master: Path, splits: Path):
@@ -122,18 +174,51 @@ def dump(rows, header: str) -> str:
     return header + body
 
 
-def verify(questions, spec, base: Path) -> int:
-    """Regenerate the derived files that already exist and compare."""
-    cases = [("development", base / "questions_vnext_dev.yaml"),
-             ("regression+development", base / "questions_vnext_tuning.yaml")]
-
+def verify(questions, spec, base: Path, master: Path, splits: Path) -> int:
+    """Regenerate every derived file and compare it against what is on disk."""
     failures = 0
-    for split, path in cases:
+    for split in DERIVED:
+        path = path_for(split, base, master)
         if not path.exists():
-            print(f"  {path.name:<34} skipped, not on disk")
+            failures += 1
+            print(f"  {path.name:<34} MISSING")
+            print(f"    the {split} split is measured somewhere; regenerate it:")
+            print(f"      python src/derive_split.py {split} --force")
             continue
-        existing = yaml.safe_load(path.read_text(encoding="utf-8"))
+
+        text = path.read_text(encoding="utf-8")
         rebuilt = select(questions, spec, split)
+
+        want_header = header_for(split, master, splits)
+        got_header = header_of(text)
+        if got_header != want_header:
+            failures += 1
+            print(f"  {path.name:<34} HEADER DIFFERS")
+            for line in got_header.splitlines():
+                if line not in want_header.splitlines():
+                    print(f"    on disk, not generated:  {line!r}")
+            for line in want_header.splitlines():
+                if line not in got_header.splitlines():
+                    print(f"    generated, not on disk:  {line!r}")
+            print("    A derived file says it is not edited by hand, and this "
+                  "is the only\n    check that reads its header. Regenerate "
+                  "rather than repair.")
+            continue
+
+        # A file damaged above the questions may not parse at all. That is a
+        # result, not a crash: reporting it here is the difference between the
+        # tool naming the broken file and a traceback saying yaml did not like
+        # something.
+        try:
+            existing = yaml.safe_load(text)
+        except yaml.YAMLError as exc:
+            failures += 1
+            print(f"  {path.name:<34} WILL NOT PARSE")
+            print(f"    {str(exc).splitlines()[0]}")
+            print(f"    Regenerate it: python src/derive_split.py {split} "
+                  f"--force")
+            continue
+
         if existing == rebuilt:
             print(f"  {path.name:<34} matches ({len(rebuilt)} questions)")
         else:
@@ -164,7 +249,9 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true",
                     help="report what would be written, write nothing")
     ap.add_argument("--verify", action="store_true",
-                    help="regenerate the existing derived files and compare")
+                    help="regenerate every derived file and compare")
+    ap.add_argument("--force", action="store_true",
+                    help="overwrite the derived file if it already exists")
     args = ap.parse_args()
 
     for p in (args.master, args.splits):
@@ -187,8 +274,13 @@ def main() -> int:
           f"exactly once\n")
 
     if args.verify:
-        print("regenerating the derived files already on disk")
-        failures = verify(questions, spec, args.master.parent)
+        print(f"regenerating all {len(DERIVED)} derived files and comparing")
+        failures = verify(questions, spec, args.master.parent, args.master,
+                          args.splits)
+        if failures:
+            print(f"\n{failures} of {len(DERIVED)} derived file(s) do not match "
+                  f"the master benchmark.\nEvery per-split figure is measured "
+                  f"against these.")
         return 1 if failures else 0
 
     if not args.split:
@@ -201,19 +293,17 @@ def main() -> int:
 
     print(summarise(rows, args.split))
 
-    out = args.out or (args.master.parent /
-                       f"questions_vnext_{args.split.replace('+', '_')}.yaml")
-    header = HEADERS.get(args.split, "# DERIVED FILE - do not edit by hand.\n"
-                                     f"# {args.split} split only, generated from "
-                                     f"{args.master.name} and {args.splits.name}.\n")
+    out = args.out or path_for(args.split, args.master.parent, args.master)
+    header = header_for(args.split, args.master, args.splits)
     text = dump(rows, header)
 
     if args.dry_run:
         print(f"\nwould write {out} ({len(text) / 1024:.0f} KB) -- nothing written")
         return 0
 
-    if out.exists():
-        print(f"\n{out} already exists. Delete it first, or pass --out.")
+    if out.exists() and not args.force:
+        print(f"\n{out} already exists. Pass --force to overwrite it, or --out "
+              f"to write elsewhere.")
         return 1
 
     out.write_text(text, encoding="utf-8")
