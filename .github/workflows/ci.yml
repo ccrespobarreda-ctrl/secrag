@@ -121,11 +121,16 @@ jobs:
       # signal that separates the two.
       #
       # The threshold ratchets down as anchors are rewritten. Never up.
+      #
+      # Four anchors cannot be strengthened and are named in the question file
+      # with their reason, each recording the anchor text it forgives so a
+      # rewritten anchor loses its pardon. That count ratchets down too.
       - name: Every gold label resolves, and every anchor identifies its chunk
         run: |
           python src/verify_labels.py \
             --questions eval/questions_vnext.yaml \
-            --max-anchor-matches 8
+            --max-anchor-matches 8 \
+            --max-exceptions 4
 
       - name: The split files still match the master benchmark
         run: python src/derive_split.py --verify

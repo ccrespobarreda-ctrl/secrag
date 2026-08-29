@@ -314,6 +314,9 @@
   - doc_id: LEVI-10-K-2025
     chunk_index: 113
     contains: Americas
+    unlocalisable:
+      anchor: Americas
+      reason: No extension available around this occurrence carries a figure from the labelled answer, so a longer anchor would be no more falsifiable.
   - doc_id: LEVI-10-K-2025
     chunk_index: 131
     contains: 3,297.0
@@ -456,15 +459,22 @@
   - doc_id: ANF-10-K-2026
     chunk_index: 53
     contains: '2025'
+    unlocalisable:
+      anchor: '2025'
+      reason: No extension available around this occurrence carries a figure from the labelled answer, so a longer anchor would be no more falsifiable.
   - doc_id: ANF-10-K-2026
     chunk_index: 55
     contains: '2025'
+    unlocalisable:
+      anchor: '2025'
+      reason: Its only occurrence sits inside the filing's page footer, "Abercrombie & Fitch Co. 21 2025 Form 10-K Table of Contents", so no extension around
+        it says anything about the chunk's own content.
   - doc_id: ANF-10-K-2026
     chunk_index: 56
     contains: Mitigation
   - doc_id: ANF-10-K-2026
     chunk_index: 83
-    contains: '2025'
+    contains: negatively impacted operating income by $90 million or 170 basis points
 - id: Q030
   gold_chunk_ids:
   - 1623

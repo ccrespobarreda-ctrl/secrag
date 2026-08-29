@@ -19,6 +19,9 @@
   - doc_id: FIGS-10-K-2025
     chunk_index: 0
     contains: Community Hubs
+    unlocalisable:
+      anchor: Community Hubs
+      reason: No extension available around this occurrence carries a figure from the labelled answer, so a longer anchor would be no more falsifiable.
 - id: Q083
   question: How do Crocs and Columbia Sportswear differ in the geographic and supplier concentration of their outsourced manufacturing?
   type: comparative

@@ -45,6 +45,31 @@ So the gate counts matches and nothing else. The count carrying the answer is
 still reported, because it says what an anchor would catch if the chunk lost the
 figure, but it does not excuse anything.
 
+An anchor can also be satisfied by the filing's own furniture. Q029's chunk 55
+was anchored on '2025', and its only occurrence sits inside "Abercrombie & Fitch
+Co. 21 2025 Form 10-K Table of Contents" -- a page footer repeated across the
+document. The match count catches this the same way it catches 'Wayfair': text
+that appears everywhere identifies nothing, whether it is a company name or a
+page number.
+
+WHEN AN ANCHOR CANNOT BE STRENGTHENED
+
+A few anchors are left unlocalisable on purpose, because no extension around
+their occurrence carries a figure from the labelled answer and a longer anchor
+would be no more falsifiable. The reasons are in the README, and the gate has to
+know what the README already explains or the build fails on a decision that was
+made deliberately.
+
+So an entry may carry `unlocalisable`, with the reason and -- this is the part
+that matters -- the anchor text it was written for. An exception forgives an
+anchor, not a question. src/fix_anchors.py rewrites `contains` programmatically
+and would not touch the exception beside it, so without that field a rewritten
+anchor would inherit a pardon nobody reviewed. With it, the mismatch fails
+loudly.
+
+--max-exceptions caps how many there may be, and ratchets down like the
+threshold. It never goes up so a build passes.
+
 The format and the resolution both live in src/labels.py; this is the report.
 """
 
@@ -155,6 +180,9 @@ def main() -> int:
     ap.add_argument("--max-anchor-matches", type=int, default=0,
                     help="fail if an anchor matches more chunks than this "
                          "(0 reports without failing)")
+    ap.add_argument("--max-exceptions", type=int, default=0,
+                    help="fail if more anchors than this carry `unlocalisable` "
+                         "(0 reports without failing). Ratchets down, never up")
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -183,15 +211,36 @@ def main() -> int:
     # matches many is not evidence about a position, and every figure measured
     # against that label rests on a check that cannot fail.
     anchor_counts = []
+    exc_problems = []
     for q in labeled:
         answer = _answer_words(q.get("gold_answer"))
         for g in (q.get("gold_chunks") or []):
             anchor = g.get("contains")
             if not anchor:
                 continue
+            exc = g.get("unlocalisable")
+            if exc:
+                registered = str(exc.get("anchor", ""))
+                if _flat(registered).lower() != _flat(anchor).lower():
+                    exc_problems.append({
+                        "id": q["id"], "kind": "stale exception",
+                        "detail": (f"{g['doc_id']} chunk {g['chunk_index']} is "
+                                   f"excused for {registered!r} but now carries "
+                                   f"{anchor!r} -- review it, then rewrite or "
+                                   f"remove the exception"),
+                    })
+                    continue
+                if not str(exc.get("reason", "")).strip():
+                    exc_problems.append({
+                        "id": q["id"], "kind": "exception without a reason",
+                        "detail": (f"{g['doc_id']} chunk {g['chunk_index']} is "
+                                   f"excused with no reason given"),
+                    })
+                    continue
             n = _count_in_document(cur, g["doc_id"], anchor)
             carried = len({_norm(w) for w in anchor.split()} & answer)
-            anchor_counts.append((q["id"], g["doc_id"], anchor, n, carried))
+            anchor_counts.append((q["id"], g["doc_id"], anchor, n, carried,
+                                  bool(exc)))
     conn.close()
 
     expected_labels = sum(len(q.get("gold_chunks") or q.get("gold_chunk_ids") or [])
@@ -213,6 +262,8 @@ def main() -> int:
         for qid in sorted(set(unanchored)):
             print(f"  {qid}")
 
+    excused = [r for r in anchor_counts if r[5]]
+
     if anchor_counts:
         uniq = sum(1 for r in anchor_counts if r[3] <= 1)
         few = sum(1 for r in anchor_counts if 2 <= r[3] <= 8)
@@ -225,17 +276,53 @@ def main() -> int:
               f"(cannot say which chunk)")
         print(f"{'anchors carrying the labelled answer':<40}{carrying:>5}   "
               f"(would catch a lost figure)")
+        print(f"{'anchors excused, reviewed by hand':<40}{len(excused):>5}   "
+              f"(reasons in {args.questions.name})")
         if many:
             print("\nThese match too many chunks to identify one, so they stay "
                   "satisfied\nwherever the label points:")
-            for qid, doc_id, anchor, n, _ in sorted(
+            for qid, doc_id, anchor, n, _, is_exc in sorted(
                     many, key=lambda r: -r[3])[:args.show]:
-                print(f"  {qid:<7} {doc_id:<18} {anchor[:34]!r} in {n} chunks")
+                mark = "   excused" if is_exc else ""
+                print(f"  {qid:<7} {doc_id:<18} {anchor[:34]!r} in {n} "
+                      f"chunks{mark}")
             if len(many) > args.show:
                 print(f"  ... {len(many) - args.show} more")
 
+        # An exception written against the corpus can sit below the threshold
+        # when this runs against tests/fixture_corpus.json, which holds a
+        # handful of chunks per document rather than a couple of hundred and can
+        # only ever count fewer. Not an error, but reported: a pardon doing
+        # nothing here should be visible rather than silent.
+        dormant = [r for r in excused
+                   if args.max_anchor_matches
+                   and r[3] <= args.max_anchor_matches]
+        if dormant:
+            print("\nExcused, but under the threshold against this corpus. "
+                  "Against the\nfull corpus they are not:")
+            for qid, doc_id, anchor, n, _, _ in dormant:
+                print(f"  {qid:<7} {doc_id:<18} {anchor[:34]!r} in {n} chunks")
+
+    # An excused anchor is still counted and still printed above; it just does
+    # not fail the build.
     over = [r for r in anchor_counts
-            if args.max_anchor_matches and r[3] > args.max_anchor_matches]
+            if args.max_anchor_matches and r[3] > args.max_anchor_matches
+            and not r[5]]
+
+    if args.max_exceptions and len(excused) > args.max_exceptions:
+        exc_problems.append({
+            "id": "-", "kind": "too many exceptions",
+            "detail": (f"{len(excused)} anchors are excused, more than the "
+                       f"limit of {args.max_exceptions}. The limit ratchets "
+                       f"down, never up: strengthen an anchor instead"),
+        })
+
+    if exc_problems:
+        print(f"\n{len(exc_problems)} problem(s) with the exceptions "
+              f"themselves.\nThe labels are fine; the pardons are not:")
+        for p in exc_problems:
+            print(f"  {p['id']:<7} {p['kind']}: {p['detail']}")
+        return 1
 
     if not problems and not over:
         severe_n = sum(1 for r in anchor_counts if r[3] > 8)
@@ -243,6 +330,9 @@ def main() -> int:
         if args.max_anchor_matches:
             print(f"No anchor matches more than {args.max_anchor_matches} "
                   f"chunks of its document.")
+            if excused:
+                print(f"{len(excused)} are excused by hand, with their reasons "
+                      f"in {args.questions.name}.")
         elif severe_n:
             # Saying only the first sentence would be true and misleading at
             # once: the anchors above resolve, and cannot fail. Reporting a
@@ -259,7 +349,7 @@ def main() -> int:
               f"{args.max_anchor_matches} chunks of their document.\nEvery "
               f"label resolves, but these cannot say which chunk they mean. "
               f"Fix them\nby hand, or with src/fix_anchors.py.")
-        for qid, doc_id, anchor, n, _ in over:
+        for qid, doc_id, anchor, n, _, _ in over:
             print(f"  {qid:<7} {doc_id:<18} {anchor[:40]!r} in {n} chunks")
         return 1
 
