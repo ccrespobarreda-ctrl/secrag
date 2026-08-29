@@ -87,7 +87,13 @@ review:                  ## read the generation results, case by case
 	$(PY) src/review_generation.py
 
 results-page:            ## build docs/index.html from the evaluation files
-	$(PY) src/build_results_page.py
+	$(PY) src/build_results_page.py \
+	  --retrieval eval/results/vnext_baseline_legacy_v2.json \
+	  --generation eval/results/vnext_generation_promptv2_judge2.json \
+	  --generation eval/results/vnext_holdout_generation.json \
+	  --questions eval/questions_vnext.yaml \
+	  --out docs/index.html \
+	  --contact "c.crespobarreda@gmail.com"
 
 test:                    ## parser, chunking and citation tests
 	$(PY) tests/test_parse.py

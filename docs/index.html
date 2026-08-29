@@ -129,16 +129,16 @@ footer a{color:var(--ink-2)}
   this system existed — because the questions added later were labeled by literal
   string match and a lexical search finds those labels almost every time. Why that
   matters is in <code>docs/measurement-honesty.md</code>. Of those 50, the
-  34 answerable ones carry answer chunks, whose
-  answer chunks were identified by reading the filings. Recall@16 asks whether any
+  34 answerable ones carry answer chunks, identified by reading
+  the filings. Recall@16 asks whether any
   correct chunk arrived; coverage asks what fraction of them did. The other
   16 questions have no answer chunks by definition and belong to the
   refusal measurement below.</p>
 
   <table>
     <thead><tr><th>strategy</th><th>Recall@16</th><th>MRR</th><th>Coverage</th></tr></thead>
-    <tbody><tr class=""><td>semantic</td><td>0.500</td><td>0.228</td><td>0.394</td></tr><tr class=""><td>keyword</td><td>0.412</td><td>0.159</td><td>0.303</td></tr><tr class="best"><td>keyword+company</td><td>0.735</td><td>0.280</td><td>0.628</td></tr><tr class=""><td>hybrid</td><td>0.559</td><td>0.287</td><td>0.433</td></tr><tr class=""><td>hybrid+company</td><td>0.735</td><td>0.310</td><td>0.589</td></tr><tr class="sab"><td>sabotage · starved</td><td>0.147</td><td>0.147</td><td>0.110</td></tr><tr class="sab"><td>sabotage · no-keyword</td><td>0.500</td><td>0.228</td><td>0.394</td></tr><tr class="sab"><td>sabotage · no-semantic</td><td>0.412</td><td>0.159</td><td>0.303</td></tr><tr class="sab"><td>sabotage · or-keyword</td><td>0.412</td><td>0.163</td><td>0.303</td></tr><tr class="sab"><td>sabotage · no-company</td><td>0.559</td><td>0.287</td><td>0.433</td></tr></tbody>
-    <caption>5 degradations, each disabling one capability. 5 of 5 move the metric down, which is what makes the harness worth trusting: a check that only ever passes cannot distinguish a working system from a broken one.</caption>
+    <tbody><tr class=""><td>semantic</td><td>0.500</td><td>0.228</td><td>0.394</td></tr><tr class=""><td>keyword</td><td>0.412</td><td>0.159</td><td>0.303</td></tr><tr class="best"><td>keyword+company</td><td>0.735</td><td>0.280</td><td>0.628</td></tr><tr class=""><td>hybrid</td><td>0.559</td><td>0.287</td><td>0.433</td></tr><tr class=""><td>hybrid+company</td><td>0.735</td><td>0.310</td><td>0.589</td></tr></tbody>
+    <caption>Degradation checks are not in this run. Build with --sabotage to include them: they disable one capability each and confirm the metric falls, because a check that only ever passes cannot distinguish a working system from a broken one.</caption>
   </table>
   <p class="groupsub">The lexical baseline — Postgres full-text search with the same company filter, no embeddings and no fusion — ties on Recall@16 and leads on coverage (0.628 against 0.589). The dense half contributes ordering (0.310 MRR against 0.280), not reach. That was not the expected result; it is documented in <code>docs/measurement-honesty.md</code>.</p>
 
@@ -152,12 +152,7 @@ footer a{color:var(--ink-2)}
     meaninglessness.</caption>
   </table>
 
-  <div class="note">
-    <b>Recall@16 and coverage diverge most where the answer is distributed.</b>
-    On comparatives, recall reads 1.000 and coverage 0.350: a comparative needs
-    evidence from two filings, and finding one of them counts as a hit. Reporting
-    only recall would have called the weakest question type the strongest.
-  </div>
+  <div class="note"><b>Recall@16 and coverage diverge where the answer is distributed.</b> On keyword+company, recall and coverage part company on multi_chunk 0.900 against 0.685, comparative 0.600 against 0.400: an answer spread over several passages counts as found the moment one of them arrives. Reporting recall alone would flatter exactly the questions that need the most evidence.</div>
 </div></section>
 
 <section id="generation"><div class="wrap">
@@ -193,7 +188,8 @@ footer a{color:var(--ink-2)}
       <span class="d">0 of 31 questions</span></div>
     <div class="card"><span class="k">claims grounded in a citation</span>
       <span class="v pos">97.4%</span>
-      <span class="d">680 claims judged, 3 judge failures</span></div>
+      <span class="d">680 of 694 claims decided; 11 absence,
+      3 judge failures</span></div>
   </div>
 
   <table>
@@ -212,8 +208,12 @@ footer a{color:var(--ink-2)}
     ten-token budget, and nearly a fifth of verdicts came back empty — the judge
     spending its allowance before answering, which is a failure of the evaluator
     and not evidence about any claim. The figure above is one verdict per claim,
-    judged against all of its citations at once, over 680 claims with
-    3 judge failures.
+    judged against all of its citations at once, over 680 decided claims.
+    A further 11 came back as absence -- the claim was read, and what it
+    asserts is not addressed by the excerpts either way -- and 3 as
+    judge failures. Neither is counted as supported or unsupported, so the rate
+    above is 680 claims wide, not 694; over all 694 attempts
+    it reads 95.4%.
   </div>
 </div></section>
 

@@ -240,7 +240,15 @@ def retrieval_section(r: dict) -> str:
         baseline_note = ""
 
     sab = [k for k in S if k.startswith("SABOTAGE")]
-    best = max(main, key=lambda k: S[k]["recall_at_k"])
+    # The two lead strategies tie exactly on the original 50, and max() would
+    # then bold whichever the file happened to list first -- a highlight that
+    # moves with dictionary order rather than with a result. Ties are broken on
+    # coverage, then MRR, and the same tolerance as the baseline note above.
+    def _rank(name):
+        s = S[name]
+        return (round(s["recall_at_k"], 3), round(s["coverage"], 3),
+                round(s["mean_rr"], 3))
+    best = max(main, key=_rank)
     k = r["k"]
 
     rows = ""
@@ -282,6 +290,35 @@ def retrieval_section(r: dict) -> str:
                          f"ever passes cannot distinguish a working system from a "
                          f"broken one.")
 
+    # The same defect the sabotage caption had, in prose instead of a caption:
+    # this note asserted 1.000 and 0.350, and neither is in any results file --
+    # 0.350 appears nowhere at all, and the only comparative recall of 1.000 is
+    # in the holdout, which this section explicitly does not measure. Computed
+    # now, like every other figure on the page.
+    #
+    # Every type over the threshold, not the widest one. The gaps sit within a
+    # few hundredths of each other, so an argmax would change the sentence's
+    # subject on noise; and the explanation below -- an answer spread across
+    # passages counts as found once one arrives -- is true of distributed
+    # answers and would be wrong under a type that diverged for another reason.
+    DIVERGENCE_MIN = 0.10
+    diverging = [(t, S[best]["recall_by_type"].get(t, 0.0),
+                  S[best]["coverage_by_type"].get(t, 0.0)) for t in types]
+    diverging = sorted([d for d in diverging if d[1] - d[2] >= DIVERGENCE_MIN],
+                       key=lambda d: -(d[1] - d[2]))
+    if diverging:
+        pairs = ", ".join(f"{esc(t)} {rec:.3f} against {cov:.3f}"
+                          for t, rec, cov in diverging)
+        divergence_note = (
+            f'<div class="note"><b>Recall@{k} and coverage diverge where the '
+            f'answer is distributed.</b> On {esc(best)}, recall and coverage '
+            f'part company on {pairs}: an answer spread over several passages '
+            f'counts as found the moment one of them arrives. Reporting recall '
+            f'alone would flatter exactly the questions that need the most '
+            f'evidence.</div>')
+    else:
+        divergence_note = ""
+
     return f"""
 <section id="retrieval"><div class="wrap">
   <h2>Retrieval</h2>
@@ -289,8 +326,8 @@ def retrieval_section(r: dict) -> str:
   this system existed — because the questions added later were labeled by literal
   string match and a lexical search finds those labels almost every time. Why that
   matters is in <code>docs/measurement-honesty.md</code>. Of those 50, the
-  {n_answerable} answerable ones carry answer chunks, whose
-  answer chunks were identified by reading the filings. Recall@{k} asks whether any
+  {n_answerable} answerable ones carry answer chunks, identified by reading
+  the filings. Recall@{k} asks whether any
   correct chunk arrived; coverage asks what fraction of them did. The other
   {n_unanswerable} questions have no answer chunks by definition and belong to the
   refusal measurement below.</p>
@@ -312,12 +349,7 @@ def retrieval_section(r: dict) -> str:
     meaninglessness.</caption>
   </table>
 
-  <div class="note">
-    <b>Recall@{k} and coverage diverge most where the answer is distributed.</b>
-    On comparatives, recall reads 1.000 and coverage 0.350: a comparative needs
-    evidence from two filings, and finding one of them counts as a hit. Reporting
-    only recall would have called the weakest question type the strongest.
-  </div>
+  {divergence_note}
 </div></section>"""
 
 
@@ -333,7 +365,12 @@ def generation_section(g: dict) -> str:
     decided = gr.get("supported", 0) + gr.get("unsupported", 0)
     supported = gr.get("supported", 0) / decided if decided else 0
     failures = gr.get("judge_error", 0)
-    attempts = decided + failures
+    # `absence` is a verdict, not a judge failure: the claim was read and found
+    # to assert something the excerpts do not address. Reporting it beside the
+    # failures, rather than folding it silently out of the denominator, is the
+    # difference between a rate and a rate that flatters itself.
+    absence = gr.get("absence", 0)
+    attempts = decided + failures + absence
 
     by_type = defaultdict(list)
     for r in recs:
@@ -388,7 +425,8 @@ def generation_section(g: dict) -> str:
       <span class="d">{len({r["id"] for r in hallucinated})} of {n_una_q} questions</span></div>
     <div class="card"><span class="k">claims grounded in a citation</span>
       <span class="v pos">{pct(supported)}</span>
-      <span class="d">{decided} claims judged, {failures} judge failures</span></div>
+      <span class="d">{decided} of {attempts} claims decided; {absence} absence,
+      {failures} judge failures</span></div>
   </div>
 
   <table>
@@ -407,8 +445,12 @@ def generation_section(g: dict) -> str:
     ten-token budget, and nearly a fifth of verdicts came back empty — the judge
     spending its allowance before answering, which is a failure of the evaluator
     and not evidence about any claim. The figure above is one verdict per claim,
-    judged against all of its citations at once, over {decided} claims with
-    {failures} judge failures.
+    judged against all of its citations at once, over {decided} decided claims.
+    A further {absence} came back as absence -- the claim was read, and what it
+    asserts is not addressed by the excerpts either way -- and {failures} as
+    judge failures. Neither is counted as supported or unsupported, so the rate
+    above is {decided} claims wide, not {attempts}; over all {attempts} attempts
+    it reads {pct(gr.get("supported", 0) / attempts if attempts else 0)}.
   </div>
 </div></section>"""
 
