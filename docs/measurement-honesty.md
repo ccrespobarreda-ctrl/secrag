@@ -241,11 +241,35 @@ and all twelve per-type cells. That is the test that this was verification
 rather than tuning: anchors take no part in retrieval, and if a figure had
 moved, something other than an anchor had been edited.
 
-Five anchors were deliberately left. Three belong to Q029, whose labelled chunk
-sits on the wrong side of the boundary described below — rewriting its anchor
-would conceal that. Two others have no available extension carrying any of the
+Five anchors were deliberately left, and a later session reading the chunks
+themselves brought that to four.
+
+One of the five did not need a pardon. Q029's chunk 83 carries the figure from
+its own labelled answer — *negatively impacted operating income by $90 million or
+170 basis points* — and now anchors on it, matching two chunks through the
+overlap. It had been anchored on `'2025'` for weeks. Nothing had gone wrong; it
+had simply never been read.
+
+**One of the three that remain was anchored to the filing's furniture.** Q029's
+chunk 55 was anchored on `'2025'`, and its only occurrence sits inside
+*Abercrombie & Fitch Co. 21 2025 Form 10-K Table of Contents* — a page footer
+repeated across the document. That is `'Wayfair'` again with a different face:
+text that appears everywhere identifies nothing, and whether it is a company name
+or a page number makes no difference to what the anchor can detect. The anchor
+was not weak. It was not testing the chunk at all.
+
+The other two, Q022 and Q082, have no available extension carrying any of the
 labelled answer, and buying position at the cost of content is not an
-improvement.
+improvement. Q029's chunk 53 is the same case: it opens by repeating the end of
+chunk 52 and closes by repeating the start of chunk 54, so every extension around
+its `'2025'` matches both, and what is unique to it carries no figure.
+
+**The four are named in the question file with their reason, and gated.** An
+exception records the anchor text it forgives, so an anchor rewritten later by
+the tool loses its pardon rather than inheriting one nobody reviewed, and
+`--max-exceptions` caps how many there may be. Like the threshold, that count
+ratchets down. It went from five to four not by loosening anything but because
+reading a chunk removed the need for one.
 
 ### Chunk boundaries cut risk factors from their headings
 
@@ -304,6 +328,75 @@ can fail. Replacing `'Wayfair'` with a span that appears once improves the
 benchmark's future integrity without touching a single published number, which
 makes it the rare change with no reason to distrust it.
 
+## The fourth problem: the measurement moved under the number
+
+The three above are about retrieval and its labels. This one is about the two
+headline generation figures, and it was found by comparing two result files that
+were supposed to differ only in their judge.
+
+### One record, and the two numbers that rest on it
+
+`vnext_generation_promptv2.json` and `vnext_generation_promptv2_judge2.json` hold
+210 records each. The generated `text` is identical in all 210 — the second file
+re-judges the first, it does not regenerate it. On that identical text, one
+record changes verdict: Q016, run 1, unanswerable, from `refused: false` to
+`refused: true`.
+
+That single flip is the whole of both headline figures:
+
+| | promptv2 | judge2 | published |
+|---|---:|---:|---|
+| Refusal on unanswerable | 65/66 | 66/66 | 31/31 |
+| Hallucination | 1/66 | 0/66 | 0/31 |
+
+The cause is documented in the harness and was a genuine improvement: refusal
+detection moved from a substring test to `is_refusal`, which asks whether the
+limitation *is* the answer rather than a caveat attached to one. Q016's response
+opens by saying the excerpts give no precise count and then cites what YETI does
+state. Under one detector that is a refusal; under the other it is an answer.
+Both readings are defensible.
+
+**What is not defensible is publishing the zero without the sentence.** The front
+page leads with *asked 31 questions it could not answer, it invented 0*, and that
+zero is one borderline record away from a one. It reads as a property of the
+system; it is partly a property of the detector. Zero with `is_refusal`, one with
+the substring test, on the same text — that is the honest form, and it costs
+nothing to say.
+
+Two related records moved with it: Q044 lost the problem *refused and still
+stated a figure* across all three of its runs, and Q042 gained *hedged figure in
+a refusal*. The file is named for its judge; the change was in the verification
+code beside it.
+
+### The page asserted a figure it had never measured
+
+The results page is generated, and it says so at the foot: every figure is read
+from `eval/results/*.json` at build time, so the page cannot drift from what was
+measured. One note under the by-type table was not. It read *on comparatives,
+recall reads 1.000 and coverage 0.350* — three lines of prose hardcoded inside a
+generator where everything around them, including the sabotage caption and the
+baseline note, is computed.
+
+Neither figure is in any results file. `0.350` appears nowhere at all, for any
+metric, any strategy or any question type. The only comparative recall of 1.000
+is in the holdout, which that section explicitly does not measure.
+
+The generator already knew the shape of this defect. A comment above the sabotage
+caption records that it *used to assert a result whether or not the file
+contained one*, and calls a page claiming a check it did not run exactly the
+failure this project measures. The caption was fixed. The note four lines below
+it was missed, in the one place where a reader would find it in thirty seconds by
+comparing a sentence with the table above it.
+
+It is computed now, over every question type whose recall-coverage gap clears a
+stated threshold rather than the widest one — the gaps sit within a few
+hundredths of each other, and a sentence that changes its subject on noise is not
+a finding. The same session found the bolded row breaking its tie on dictionary
+order, and the groundedness card reporting its judge failures while saying
+nothing about the absence verdicts also sitting outside the denominator: 680 of
+694 claims decided, 11 absence, and the rate over all attempts now printed beside
+the rate over decided ones.
+
 ## The figures that survive
 
 | | Value | 95% CI | n |
@@ -331,7 +424,15 @@ anything.
 capability the system has measures the capability, not the comparison.
 
 **Verification.** Anchor uniqueness is checked and gated in continuous
-integration. A verifier that cannot fail is not a verifier.
+integration. A verifier that cannot fail is not a verifier. The anchors that
+cannot be strengthened are named with their reason rather than tolerated
+silently, and each exception records the anchor it forgives so it expires when
+that anchor is rewritten.
+
+**Generated, not asserted.** A figure in prose is held to the same rule as a
+figure in a table: read from the results at build time, or not printed. A page
+that computes ten numbers and types the eleventh is a page whose eleventh number
+nobody will check.
 
 **Reporting.** Every figure carries its split, its n and an interval. Saturated
 types are marked as blind rather than quoted as strengths.
