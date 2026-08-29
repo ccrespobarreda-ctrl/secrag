@@ -25,7 +25,7 @@ Measured over 100 questions, 3 runs each, on 19 filings and 4,169 passages.
 | Answers invented on those questions | **0** | [0%, 11.0%] |
 | Answerable questions wrongly refused, retrieval-adjusted | **0 / 69** | [0%, 5.3%] |
 | Refusal decision changed between runs | **0 / 100** | — |
-| Claims grounded in a cited passage | 97.4% | 680 claims, model-judged |
+| Claims grounded in a cited passage | 97.4% | 680 of 694 decided; 11 absence, 3 judge failures |
 | Retrieval Recall@16 on the original 50 questions | 0.735 | [0.569, 0.854] |
 
 Ten of the 31 unanswerable questions are written to bait an invention: a fiscal
@@ -96,9 +96,12 @@ continuous integration, at a threshold that only ratchets down. Twenty-four
 anchors were rewritten to name their passage rather than a word that appears
 throughout the filing — `'Wayfair'` became `'of CastleGate and the Wayfair'`,
 `'4,966,370'` became `'(Note 10) $ 4,966,370'`. Anchors that cannot identify
-their chunk fell from 29 to 5, and **not one published figure changed**, which
-is the test that this was verification and not tuning. The five that remain are
-listed under limitations with the reason each was left.
+their chunk fell from 29 to 4, and **not one published figure changed**, which
+is the test that this was verification and not tuning. It reached 4 rather than 5
+by reading a chunk: Q029's chunk 83 carried the figure from its own labelled
+answer and only needed anchoring on it. The four that remain are named in the
+question file with the reason each was left, and that count is gated in
+continuous integration and ratchets down like the threshold.
 
 **8 — Chunking cuts risk factors away from their content.** A 10-K risk factor
 opens with a one-sentence heading and develops over paragraphs. **243 of 4,169
@@ -186,9 +189,10 @@ cold connection makes the first call of each type an outlier.
 **Cost is dominated by what is sent, not by what is written**, at a ratio of 84
 to 1. That makes `top_k` the only real cost lever: it was raised from 8 to 16 to
 lift coverage on comparison and multi-passage questions, and this is what that
-decision costs — roughly double the input tokens per query. Convert the token
-counts above at current rates; they are measured from the API response rather
-than estimated from prompt size.
+decision costs — roughly double the input tokens per query. The holdout run cost
+3 € in total, which is about 0.02 € per query at the rates in force when it was
+measured. Token counts are read from the API response rather than estimated from
+prompt size, so they can be reconverted at any later rate.
 
 **Declining is cheaper than answering.** An unanswerable question consumes 10,270
 input and 75 output tokens; a multi-passage answer, 10,952 and 577.
@@ -329,9 +333,8 @@ and a re-chunk can falsify it silently.
 | `src/check_db_settings.py` | the database settings retrieval depends on |
 | `src/fix_anchors.py` | two-phase anchor strengthening, reviewed by a person |
 | `src/derive_split.py` | derives split files from the master benchmark |
-| `src/audit_anchors.py` | anchor uniqueness audit, with proposed replacements |
 | `src/check_neighbours.py` | what arrived when a labelled chunk did not |
-| `docs/measurement-honesty.md` | the three measurement problems, in full |
+| `docs/measurement-honesty.md` | the four measurement problems, in full |
 | `eval/questions_vnext.yaml` | 100 questions, 127 audited gold labels |
 
 ## Licence
