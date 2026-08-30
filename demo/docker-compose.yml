@@ -1,0 +1,41 @@
+# The demo runs against its own database, not the development one.
+#
+# The repository's docker-compose.yml serves the corpus you work against. This
+# file serves a 295-chunk extract, and the two must never share a container.
+#
+# The reason is on the record. The label fixture was once loaded into the
+# development database, which already held the corpus; the loader upserts rather
+# than truncates, so it succeeded, and the check that followed reported 4,124
+# chunks instead of 295. Nothing errored. It cost an afternoon to notice that a
+# number three digits wide was measured against the wrong corpus.
+#
+# Someone cloning this repository has no way to suspect that. So: a different
+# project name, a different port, a different volume. Bring it up while your own
+# stack is running, tear it down with one command, and it cannot touch anything
+# you were measuring.
+#
+#     docker compose -f demo/docker-compose.yml up -d
+#     docker compose -f demo/docker-compose.yml down -v
+
+name: secrag-demo
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: secrag
+      POSTGRES_PASSWORD: secrag
+      POSTGRES_DB: secrag_demo
+    # 5434, because 5432 is the convention and 5433 is what the development
+    # stack in the repository root already uses.
+    ports: ["5434:5432"]
+    volumes:
+      - secrag_demo_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U secrag -d secrag_demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  secrag_demo_pgdata:

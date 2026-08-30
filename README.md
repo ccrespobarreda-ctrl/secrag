@@ -4,6 +4,7 @@
 · [c.crespobarreda@gmail.com](mailto:c.crespobarreda@gmail.com)
 
 **[See the results and every question →](https://ccrespobarreda-ctrl.github.io/secrag/)**
+· **[Run it yourself in three commands →](demo/README.md)**
 
 ---
 
@@ -286,13 +287,15 @@ once, by a documented amount, for a documented reason.
   describes what reaches the model is higher, and answer correctness of 91.2% is
   the closer proxy. Both are published rather than the more flattering one.
 
-- **Five gold anchors still cannot identify their chunk, deliberately.** Three
-  belong to Q029, whose labelled chunk sits on the wrong side of the boundary
-  described in finding 8 — rewriting its anchor would hide that. The other two,
-  on Q022 and Q082, have no available extension that carries any of the labelled
-  answer, so the change would buy position at the cost of content. The
-  continuous-integration threshold stays at 8 until those are resolved, and it
-  never rises to make a build pass.
+- **Four gold anchors still cannot identify their chunk, deliberately.** None
+  has an extension carrying a figure from its labelled answer, so a longer anchor
+  would buy position at the cost of content. Q029's chunk 55 is the clearest
+  case: its only `'2025'` sits inside the filing's page footer, so no window
+  around it says anything about the chunk. Each is named in the question file
+  with its reason, and records the anchor text it forgives, so an anchor
+  rewritten later loses its pardon rather than inheriting one nobody reviewed.
+  The continuous-integration threshold stays at 8 and the exception count at 4;
+  neither ever rises to make a build pass.
 
 - **Chunk boundaries are a known defect and have not been changed.** Fixing them
   means re-chunking, which reissues every `chunk_id` and invalidates all 127
@@ -300,6 +303,22 @@ once, by a documented amount, for a documented reason.
   release of its own, not a patch.
 
 ## Reproducing it
+
+The full pipeline fetches nineteen filings from EDGAR and embeds four thousand
+passages, which takes a while. To watch the system run first, `demo/` holds a
+295-chunk extract with its vectors and needs no download and no API key:
+
+```bash
+docker compose -f demo/docker-compose.yml up -d
+python demo/load_demo.py
+LLM_PROVIDER=echo python src/generate.py "What brands does Gap Inc. operate?"
+```
+
+Retrieval over that extract is an easier problem than over the corpus, so its
+results are not comparable to the figures above and none of them come from it.
+[`demo/README.md`](demo/README.md) says so up front.
+
+The whole thing:
 
 ```powershell
 docker compose up -d                              # Postgres with pgvector
@@ -336,6 +355,7 @@ and a re-chunk can falsify it silently.
 | `src/check_neighbours.py` | what arrived when a labelled chunk did not |
 | `docs/measurement-honesty.md` | the four measurement problems, in full |
 | `eval/questions_vnext.yaml` | 100 questions, 127 audited gold labels |
+| `demo/` | self-contained extract, its own database, no API key |
 
 ## Licence
 
