@@ -16,10 +16,29 @@ would notice.
 Every published retrieval figure was measured under whatever value was in force
 at the time. Changing it later is not a tuning knob, it is a new measurement.
 This prints the current value so that fact is visible rather than assumed.
+
+AND WHICH DATABASE, WHICH IS THE EASIER MISTAKE
+
+The corpus is not in the repository and DATABASE_URL is not versioned, so which
+database a run measures against is decided by a shell variable. Four databases
+have answered to that variable in this project: the managed instance the figures
+were measured on, a local container holding an older load, the label fixture, and
+the demo. Three of them return a number and none of them raises anything.
+
+A session once pointed at a 295-chunk extract and was one command away from
+generating seventy questions against it, at a real cost, with output that would
+have looked entirely ordinary. --expect-chunks turns that into a failure:
+
+    python src/check_db_settings.py --expect-chunks 4169
+
+Run it before anything that spends money or gets published. It is the same
+argument as every other check here — a number measured against the wrong thing
+is indistinguishable from a number measured against the right one.
 """
 
 from __future__ import annotations
 
+import argparse
 import logging
 import os
 import sys
@@ -40,6 +59,13 @@ SETTINGS = [
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser(
+        description="Report the settings retrieval reproducibility depends on")
+    ap.add_argument("--expect-chunks", type=int,
+                    help="fail unless the database holds exactly this many "
+                         "chunks. The published figures were measured on 4,169")
+    args = ap.parse_args()
+
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     if not os.environ.get("DATABASE_URL"):
         log.error("DATABASE_URL is not set")
@@ -88,10 +114,38 @@ def main() -> int:
                 "gin" if "gin" in definition else "btree")
         print(f"    {name:<28}{kind}")
 
+    # The host, with no credentials. Reading "localhost" where the published
+    # figures came from a managed instance is the whole point of printing it.
+    url = os.environ["DATABASE_URL"]
+    host = url.split("@")[-1].split("/")[0] if "@" in url else "(no host)"
+    print(f"\n  host   {host}")
+
     conn.close()
     print("\n  If ef_search is not the value the published figures were "
           "measured under,\n  changing it now produces different numbers "
           "against the same corpus.")
+
+    if args.expect_chunks is not None and total != args.expect_chunks:
+        print(f"\n{'=' * 66}")
+        print(f"WRONG DATABASE: {total:,} chunks, expected "
+              f"{args.expect_chunks:,}")
+        print("=" * 66)
+        print(f"  host  {host}")
+        print(f"  name  {db}")
+        print("\n  DATABASE_URL points somewhere other than the corpus the "
+              "published\n  figures were measured on. Nothing here would have "
+              "raised: retrieval\n  returns chunks, the harness prints a "
+              "number, and the number is\n  measured against a different "
+              "corpus.")
+        print("\n  Fix the variable before running anything that spends money "
+              "or gets\n  published. If this database is deliberate, it is a "
+              "new measurement\n  and not comparable with anything already "
+              "reported.")
+        return 1
+
+    if args.expect_chunks is not None:
+        print(f"\n  {total:,} chunks, as expected. This is the corpus the "
+              f"published figures\n  were measured on.")
     return 0
 
 
