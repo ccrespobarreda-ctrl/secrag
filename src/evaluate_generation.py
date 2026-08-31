@@ -132,6 +132,7 @@ def retriever(name: str):
     reimplemented. Two copies of a baseline drift, and a baseline that drifts is
     two systems being compared instead of one difference.
     """
+    import retrieve as R
     if name == "hybrid+company":
         return lambda cur, question, qv, k: R.search(cur, question, qv, top_k=k)
 
@@ -260,6 +261,10 @@ def main() -> int:
     ap.add_argument("--runs", type=int, default=3)
     ap.add_argument("-k", type=int, default=C.RETRIEVAL_TOP_K)
     ap.add_argument("--provider")
+    ap.add_argument("--require-provider",
+                    help="fail unless the resolved provider is this one. Echo "
+                         "refuses everything, which scores 100%% refusal and 0%% "
+                         "hallucination without calling anything")
     ap.add_argument("--no-judge", action="store_true")
     ap.add_argument("--no-cache", action="store_true")
     ap.add_argument("--out", default="eval/results/generation.json", type=Path)
@@ -283,7 +288,7 @@ def main() -> int:
     import retrieve as R
     import labels as L
 
-    provider = get_provider(args.provider)
+    provider = get_provider(args.provider, require=args.require_provider)
     model = os.environ.get("GENERATION_MODEL", provider.name)
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     cur = conn.cursor()

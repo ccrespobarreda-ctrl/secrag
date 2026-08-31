@@ -34,6 +34,23 @@ evaluation harness has to account for it: a refusal rate measured once is a
 sample, not a constant. The results page states the number of runs behind each
 figure for that reason.
 
+THE DEFAULT IS SAFE, WHICH IS WHY IT HAD TO BE LOUD
+
+LLM_PROVIDER defaults to echo, and that is right: a missing variable should not
+start spending money. But nothing in this project loaded .env, so a session that
+had not run load-env.ps1 resolved to echo while .env plainly said anthropic --
+and an evaluation then ran end to end without calling a model.
+
+What it produces in that state is the problem. Echo refuses everything, so the
+run reports 100% refusal on unanswerable questions and 0% hallucination: the most
+flattering possible values on the two figures this project leads with, obtained
+by making no calls at all. It cost nothing and looked like a result.
+
+Two changes. .env is loaded here, so the file that declares the provider is the
+file that decides it. And the harness that spends money asks for the provider by
+name -- see --require-provider in evaluate_generation.py -- so falling back to
+echo fails the run instead of silently producing a perfect score.
+
 WHAT IS DELIBERATELY NOT HERE
 
 No prompt construction, no citation parsing, no retry-on-bad-output. Those belong
@@ -56,6 +73,19 @@ import config as C  # noqa: E402
 
 
 log = logging.getLogger("llm")
+
+# Loaded here rather than left to each caller. The provider is declared in .env;
+# a caller that forgot to load it did not get an error, it got echo, and echo
+# scores perfectly on the two headline metrics without calling anything.
+#
+# override=False on purpose: a variable already set in the shell beats the file,
+# which is what makes `LLM_PROVIDER=echo python ...` work as a deliberate dry run.
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=False)
+except ImportError:  # python-dotenv is optional; the variables may be exported
+    pass
 
 # Transient API failures, and how long to wait before deciding a run is lost.
 #
@@ -263,9 +293,29 @@ _PROVIDERS = {
 }
 
 
-def get_provider(name: str | None = None) -> LLMProvider:
-    name = (name or os.environ.get("LLM_PROVIDER", "echo")).lower()
-    if name not in _PROVIDERS:
+def get_provider(name: str | None = None,
+                 require: str | None = None) -> LLMProvider:
+    """
+    Resolve the provider, and optionally refuse to be a different one.
+
+    `require` exists for the harnesses that spend money. Asking for anthropic and
+    silently receiving echo is not a smaller version of the run; it is a
+    different measurement that happens to score perfectly, and it has already
+    happened once.
+    """
+    requested = name or os.environ.get("LLM_PROVIDER", "echo")
+    resolved = requested.lower()
+    if resolved not in _PROVIDERS:
         raise SystemExit(
-            f"Unknown provider {name!r}. Options: {', '.join(_PROVIDERS)}")
-    return _PROVIDERS[name]()
+            f"Unknown provider {resolved!r}. Options: {', '.join(_PROVIDERS)}")
+
+    if require and resolved != require.lower():
+        raise SystemExit(
+            f"This run asked for provider {require!r} and resolved {resolved!r}.\n"
+            f"LLM_PROVIDER is {os.environ.get('LLM_PROVIDER') or '(not set)'}, "
+            f"and .env is read from the repository root.\n"
+            f"Echo refuses every question, which scores 100% refusal and 0% "
+            f"hallucination\nwithout calling anything. Stopping rather than "
+            f"reporting that as a result.")
+
+    return _PROVIDERS[resolved]()
