@@ -114,6 +114,32 @@ JUDGE_ABSENCE = "absence"
 
 
 # ─────────────────────────────────────────────────────────────────────
+# Which retriever feeds the model
+# ─────────────────────────────────────────────────────────────────────
+def retriever(name: str):
+    """
+    The generation harness measured one retrieval configuration and could not be
+    pointed at another: R.search was called directly, with no option.
+
+    That left the project's own open question unanswerable. Holding the company
+    filter constant, the lexical baseline ties the full system on Recall@16
+    across all four splits and leads it on coverage in two; the dense half
+    contributes ordering. Whether better ordering produces better *answers* is a
+    different question from whether it retrieves better, and it needs the model
+    fed from each path in turn.
+
+    keyword_with_company is imported from the retrieval harness rather than
+    reimplemented. Two copies of a baseline drift, and a baseline that drifts is
+    two systems being compared instead of one difference.
+    """
+    if name == "hybrid+company":
+        return lambda cur, question, qv, k: R.search(cur, question, qv, top_k=k)
+
+    from evaluate_retrieval import keyword_with_company
+    return lambda cur, question, qv, k: keyword_with_company(cur, question, k)
+
+
+# ─────────────────────────────────────────────────────────────────────
 # Cache
 # ─────────────────────────────────────────────────────────────────────
 def cache_key(question: str, excerpt_ids: list[int], run: int, model: str) -> str:
@@ -124,6 +150,11 @@ def cache_key(question: str, excerpt_ids: list[int], run: int, model: str) -> st
     must produce three separate calls, or the variance this harness exists to
     measure would be cached away.
     """
+    # The excerpt ids carry the retrieval strategy implicitly, which is what
+    # makes a second strategy safe to run against the same cache: different
+    # excerpts key differently and are paid for, and where two strategies return
+    # the same excerpts in the same order the answer would be identical anyway,
+    # so reusing it is correct and free.
     raw = f"{model}|{run}|{question}|{','.join(map(str, excerpt_ids))}"
     return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
@@ -232,6 +263,10 @@ def main() -> int:
     ap.add_argument("--no-judge", action="store_true")
     ap.add_argument("--no-cache", action="store_true")
     ap.add_argument("--out", default="eval/results/generation.json", type=Path)
+    ap.add_argument("--retrieval", default="hybrid+company",
+                    choices=("hybrid+company", "keyword+company"),
+                    help="which retriever feeds the model; the default is what "
+                         "the system ships")
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -273,15 +308,17 @@ def main() -> int:
 
     log.info("%d questions x %d runs, provider %s, model %s",
              len(questions), args.runs, provider.name, model)
+    log.info("retrieval %s", args.retrieval)
     log.info("cache %s, judge %s\n",
              "off" if args.no_cache else f"on ({len(cache)} entries)",
              "off" if args.no_judge else "on")
 
     started = time.time()
     failed = []
+    search = retriever(args.retrieval)
     for i, q in enumerate(questions, 1):
         qv = embed_query(q["question"])
-        hits = R.search(cur, q["question"], qv, top_k=args.k)
+        hits = search(cur, q["question"], qv, args.k)
         excerpt_ids = [h.chunk_id for h in hits]
 
         for run in range(args.runs):
@@ -481,6 +518,9 @@ def main() -> int:
     args.out.write_text(json.dumps({
         "generated": datetime.now().isoformat(timespec="seconds"),
         "model": model, "runs": args.runs, "top_k": args.k,
+        # Without this a results file cannot say which retriever produced it,
+        # and two runs of this harness would be indistinguishable on disk.
+        "retrieval": args.retrieval,
         "refusal_rate": refusal, "false_refusal_rate": false_refusal,
         "hallucination_rate": hallucination,
         "groundedness": dict(judged),
