@@ -22,6 +22,25 @@ measure — whether the system refuses — belongs to the generation harness. Th
 retrieval behaviour is still worth a glance, so the count of chunks returned for
 them is reported separately: a question with no answer should ideally not pull
 back confident-looking passages.
+
+WHAT EVERY RESULT FILE NOW RECORDS
+
+`measured_against`: the question file, its SHA-256, its label counts, and the
+size of the corpus in the warehouse at the moment of writing. Two figures in
+this repository, 0.735 and 0.912, differ by almost eighteen points and neither
+file said which question file produced it; establishing that one used the 88
+pre-canonical labels took an afternoon. Every fact needed was available while
+the measurement ran, and none of it was written down.
+
+AND WHY IT REFUSES TO SAVE OVER BROKEN LABELS
+
+This module used to log "every number below is measured against these labels"
+and then write the numbers anyway. On 8 September it did exactly that: 23 of 127
+labels no longer held, the run reported them, measured, and saved a result file
+with an exit code of 0. A figure measured against a label pointing at text that
+is not the answer is not a weaker figure, it is not a measurement, and
+`src/verify_labels.py` already says so in capitals. `--save` now declines unless
+`--allow-broken-labels` says the run is a diagnosis rather than a result.
 """
 
 from __future__ import annotations
@@ -37,11 +56,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import config as C  # noqa: E402
 import retrieve as R  # noqa: E402
+import provenance as P  # noqa: E402
 
 log = logging.getLogger("eval")
 
 
-def load_questions(path: Path, cur) -> list[dict]:
+def load_questions(path: Path, cur) -> tuple[list[dict], list[dict]]:
     """
     Read the questions and resolve their labels against the corpus.
 
@@ -49,6 +69,10 @@ def load_questions(path: Path, cur) -> list[dict]:
     unlabeled question, it is a broken measurement, and the difference matters:
     an unlabeled question is skipped and said so, while a broken one would be
     scored against text that is not the answer.
+
+    The problems are returned rather than only logged. An earlier version kept
+    them to itself, printed a warning, and the caller went on to write a result
+    file: the warning scrolled past and the number was published.
     """
     import labels as L
 
@@ -71,7 +95,7 @@ def load_questions(path: Path, cur) -> list[dict]:
                     "skipped: %s", len(unlabeled), ", ".join(unlabeled[:8]))
         log.warning("Label them with src/find_gold.py before trusting any number "
                     "below.")
-    return questions
+    return questions, problems
 
 
 def score_one(hits, gold: set[int], k: int) -> tuple[float, float, float]:
@@ -196,6 +220,9 @@ def main() -> int:
     ap.add_argument("--sabotage", action="store_true",
                     help="run the degraded retrievers and confirm the metrics move")
     ap.add_argument("--save", type=Path, help="write results as JSON")
+    ap.add_argument("--allow-broken-labels", action="store_true",
+                    help="save even if gold labels no longer hold. For a "
+                         "diagnosis, never for a published figure")
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -208,7 +235,12 @@ def main() -> int:
 
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     cur = conn.cursor()
-    questions = load_questions(args.questions, cur)
+    questions, broken = load_questions(args.questions, cur)
+
+    # Said out loud as well as written to the file: `make sabotage` passes no
+    # --questions at all, so the default is easy to measure against by accident.
+    provenance = P.describe(args.questions, cur)
+    log.info(P.summarise(provenance))
 
     strategies = {
         "semantic": lambda c, q, v: R.search_semantic(c, v, top_k=args.k),
@@ -302,10 +334,28 @@ def main() -> int:
         print("\n  The published value of 60 comes from TREC experiments, not from")
         print("  10-K filings. This table is what should decide it.")
 
+    if args.save and broken and not args.allow_broken_labels:
+        # The refusal is the point. On 8 September this module reported 23
+        # broken labels, measured, saved, and exited 0; the file it wrote was
+        # indistinguishable from a real result.
+        print(f"\nREFUSING TO SAVE. {len(broken)} gold label(s) no longer hold, "
+              f"so the\nfigures above are not measured against the answers they "
+              f"name.")
+        print("\n  Repair the labels:  python src/verify_labels.py "
+              f"--questions {args.questions}")
+        print("  Or, to keep this run as a diagnosis rather than a result, add"
+              "\n  --allow-broken-labels, which records the count in the file.")
+        conn.close()
+        return 1
+
     if args.save:
         args.save.parent.mkdir(parents=True, exist_ok=True)
         payload = {
             "generated": datetime.now().isoformat(timespec="seconds"),
+            # First, because it is the first thing a reader of this file needs
+            # and the last thing anyone thought to record.
+            "measured_against": provenance,
+            "broken_labels": len(broken),
             "k": args.k, "rrf_k": C.RRF_K,
             "answerable": results["_answerable"],
             "unanswerable": results["_unanswerable"],
@@ -333,6 +383,9 @@ def main() -> int:
         }
         args.save.write_text(json.dumps(payload, indent=1), encoding="utf-8")
         print(f"\nSaved to {args.save}")
+        if broken:
+            print(f"  with broken_labels: {len(broken)} recorded inside it. "
+                  f"This is a diagnosis,\n  not a figure to publish.")
 
     conn.close()
     return 0
