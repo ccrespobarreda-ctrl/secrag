@@ -12,7 +12,7 @@
   notes: 'Item 8, nota de desglose por segmento. Rango 16, fuera del top-8. 3517 descartado: tiene la cifra desglosada por categoria, sin la linea de total.'
   gold_chunks:
   - doc_id: URBN-10-K-2026
-    chunk_index: 121
+    chunk_index: 118
     contains: 6,165,376
 - id: Q002
   question: What were Under Armour's net revenues in fiscal 2026?
@@ -25,7 +25,7 @@
     fragmento anterior.'
   gold_chunks:
   - doc_id: UAA-10-K-2026
-    chunk_index: 126
+    chunk_index: 123
     contains: (Note 10) $ 4,966,370
 - id: Q003
   question: How does Lululemon recognize revenue from product sales?
@@ -38,7 +38,7 @@
   notes: 'Final audit: current corpus evidence is chunk 2315.'
   gold_chunks:
   - doc_id: LULU-10-K-2026
-    chunk_index: 118
+    chunk_index: 114
     contains: transfer of control
 - id: Q004
   question: What was Nike's inventory balance at the end of fiscal 2026?
@@ -51,7 +51,7 @@
     por solapamiento entre chunks. El antiguo ID 2448 estaba desfasado respecto al corpus actual.'
   gold_chunks:
   - doc_id: NKE-10-K-2026
-    chunk_index: 85
+    chunk_index: 83
     contains: '7.5'
 - id: Q005
   question: Which auditor signed Crocs' financial statements?
@@ -64,7 +64,7 @@
     Consent of Deloitte & Touche LLP y es evidencia indirecta; no se acepta como gold directo. El antiguo ID 736 estaba desfasado.'
   gold_chunks:
   - doc_id: CROX-10-K-2025
-    chunk_index: 169
+    chunk_index: 166
     contains: Deloitte
 - id: Q006
   question: On what date does Nike's fiscal year end?
@@ -113,7 +113,7 @@
   notes: 'Final audit: chunk 3903 directly reports Store Count 323 at period end.'
   gold_chunks:
   - doc_id: WRBY-10-K-2025
-    chunk_index: 155
+    chunk_index: 153
     contains: Store Count(1) 323 276 237
 - id: Q010
   question: What were Wayfair's total net revenues for the year ended December 31, 2025?
@@ -126,7 +126,7 @@
     literales el recuperador encontro dos.
   gold_chunks:
   - doc_id: W-10-K-2025
-    chunk_index: 151
+    chunk_index: 150
     contains: data) Net revenue $ 12,457
 - id: Q011
   question: What are Peloton's primary sources of revenue?
@@ -140,10 +140,10 @@
     cada uno.
   gold_chunks:
   - doc_id: PTON-10-K-2026
-    chunk_index: 138
+    chunk_index: 137
     contains: (collectively, the “Connected
   - doc_id: PTON-10-K-2026
-    chunk_index: 145
+    chunk_index: 144
     contains: of Ending Paid Connected
 - id: Q012
   question: What was Lululemon's inventory balance at fiscal year end?
@@ -156,7 +156,7 @@
     definicion del ano fiscal y el 5 un fragmento de URBN.
   gold_chunks:
   - doc_id: LULU-10-K-2026
-    chunk_index: 100
+    chunk_index: 96
     contains: 1,700,753
 - id: Q013
   question: What brands does Gap Inc. operate?
@@ -181,7 +181,7 @@
     auditada por Deloitte: acertar por accidente.'
   gold_chunks:
   - doc_id: URBN-10-K-2026
-    chunk_index: 119
+    chunk_index: 116
     contains: Deloitte
 - id: Q015
   question: What was Crocs' gross profit for fiscal 2025?
@@ -194,7 +194,7 @@
     CHWY, GAP, NKE y LEVI: cuatro empresas equivocadas con la misma metrica.'
   gold_chunks:
   - doc_id: CROX-10-K-2025
-    chunk_index: 169
+    chunk_index: 166
     contains: 2,357,055
 - id: Q016
   question: In how many countries are Yeti products sold?
@@ -233,7 +233,7 @@
     y 6 fueron ANF, COLM, CROX y DECK declarando SUS segmentos con la frase exacta: contexto plausible para responder mal citando una fuente real.'
   gold_chunks:
   - doc_id: UAA-10-K-2026
-    chunk_index: 217
+    chunk_index: 214
     contains: North America EMEA Asia-Pacific Latin America Total Reportable Segments
 - id: Q019
   question: What was Columbia Sportswear's dividend per share?
@@ -367,10 +367,10 @@
     tercera aparicion en primera posicion) y una tabla de recompra de acciones. Puestos 3 a 6: URBN, ANF x2, NKE.'
   gold_chunks:
   - doc_id: UAA-10-K-2026
-    chunk_index: 86
+    chunk_index: 84
     contains: 2,859,420
   - doc_id: UAA-10-K-2026
-    chunk_index: 87
+    chunk_index: 85
     contains: 442,503
 - id: Q026
   question: What risks does Etsy disclose about seller and buyer behaviour on its marketplace?
@@ -405,10 +405,10 @@
   answerable: true
   gold_chunks:
   - doc_id: GAP-10-K-2026
-    chunk_index: 57
+    chunk_index: 55
     contains: 'follows: Fiscal Year 2025'
   - doc_id: GAP-10-K-2026
-    chunk_index: 102
+    chunk_index: 99
     contains: channel for fiscal 2025,
 - id: Q028
   gold_chunk_ids:
@@ -437,7 +437,7 @@
     chunk_index: 7
     contains: provided by Wayfair
   - doc_id: W-10-K-2025
-    chunk_index: 165
+    chunk_index: 164
     contains: 'Costs: Wayfair'
   - doc_id: W-10-K-2025
     chunk_index: 5
@@ -473,7 +473,7 @@
     chunk_index: 56
     contains: Mitigation
   - doc_id: ANF-10-K-2026
-    chunk_index: 83
+    chunk_index: 80
     contains: negatively impacted operating income by $90 million or 170 basis points
 - id: Q030
   gold_chunk_ids:
@@ -492,7 +492,7 @@
     chunk_index: 0
     contains: categories across wipes, personal care, diapers, and beauty
   - doc_id: HNST-10-K-2025
-    chunk_index: 172
+    chunk_index: 171
     contains: third-party ecommerce sites and, prior to December 31, 2025, Honest.com
 - id: Q031
   question: Do both Nike and Under Armour cite foreign currency exchange rates as a risk factor?
@@ -526,7 +526,7 @@
   notes: 'Final audit: corrected stale cross-company label. 2314 is LULU; 2362 is NKE.'
   gold_chunks:
   - doc_id: LULU-10-K-2026
-    chunk_index: 117
+    chunk_index: 113
     contains: locations, and lululemon
   - doc_id: NKE-10-K-2026
     chunk_index: 0
@@ -582,7 +582,7 @@
     chunk_index: 103
     contains: 5,472,296
   - doc_id: CROX-10-K-2025
-    chunk_index: 169
+    chunk_index: 166
     contains: 4,040,647
 - id: Q041
   question: What is the home address of Etsy's chief executive officer?

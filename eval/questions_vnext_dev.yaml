@@ -159,7 +159,7 @@
   notes: vNext extractive dev. Gold evidence manually audited; asks for Wayfair customer scale and repeat-order share.
   gold_chunks:
   - doc_id: W-10-K-2025
-    chunk_index: 106
+    chunk_index: 105
     contains: 21 million active customers and during the year ended December 31, 2025, 80.3% of orders came from repeat buyers
 - id: Q066
   question: How do Peloton's Paid Connected Fitness and Paid App subscription offerings differ?
