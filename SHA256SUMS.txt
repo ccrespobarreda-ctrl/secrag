@@ -1,9 +1,58 @@
+# Integrity of the frozen release SECRAG-RRF40-2026-08-17.
+#
+# TWO KINDS OF ENTRY, AND WHY ONE OF THEM CANNOT BE CHECKED
+#
+# This file used to make one claim about sixteen files and could not keep it.
+# Nine of them are evidence -- the results behind every published figure, the
+# configuration they were measured under, and the manifests. Those verify, and
+# are verified on every push.
+#
+# Five are the retriever and the three harness modules. They were hashed at
+# 17:42 on 17 August, from a working tree, and edited before anything was
+# committed. Three searches establish it, and all three are in the repository
+# so the claim can be re-tested instead of believed:
+#
+#   verify_release.py        the bytes match neither the working tree nor the
+#                            release tag
+#   find_release_commit.py   no commit of the 42 in this repository holds them
+#   find_release_blobs.py    none of the 195 blobs in the object database holds
+#                            them, reachable or orphaned
+#
+# So those five can never pass. They are marked `record`: the published value
+# stays visible and nothing pretends to check it. A check that can never pass
+# is not a check, it is a red build waiting to be switched off, and this
+# repository documents what happens to a check nobody runs.
+#
+# What remains true is in FINAL_RELEASE_MANIFEST_ADDENDUM.md: those figures
+# were produced by this code, the results files are byte-identical to
+# publication, and finding 6 reproduced all twelve retrieval figures a week
+# later from a modified harness. What is not true, and was implied by listing
+# these five as release artifacts, is that a reader can check out the release
+# and reproduce the bytes.
+#
+# WHICH BYTES THESE HASH
+#
+# Computed on Windows, over CRLF. .gitattributes stores text with LF and checks
+# it out however the platform wants, so a clone elsewhere holds the same content
+# in different bytes and a plain `sha256sum -c` mismatches every entry -- which
+# is why this list went unchecked for weeks while one of its entries was false.
+# verify_release.py recovers the hashed form instead of the hashes being
+# rewritten: FINAL_RELEASE_MANIFEST.md carries twelve of these in the same form
+# and is itself frozen.
+#
+# WHAT IS NOT LISTED
+#
+# Living documents. README.md and docs/handoff-final-es.md were listed here and
+# have been removed: the README's hash had been false since 30 August, when the
+# demo commit changed the file. A frozen artifact list cannot hold a document
+# that is expected to change, and the freeze rule never claimed it did.
+
+# The evidence behind every published figure, and the configuration it was
+# measured under. If one of these changes, something is wrong, and the answer
+# is not a new hash.
+#@ verify tree
+
 5FAACC51771D19B437391E1EB1344922094FD243E548BFCEDF108BA659256DAD ./src/config.py
-13E6ABE14D23641BB48F638532D6D536F99C67962204CF0FC3126B988EB8B850 ./src/retrieve.py
-FA8513B75C8F1B5BA1BC11147DB0E1FDAC0C1856EB64E26435E321EA962465AC ./src/generate.py
-AAE9CB188B532745FC9D0DD0864344273F80EFCC009B503B6F9205B59C6A54D4 ./src/evaluate_retrieval.py
-F1264B2B55283A8C255B5D4E4523B38A908D5E902A3250B1CAF157E4CD7B0ECE ./src/evaluate_generation.py
-A5DF48647CB4EFF4E1847C94886CC23E8E378000D08E8EDB4A686F8E4356DA49 ./src/evaluate_correctness.py
 8F40D8387DC52A072DEC0F4204D0DAFF2C499F05A42F00B4A027F952A3CA6429 ./eval/questions_canonical.yaml
 2F2080B657E78397A6A5DF481C689F8BED077B9404D074BB4D401264953B83D9 ./eval/results/retrieval_final.json
 015DE847646DE2E25D1BA78144185A144EBE3E844B4CA58AAC1D182FE2545C11 ./eval/results/generation_final_rrf40.json
@@ -12,5 +61,13 @@ A5DF48647CB4EFF4E1847C94886CC23E8E378000D08E8EDB4A686F8E4356DA49 ./src/evaluate_
 822559303C27B4E6F5585B52033D32AED6328293FBACE0FDFC0F6C000B1546DB ./eval/results/final_evaluation_rrf40.json
 5949DDE284AEADC08B19ED937E0EDE1CACB25797D4A9850678F087141AB48E03 ./FINAL_RELEASE_MANIFEST.json
 07B66812FA960811CC39BC3284CA89C6446C6D8C6E6B1440E309699FAE89B18D ./FINAL_RELEASE_MANIFEST.md
-14E970F4762313626DE1B241FC679CBAF6BC96322C608EE8F9FA0E2F0E51BB64 ./README.md
-665527EF16DF35FF0D47FB5913CB37CCF8509FF408284FC8254D53ECEDFF8101 ./docs/handoff-final-es.md
+
+# Recorded, not verifiable. Kept because these are the values the release
+# published, removed from verification because nothing can satisfy them.
+#@ verify record
+
+13E6ABE14D23641BB48F638532D6D536F99C67962204CF0FC3126B988EB8B850 ./src/retrieve.py
+FA8513B75C8F1B5BA1BC11147DB0E1FDAC0C1856EB64E26435E321EA962465AC ./src/generate.py
+AAE9CB188B532745FC9D0DD0864344273F80EFCC009B503B6F9205B59C6A54D4 ./src/evaluate_retrieval.py
+F1264B2B55283A8C255B5D4E4523B38A908D5E902A3250B1CAF157E4CD7B0ECE ./src/evaluate_generation.py
+A5DF48647CB4EFF4E1847C94886CC23E8E378000D08E8EDB4A686F8E4356DA49 ./src/evaluate_correctness.py

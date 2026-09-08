@@ -13,6 +13,10 @@
 # still resolve and every anchor is still inside its chunk. A green build here
 # means the measurements can be trusted, not merely that the imports work.
 #
+# It also verifies SHA256SUMS.txt, which nothing was doing. A checksum list
+# that no job runs is not a guarantee, it is a claim; the README's entry in it
+# had been false for weeks and had no way to surface.
+#
 # No model is ever called. Nothing in this workflow costs anything, and no API
 # key is needed: LLM_PROVIDER stays at the default, which returns a fixed
 # refusal without a network call.
@@ -27,15 +31,30 @@ on:
 
 jobs:
   tests:
-    name: unit tests
+    name: unit tests and release integrity
     runs-on: ubuntu-latest
     steps:
+      # fetch-depth: 0 for the tags. The default shallow checkout has none, and
+      # the release-code half of SHA256SUMS.txt is verified against the tag the
+      # release was cut from, so without this the check reports the release as
+      # unrecoverable on every run.
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
+
+      # Needs no dependencies and no corpus, so it runs before the install
+      # and fails in a couple of seconds.
+      #
+      # The same file a person runs by hand, deliberately: a local check that is
+      # not the same code as the gate will disagree with it eventually. Why this
+      # is not `sha256sum -c` is written at the top of the script.
+      - name: The frozen release artifacts are unchanged
+        run: python verify_release.py
 
       - name: Install dependencies
         run: |

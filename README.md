@@ -1,4 +1,4 @@
-# SEC filings RAG — measured retrieval, cited answers, and a system that declines
+# An evaluation harness for document RAG, and the RAG it was built to test
 
 **Cristina Crespo Barreda** · data analytics, data science, ML engineering
 · [c.crespobarreda@gmail.com](mailto:c.crespobarreda@gmail.com)
@@ -12,9 +12,29 @@ If you put a language model in front of your documents, the risk is not that it
 answers badly. It is that it answers confidently when the document does not say
 what it claims, and nobody notices until the number is in a report.
 
-This system answers questions about SEC 10-K annual reports, cites the passage
-behind every figure, verifies those citations in code, and declines when the
-documents do not support an answer. The evaluation measures all three.
+The usual answer is to build the system and quote a score. This repository is the
+other half: **the machinery that decides whether such a score can be believed**,
+and a working RAG over SEC 10-K filings as the thing it is pointed at.
+
+Both halves are here. The system retrieves from 19 annual reports, cites the
+passage behind every figure, verifies those citations in code, and declines when
+the documents do not support an answer. The harness measures all three, and then
+measures itself — which is where the interesting part is.
+
+**Thirteen measurement defects were found, and not one of them was in the RAG.** A
+benchmark that scored its own labelling method. A baseline denied a capability
+the system had. A verifier that could not fail, twice over. Two headline figures
+that rested on one borderline record. A page that asserted a figure it had never
+measured. Each produced a plausible number, none raised an error, and every one
+was found by checking rather than by anything breaking. Those five are the ones
+written up in full in [`docs/measurement-honesty.md`](docs/measurement-honesty.md);
+the list below holds all fourteen findings — thirteen defects and one control
+that held.
+
+That is the transferable part. The corpus is 10-K filings because they are
+public, dense with exact figures, and hard in ways that matter; the labelling
+rule, the split discipline, the ablations and the checks that fail loudly are not
+about SEC filings at all.
 
 ## The numbers
 
@@ -38,10 +58,30 @@ same claim as zero inventions out of a thousand. The interval says how much the
 sample supports, and a system evaluated this way should not overclaim in the act
 of measuring overclaiming.
 
-## What was found while building it
+## What the harness found
 
-These are the results of auditing my own work. They are here rather than buried
-because a benchmark you cannot criticise is a benchmark you have not checked.
+These are the results of auditing my own work, and they are the reason this
+repository is worth reading. A benchmark you cannot criticise is a benchmark you
+have not checked, so the defects are at the top rather than in an appendix.
+
+Note what is not on this list: not one of them is a bug in retrieval or in
+generation. Every one is a defect in how those were being measured, and every one
+would have gone on producing a reasonable-looking figure indefinitely.
+
+Four causes account for all thirteen. **This table is an index, not an ordering.**
+The numbers are identifiers, fixed in the order the findings were found, and they
+are cited from outside this file — `tests/fixture.py` names finding 8 and
+`docs/measurement-honesty.md` names finding 9 — so they are never reshuffled to
+read better. A reference that still resolves and points at the wrong thing is
+finding 7 with a different subject.
+
+| Root cause | Findings |
+|---|---|
+| **The benchmark was built to be passed.** Labels selected for evidence a keyword search could already reach, scored against a baseline denied a capability the system had. | 1, 2 |
+| **Guarantees that were not being made.** A flag, an anchor check, a reproducible run, a checksum list: each looked satisfied, none was. | 5, 7, 10, 14 |
+| **The unit of measurement was arbitrary.** Recall scored against one chunk where the evidence spans several, on boundaries that cut an argument from its heading. | 8, 9 |
+| **The published figure was not the figure measured.** An evaluator, a detector and a results page, each producing a number the data did not support. | 3, 11, 12, 13 |
+| *Not a defect.* The control that held. | 6 |
 
 **1 — The benchmark was inflating its own scores.** Half the questions were
 labeled by searching the corpus for the answer string, and questions whose
@@ -132,6 +172,75 @@ August and changed nothing: two runs seven minutes apart agree to six decimal
 places, because four thousand vectors is too small an index for the setting to
 matter. **This is the one finding whose fix moves no number: it turns an
 assumption into a declaration.**
+
+**11 — Two headline figures rested on one borderline record.** Two result files
+holding identical generated text disagreed on one of 210 records, and that single
+flip was the whole difference between 65/66 and 66/66 refusal, and between 1/66
+and 0/66 hallucination. The cause was a real improvement — refusal detection
+moved from a substring test to a rule about whether the limitation *is* the
+answer — but publishing the zero without saying which detector produced it was
+not. Zero with one detector, one with the other, on the same text.
+
+**12 — The page asserted a figure it had never measured.** Every number on the
+results page is read from the results files at build time, and the page says so.
+One note under a table was not: it claimed recall 1.000 and coverage 0.350 on
+comparatives, and neither figure exists in any results file. It sat four lines
+below a comment calling that exact defect the failure this project measures. It
+is computed now.
+
+**13 — A second measurement of the zero did not return zero.** Asked again later,
+on a different set of 22 unanswerable questions and generated fresh, the
+hallucination rate was 3.0% and 1.5% depending on the retriever — inside the
+published interval of [0%, 11.0%], and not zero. Both are reported. The sealed
+holdout is not re-run to settle it: a second execution prompted by a first result
+that was not liked destroys the only property a holdout has. The question that
+moves the figure is the same one every time, and
+[`docs/measurement-honesty.md`](docs/measurement-honesty.md) names it.
+
+**14 — The frozen release could not be checked, and then could not be
+reproduced.**
+`SHA256SUMS.txt` fixes the bytes of the frozen release. `.gitattributes` stores
+text with LF and checks it out however the platform wants, and the hashes were
+computed on Windows over CRLF. So a clone on Linux or macOS reproduces every
+artifact faithfully and mismatches all sixteen entries, and nothing in
+continuous integration was running the comparison — which is why the README's
+own entry could be false from 30 August onwards without anything noticing.
+
+The hashes are unchanged. The bytes they describe are recoverable by restoring
+CR to each line, and that is what the check does now, on every push. Regenerating
+them was the obvious fix and the wrong one: `FINAL_RELEASE_MANIFEST.md` carries
+twelve of them in the same form and is itself frozen, so recomputing would have
+traded a declarable convention for two published documents disagreeing about one
+artifact.
+
+Running it exposed a larger defect underneath, and the first two explanations
+were both wrong. Nine of the fourteen artifacts matched; the five that did not
+are the retriever and the three harness modules. The obvious reading was that
+the harness had simply moved on — findings 3, 7 and 11 are each an edit to one
+of those files — so the code should be verified against the commit the release
+was cut from rather than against the disk. That tag did not exist: the frozen
+release had been identified by nothing but a commit message. Creating it did not
+help, because the tagged blobs did not match either.
+
+**The bytes are in no commit, and in no blob.** Three searches, all kept in the
+repository so the claim can be re-tested rather than believed:
+`verify_release.py` finds them in neither the working tree nor the tag,
+`find_release_commit.py` finds them in none of the 42 commits, and
+`find_release_blobs.py` hashes all 195 blobs in the object database, orphaned
+ones included, and finds them nowhere. They were hashed from a working tree at
+17:42 on 17 August and the files were edited before anything was committed.
+
+So five entries in a list whose purpose is verification can never be satisfied,
+and are now marked `record`: the published value stays visible and nothing
+pretends to check it. What is still true is that those figures were produced by
+that code, that every results file is byte-identical to publication, and that
+finding 6 reproduced all twelve retrieval figures a week later from a modified
+harness — which is the stronger claim anyway. What was false, and implied by
+listing these five as release artifacts, is that a reader can check out the
+release and reproduce the bytes.
+[`FINAL_RELEASE_MANIFEST_ADDENDUM.md`](FINAL_RELEASE_MANIFEST_ADDENDUM.md)
+records it beside the frozen document it corrects, which cannot be edited
+without breaking the freeze it defines.
 
 ## How the system works
 
@@ -353,9 +462,12 @@ and a re-chunk can falsify it silently.
 | `src/fix_anchors.py` | two-phase anchor strengthening, reviewed by a person |
 | `src/derive_split.py` | derives split files from the master benchmark |
 | `src/check_neighbours.py` | what arrived when a labelled chunk did not |
-| `docs/measurement-honesty.md` | the four measurement problems, in full |
+| `verify_release.py` | the frozen release artifacts, gated in CI |
+| `find_release_commit.py`, `find_release_blobs.py` | the searches behind finding 14 |
+| `docs/measurement-honesty.md` | the five measurement problems, in full |
 | `eval/questions_vnext.yaml` | 100 questions, 127 audited gold labels |
 | `demo/` | self-contained extract, its own database, no API key |
+| `docs/decision-rule-ordering.md` | a decision rule written and committed before the run it decides |
 
 ## Licence
 
