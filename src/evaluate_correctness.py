@@ -62,6 +62,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import config as C  # noqa: E402
+import provenance as P  # noqa: E402
 
 log = logging.getLogger("correctness")
 
@@ -160,6 +161,15 @@ def main() -> int:
     # three near-identical answers triples the cost for very little.
     rows = [r for r in data["records"]
             if r["answerable"] and r["run"] == args.run]
+
+    # Which questions, and which generation run produced the answers being
+    # judged. The release manifest reports 91.2% fully correct, and the
+    # generation file those answers came from is recorded nowhere.
+    provenance = P.describe(args.questions)
+    judged_from = P.file_digest(args.generation)
+    log.info(P.summarise(provenance))
+    log.info("judging %s [%s]", judged_from["path"],
+             (judged_from.get("sha256") or "unknown")[:12])
 
     log.info("%d answerable questions, run %d, judge %s\n",
              len(rows), args.run, provider.name)
@@ -263,6 +273,8 @@ def main() -> int:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps({
         "generated": datetime.now().isoformat(timespec="seconds"),
+        "measured_against": provenance,
+        "judged_from": judged_from,
         "judge": os.environ.get("GENERATION_MODEL", provider.name),
         "run_judged": args.run,
         "n_answerable": n,

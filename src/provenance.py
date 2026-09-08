@@ -84,6 +84,25 @@ def _corpus(cur) -> dict:
                 "note": f"corpus counts unavailable: {type(exc).__name__}"}
 
 
+def file_digest(path) -> dict:
+    """Path, hash and size of an input that is not the question file.
+
+    evaluate_correctness.py judges the answers in a generation result file and
+    records nothing about which one. The manifest's correctness figures came
+    from `correctness_final_rrf40_run0.json`, and which generation run produced
+    the answers it judged is not written anywhere.
+    """
+    path = Path(path)
+    try:
+        data = path.read_bytes()
+    except OSError as exc:
+        return {"path": path.as_posix(), "sha256": None,
+                "note": f"unreadable: {exc}"}
+    return {"path": path.as_posix(),
+            "sha256": hashlib.sha256(data).hexdigest(),
+            "bytes": len(data)}
+
+
 def describe(questions_path, cur=None) -> dict:
     path = Path(questions_path)
     try:

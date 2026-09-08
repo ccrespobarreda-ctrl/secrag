@@ -52,6 +52,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import config as C  # noqa: E402
+import provenance as P  # noqa: E402
 import generate as G  # noqa: E402
 
 log = logging.getLogger("eval-gen")
@@ -265,6 +266,9 @@ def main() -> int:
                     help="fail unless the resolved provider is this one. Echo "
                          "refuses everything, which scores 100%% refusal and 0%% "
                          "hallucination without calling anything")
+    ap.add_argument("--allow-broken-labels", action="store_true",
+                    help="run even if gold labels no longer hold. For a "
+                         "diagnosis, never for a published figure")
     ap.add_argument("--no-judge", action="store_true")
     ap.add_argument("--no-cache", action="store_true")
     ap.add_argument("--out", default="eval/results/generation.json", type=Path)
@@ -304,6 +308,24 @@ def main() -> int:
                   len(label_problems))
         for p in label_problems[:8]:
             log.error("  %-7s %s  %s", p["id"], p["kind"], p["detail"])
+
+    # Before the first API call, not after. A hundred questions times three runs
+    # costs real money, and the gold_chunk_ids written into every record below
+    # travel on into review_generation and evaluate_correctness, so a stale
+    # label would be paid for and then propagated twice. The retrieval harness
+    # can decline at save time because it spends nothing; this one cannot.
+    if label_problems and not args.allow_broken_labels:
+        log.error("")
+        log.error("STOPPING BEFORE ANY MODEL CALL. Repair the labels first:")
+        log.error("  python src/verify_labels.py --questions %s", args.questions)
+        log.error("Or pass --allow-broken-labels to run this as a diagnosis, "
+                  "which records")
+        log.error("the count in the result file.")
+        conn.close()
+        return 1
+
+    provenance = P.describe(args.questions, cur)
+    log.info(P.summarise(provenance))
 
     # With --no-cache nothing is read and nothing is written: the run neither
     # benefits from earlier answers nor disturbs them.
@@ -522,6 +544,8 @@ def main() -> int:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps({
         "generated": datetime.now().isoformat(timespec="seconds"),
+        "measured_against": provenance,
+        "broken_labels": len(label_problems),
         "model": model, "runs": args.runs, "top_k": args.k,
         # Without this a results file cannot say which retriever produced it,
         # and two runs of this harness would be indistinguishable on disk.

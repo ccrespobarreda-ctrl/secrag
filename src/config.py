@@ -183,7 +183,17 @@ REFUSAL_MARKER = "INSUFFICIENT_CONTEXT"
 RAW_DIR = "data/raw"
 PARSED_DIR = "data/parsed"
 CIK_CACHE = "data/cik_map.csv"
-EVAL_QUESTIONS = "eval/questions.yaml"
+# The master benchmark. This pointed at eval/questions.yaml until 8 September:
+# 88 pre-canonical labels, 31 of them with no anchor and 30 whose anchor matches
+# more than eight chunks of its own document. It is the file finding 1 replaced
+# and finding 7 describes as unable to fail, and it was the default for
+# --questions in ten modules, so `make sabotage` measured against it and
+# returned 0.912 -- the figure this project withdrew when canonical relabelling
+# cost seventeen points. Finding 16.
+#
+# eval/questions.yaml is kept, because figures measured against it are published
+# and their input has to stay readable. It is no longer the default.
+EVAL_QUESTIONS = "eval/questions_vnext.yaml"
 EVAL_RESULTS_DIR = "eval/results"
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
