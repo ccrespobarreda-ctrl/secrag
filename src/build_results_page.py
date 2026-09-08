@@ -593,6 +593,10 @@ def main() -> int:
     ap.add_argument("--contact", default="", help="email shown in the header")
     ap.add_argument("--questions", default=C.EVAL_QUESTIONS, type=Path)
     ap.add_argument("--out", default="docs/index.html", type=Path)
+    ap.add_argument("--second-look", action="append", type=Path, default=[],
+                    help="generation results from a later measurement on another "
+                         "split; their hallucination rate is printed beside the "
+                         "headline one rather than left off the page")
     ap.add_argument("--limit", type=int, default=50)
     args = ap.parse_args()
 
@@ -632,6 +636,38 @@ def main() -> int:
                    if not (v["gold_labeled"] and not v["gold_retrieved"])}
     _, halluc_hi = wilson(n_hallucinated, len(unans))
     n_chunks = r.get("chunks") or "4,169"
+    # A second measurement of the same rate, on a different split, computed from
+    # its own files rather than described in prose.
+    #
+    # The zero above is what its run produced, and its interval is honest about
+    # how little 31 questions support. Leaving a later measurement that landed
+    # inside that interval off the page would make the interval decorative:
+    # admitting values up to 11% while showing only the one that flatters. The
+    # sealed holdout is not re-run to settle it -- a second execution prompted by
+    # a first result that was not liked destroys the only property a holdout has,
+    # and no amount of money buys it back.
+    second_look = ""
+    rows = []
+    for path in args.second_look:
+        if not path.exists():
+            print(f"  --second-look {path} not found, skipped")
+            continue
+        d = json.loads(path.read_text(encoding="utf-8"))
+        n_u = len({rec["id"] for rec in d["records"] if not rec["answerable"]})
+        rows.append((d.get("retrieval", path.stem), d["hallucination_rate"], n_u))
+    if rows:
+        detail = ", ".join(f"<strong>{pct(rate)}</strong> with {esc(name)}"
+                           for name, rate, _ in rows)
+        second_look = (
+            f'<p class="lede">That zero is one run on one split. Measured again '
+            f'later on a different set of {rows[0][2]} unanswerable questions, '
+            f'generated fresh, the rate was {detail} — inside the interval '
+            f'above, and not zero. Both are reported and neither is averaged '
+            f'into the other. What moves the figure is a single question, the '
+            f'same one every time; '
+            f'<a href="measurement-honesty.md">the fifth problem</a> names '
+            f'it.</p>')
+
     contact = (f'<p class="contact">Built by Cristina Crespo Barreda. '
                f'<a href="mailto:{esc(args.contact)}">{esc(args.contact)}</a></p>'
                if args.contact else
@@ -663,6 +699,7 @@ def main() -> int:
   <strong>{pct(halluc_hi)}</strong> at 95% confidence, because zero out of
   {len(unans)} is a small sample and saying otherwise would be the same
   overclaiming this measures.</p>
+  {second_look}
   <p class="lede">It declined <strong>{len(refused_ans)}</strong> of the
   {len(ans)} questions it could have answered, and in that case the search had
   not surfaced the evidence — so declining was correct. Excluding it,

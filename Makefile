@@ -91,6 +91,8 @@ results-page:            ## build docs/index.html from the evaluation files
 	  --retrieval eval/results/vnext_baseline_legacy_v2.json \
 	  --generation eval/results/vnext_generation_promptv2_judge2.json \
 	  --generation eval/results/vnext_holdout_generation.json \
+	  --second-look eval/results/block2_hybrid.json \
+	  --second-look eval/results/block2_keyword.json \
 	  --questions eval/questions_vnext.yaml \
 	  --out docs/index.html \
 	  --contact "c.crespobarreda@gmail.com"

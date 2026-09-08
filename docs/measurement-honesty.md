@@ -397,6 +397,128 @@ nothing about the absence verdicts also sitting outside the denominator: 680 of
 694 claims decided, 11 absence, and the rate over all attempts now printed beside
 the rate over decided ones.
 
+## The fifth problem: what a second measurement said
+
+The fourth problem was found by comparing two result files. This one was found by
+running the measurement again, on purpose, to answer a question this document had
+left open — and it returned three things, only one of which was the question.
+
+### The question, and the rule written before the answer
+
+Holding the company filter constant, the lexical baseline ties the full system on
+Recall@16 across all four splits and leads it on coverage in two. Whether better
+ordering produces better *answers* was named above as unmeasured. It is measured
+now.
+
+The decision rule was written and committed before the run, in
+[`decision-rule-ordering.md`](decision-rule-ordering.md). It names correctness
+against the labelled answer as what decides, and says why groundedness cannot:
+groundedness is conditional on the excerpts that arrived, so a worse retriever
+sends worse excerpts, the model says less, and what it does say is cited
+perfectly. Choosing on it rewards whichever branch risks least.
+
+Both branches were generated from scratch in the same session, on
+`questions_vnext_tuning.yaml` — 70 questions, 48 answerable — three runs each,
+and judged for correctness on all three runs rather than one.
+
+### The answer: indistinguishable, and worth reading why
+
+| | CORRECT | PARTIAL | INCORRECT |
+|---|---:|---:|---:|
+| hybrid+company | 133/144 (92.4%) | 5 | 2 |
+| keyword+company | 127/144 (88.2%) | 9 | 2 |
+
+Four points apart, and the aggregate is the wrong way to read it. Paired over the
+same questions, 10 of 142 responses differ: 7 favour hybrid, 3 favour keyword.
+The mean paired difference is **+0.025, 95% CI [-0.005, +0.055]**, which spans
+zero. Under the rule as written, that is the third case: indistinguishable at
+this sample size.
+
+Reading the ten is what makes the interval mean something rather than merely
+bound something.
+
+**Five of them are one thing.** A response mentions a figure the other omits,
+inside the same six-sentence limit: Q022 loses the segment growth percentages,
+Q025 the operating-income changes, Q029 the $90 million tariff impact twice. In
+Q022 and Q029 *both branches retrieved the same gold chunks*. The evidence was in
+front of both and one of them used it. That is not a property of a retriever.
+
+**Three are Q035, and Q035 is two artefacts.** In one run the keyword branch
+returned an empty completion, which the harness counted as answered and the judge
+scored INCORRECT — see below. In the other two it refused, correctly by its own
+account: its excerpts carried Crocs' percentage changes but not the total, so no
+comparison was possible. Meanwhile hybrid answered correctly in all three runs
+**without retrieving either labelled chunk**, citing 946 and 681 where the labels
+name 736 and 916. Q035's labels are incomplete, which is finding 9 arriving with
+a name.
+
+**One favours keyword the same way** — Q081, where both branches missed the gold
+entirely.
+
+**One is a genuine content failure, and it belongs to hybrid.** Q033 attributes
+to Wayfair a risk about market expansion when the risk Wayfair states is customer
+acquisition, in two runs of three.
+
+So the four-point gap does not come from retrieving better. It comes from
+completeness on questions where both branches held the same evidence, plus one
+question whose labels are wrong, plus one empty API response. The interval
+already said the difference was not established; the cases say what would have
+had to be true for it to be, and it is not.
+
+The guardrails split, which is the other reason nothing is being claimed:
+hallucination 3.0% for hybrid against 1.5% for keyword, false refusal 2.1%
+against 3.5%. Each branch is worse at one of them.
+
+**The rule was not moved after the result.** It was written expecting one of
+three outcomes and the third arrived. Publishing the third is the whole point of
+writing it first.
+
+### An empty completion counted as a wrong answer
+
+One response in 420 came back empty. `is_refusal("")` is False — there is no
+marker and no refusal phrase to match — so it counted as answered; citation
+verification reported "no citations at all", correctly and uselessly; and the
+correctness judge compared the empty string against the labelled answer and
+returned INCORRECT. That is exactly the error the judge-failure handling already
+refuses to make, applied to the generator instead of the judge: not knowing is a
+different state from knowing the answer is wrong. It was half of one branch's
+incorrect count, inside a comparison between two retrievers.
+
+It was also being written to the cache under a valid key, so every later run
+would have replayed it without another call: a wrong answer bought once and kept.
+Empty completions are recorded as failed calls now, reported at the end, and not
+cached.
+
+### The zero was fragile, and here is how fragile
+
+The front page reports zero inventions on 31 unanswerable questions, with an
+upper bound of 11.0% at 95% confidence. That figure is what its run produced and
+its interval is honest about how little 31 questions support.
+
+These two runs are a second look, on a different set. Over the 22 unanswerable
+questions of the tuning split, generated fresh in August, the hallucination rate
+was **3.0% for hybrid+company and 1.5% for keyword+company** — both inside the
+published interval, neither zero. Refusal decisions changed between runs on 1 and
+2 questions of 70, where the published figure is 0 of 100.
+
+The holdout is not re-run to settle this. Its value is that no parameter was ever
+chosen with it in view, and a second execution — prompted by a first result that
+was not liked — destroys that and cannot buy it back. The published zero stands
+as what it is: one run, on one split, with an interval that already admitted
+values up to 11%.
+
+**The question that moves it is Q016 again**, for the third time and the third
+reason. It was the record whose verdict flipped when the refusal detector changed.
+It is the question whose text sits exactly on the boundary between a refusal and
+a scoped answer. And now it is the question that gets answered when the model is
+asked again. Asked how many countries YETI sells in, the excerpts name specific
+markets and never give a count, and what the system does with that is not stable
+across detectors, across runs, or across retrievers.
+
+A zero with an interval is a normal claim. A zero with an interval, a second
+measurement that fell inside it, and the name of the single question responsible
+is a different kind of claim, and it is the one this project can support.
+
 ## The figures that survive
 
 | | Value | 95% CI | n |
@@ -435,7 +557,17 @@ that computes ten numbers and types the eleventh is a page whose eleventh number
 nobody will check.
 
 **Reporting.** Every figure carries its split, its n and an interval. Saturated
-types are marked as blind rather than quoted as strengths.
+types are marked as blind rather than quoted as strengths. Where a figure has
+been measured twice with different results, both are reported and neither is
+averaged into the other.
+
+**Deciding in advance.** A measurement that costs money gets its decision rule
+written and committed first, naming what would count as each outcome. The rule
+for the retrieval-to-generation comparison returned "indistinguishable", and it
+was published as that rather than adjusted until it said something.
+
+**Empty is not wrong.** A call that returns nothing is a failed call, not a
+failed answer, and it is neither scored nor cached.
 
 **Deciding — and a metric that cannot yet decide.** Comparison questions are the
 type with room to move, at 0.300 coverage on the original set. But n=5 there
