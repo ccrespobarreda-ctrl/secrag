@@ -439,6 +439,34 @@ points.
 A figure that only ever rises is a figure nobody has audited. This one fell,
 once, by a documented amount, for a documented reason.
 
+## Every component, and the evidence for it
+
+Twelve experiments, each with the number it produced and what was done about it.
+Three of them argue against components the system uses, and those are kept in
+the table rather than dropped from it.
+
+| Experiment | Result | Decision |
+|---|---|---|
+| `hnsw.ef_search` 40 → 200 | Identical to six decimal places, twice, seven minutes apart | Fixed at 40 in `sql/schema.sql`. Four thousand vectors is too small an index for it to matter, and an undeclared default is worse than a boring one *(finding 10)* |
+| RRF constant, k 60 → 40 | Recall unchanged, coverage +0.015 | Adopted. The sweep is `make eval-sweep`, so the constant is a measurement rather than a convention |
+| Re-parse and company-detection fix | 0.882 → 0.912 | Kept |
+| Canonical re-labelling of the original 50 | 0.912 → **0.735** | Published the lower figure. The largest movement in the headline metric was reading the filings again, and it cost 17 points *(finding 1)* |
+| Remove the company filter and quota | 0.735 → 0.559 | Kept. Worth −0.176, the largest contribution of any component |
+| Excerpt budget, 16 → 1 | 0.735 → 0.147 | `top_k` stays 16. Raising it from 8 doubled input tokens, and that is what the coverage on comparison questions costs |
+| Remove the dense retriever entirely, filter held constant | **0.735, unchanged.** Lexical leads on coverage | Kept for ordering only — MRR 0.310 against 0.280 — and the earlier claim that embeddings bought a 32-point gap was withdrawn *(finding 2)* |
+| Per-company sub-queries for comparisons | Four gold chunks up, one down | Not adopted. Not distinguishable from noise at this sample size |
+| Cross-encoder reranker over the same candidates | Recall@16 unchanged, coverage −0.012, +1.86 s on a 3.40 s query | Not adopted. It cost latency and coverage to buy nothing measurable |
+| Ask the groundedness judge the same claims twice | 97.2% self-agreement, against 97.4% groundedness reported | The figure is never quoted alone. The instrument's error is the size of the signal *(finding 4)* |
+| Re-measure the zero on 22 fresh unanswerable questions | 3.0% and 1.5%, not zero | Both published, inside the interval already given. The sealed holdout was not re-run to settle it *(finding 13)* |
+| Rewrite 24 gold anchors to name their passage | Anchors that identify nothing: 29 → 4, and **not one published figure changed** | Adopted and gated in CI at a threshold that only ratchets down. The unchanged figures are the test that this was verification and not tuning *(finding 7)* |
+
+**Three neural components, three negative results**, on a corpus dense with
+exact figures and proper nouns. That is a defensible finding about this domain,
+and it is not the finding this project set out to make. What the table is really
+for is the last column: every component here is present or absent because of a
+number, and the numbers that argued against the interesting components were
+published at the same size as the ones that argued for them.
+
 ## Known limitations
 
 - **Q064** is the one answerable question in the sealed set the system declined.
