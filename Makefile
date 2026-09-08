@@ -3,10 +3,28 @@
 # silently used the second definition, and `make sabotage` pointed at
 # src/evaluate.py -- the single evaluation module the specification planned,
 # which the code split into three.
+#
+# It drifted twice more, and both were found by reading this file against
+# .github/workflows/ci.yml rather than by anything failing:
+#
+#   `help` was a real target and was not in .PHONY, so the line above was false.
+#
+#   `test` named four test files by hand while CI globbed tests/test_*.py, so
+#   tests/test_harness.py ran in CI and not here. A green `make test` and a
+#   green build were checking different things. It uses the same wildcard now,
+#   and a new test file is picked up by both or by neither.
+#
+#   `verify-labels` ran the label check with no arguments while the CI gate runs
+#   it with --max-anchor-matches 8 --max-exceptions 4. The looser one passing
+#   told you nothing about the gate. Both run the gate now.
 
-.PHONY: setup schema reset-db db-up download parse verify-parse chunk embed \
-        load verify-load verify-labels search eval-retrieval eval-sweep \
-        sabotage eval-generation eval-correctness review results-page test all
+.PHONY: help setup schema reset-db db-up download parse verify-parse chunk \
+        embed load verify-load verify-labels verify-release search \
+        eval-retrieval eval-sweep sabotage eval-generation eval-correctness \
+        ordering review results-page test all
+
+# Named once, so `test` cannot fall behind the glob CI uses.
+TESTS := $(wildcard tests/test_*.py)
 
 PY   := python3
 PSQL := psql $(DATABASE_URL)
@@ -28,8 +46,10 @@ schema:                  ## create tables, indexes and the vector extension
 reset-db:                ## DESTRUCTIVE: drop the tables and the chunk_id sequence
 ifneq ($(CONFIRM),yes)
 	@echo "This drops chunks and documents, and with them the chunk_id sequence."
-	@echo "eval/questions.yaml labels 88 chunk_ids by number; they survive a"
-	@echo "reload only if data/chunks.json is unchanged."
+	@echo "eval/questions_vnext.yaml labels 127 chunk_ids by number; they"
+	@echo "survive a reload only if data/chunks.json is unchanged. This warning"
+	@echo "named the old 88-label file until 8 September, so it understated"
+	@echo "what a reset destroys."
 	@echo
 	@echo "    make reset-db CONFIRM=yes"
 	@false
@@ -60,7 +80,11 @@ verify-load:             ## reconcile the warehouse against the files on disk
 	$(PY) src/load.py --dry-run
 
 verify-labels:           ## confirm gold chunk_ids still hold their answers
-	$(PY) src/verify_labels.py
+	$(PY) src/verify_labels.py --questions eval/questions_vnext.yaml \
+	      --max-anchor-matches 8 --max-exceptions 4
+
+verify-release:          ## the frozen release artifacts, byte for byte
+	$(PY) verify_release.py
 
 # ── retrieval ────────────────────────────────────────────────────────
 search:                  ## compare the three retrieval paths: make search Q="..."
@@ -86,6 +110,9 @@ eval-correctness:        ## is the answer right, not just present
 review:                  ## read the generation results, case by case
 	$(PY) src/review_generation.py
 
+ordering:                ## the paired analysis docs/decision-rule-ordering.md specified
+	$(PY) analyse_ordering.py
+
 results-page:            ## build docs/index.html from the evaluation files
 	$(PY) src/build_results_page.py \
 	  --retrieval eval/results/vnext_baseline_legacy_v2.json \
@@ -97,11 +124,8 @@ results-page:            ## build docs/index.html from the evaluation files
 	  --out docs/index.html \
 	  --contact "c.crespobarreda@gmail.com"
 
-test:                    ## parser, chunking and citation tests
-	$(PY) tests/test_parse.py
-	$(PY) tests/test_chunk.py
-	$(PY) tests/test_generate.py
-	$(PY) tests/test_retrieve.py
+test:                    ## every tests/test_*.py, the same set CI runs
+	@for t in $(TESTS); do echo "-- $$t"; $(PY) $$t || exit 1; done
 
 # `sabotage` rather than `eval-retrieval`: it writes the same file with the
 # degradation rows the results page expects, so the page never renders a
