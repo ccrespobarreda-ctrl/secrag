@@ -242,6 +242,72 @@ release and reproduce the bytes.
 records it beside the frozen document it corrects, which cannot be edited
 without breaking the freeze it defines.
 
+## What measures what
+
+The pipeline below is the thing being measured. This is the machinery that
+measures it, and it is the part of this repository worth reusing.
+
+```text
+eval/questions_vnext.yaml — 100 questions, 127 gold labels, an anchor phrase each
+    │
+    ├─ derive_split.py ····· legacy 50 · development · sealed holdout
+    │                        splits derived from the master file, re-verified in
+    │                        CI, so a question cannot drift between them unseen
+    │
+    └─ verify_labels.py ···· does each anchor still identify ONE chunk?
+                             --max-anchor-matches 8  --max-exceptions 4
+                             thresholds ratchet down, never up  (findings 7, 8)
+    │
+    ▼
+  THREE MEASUREMENTS
+    │
+    ├─ evaluate_retrieval.py ···· Recall@16 · MRR · coverage · no model called
+    │      └─ --sabotage ········ degrade a component, confirm the metric moves
+    │
+    ├─ evaluate_generation.py ··· refusal · false refusal · groundedness
+    │      └─ 3 runs of the same questions; a decision that changes between
+    │         runs is instrument noise, not a result  (0 of 100 changed)
+    │
+    └─ evaluate_correctness.py ·· right, not merely present and well cited
+    │
+    ▼
+  FOUR CHECKS ON THE MEASUREMENTS THEMSELVES
+    │
+    ├─ compare_splits.py ······· does a bare keyword search score this split
+    │                            suspiciously well?  0.412 vs 0.929  (finding 1)
+    ├─ check_neighbours.py ····· when the labelled chunk missed, what arrived?
+    │                            11 of 24 were adjacent  (finding 9)
+    ├─ report_intervals.py ····· one observation per question, and the interval
+    │                            that says how little 31 questions support
+    └─ the judge against itself · 97.2% self-agreement, 97.4% groundedness
+                                 reported. The error is the size of the signal.
+    │
+    ▼
+  build_results_page.py → docs/index.html
+    every number read from a results file at build time, and the page says so
+    (finding 12 is the one line that was not)
+```
+
+Nothing above calls a language model except `evaluate_generation.py` and
+`evaluate_correctness.py`. Retrieval, labelling, the splits and every check cost
+nothing to run and need no API key, which is why they can be gated on every push:
+
+```text
+.github/workflows/ci.yml — six gates, no model call, no cost
+  1  verify_release.py ················ the 9 frozen artifacts, byte for byte
+  2  tests/test_*.py ·················· parser, chunking, citations, harness
+  3  tests/fixture.py --check ········· can the fixture support every label?
+  4  tests/fixture.py --load ·········· 300-chunk extract into a real Postgres
+  5  verify_labels.py ················· all 127 resolve, every anchor identifies
+  6  derive_split.py --verify ········· splits still match the master benchmark
+```
+
+Gate 3 exists because gate 5 used to be skipped whenever the corpus was absent,
+which was always: the step printed a notice and the build went green, and the
+guarantee this README makes about a green build was not being made. Gate 1 was
+added the same way — a checksum list nothing ran, with a false entry in it for
+six weeks.
+
 ## How the system works
 
 ```text
