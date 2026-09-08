@@ -21,14 +21,14 @@ passage behind every figure, verifies those citations in code, and declines when
 the documents do not support an answer. The harness measures all three, and then
 measures itself — which is where the interesting part is.
 
-**Thirteen measurement defects were found, and not one of them was in the RAG.** A
+**Fifteen measurement defects were found, and not one of them was in the RAG.** A
 benchmark that scored its own labelling method. A baseline denied a capability
 the system had. A verifier that could not fail, twice over. Two headline figures
 that rested on one borderline record. A page that asserted a figure it had never
 measured. Each produced a plausible number, none raised an error, and every one
 was found by checking rather than by anything breaking. Those five are the ones
 written up in full in [`docs/measurement-honesty.md`](docs/measurement-honesty.md);
-the list below holds all fourteen findings — thirteen defects and one control
+the list below holds all sixteen findings — fifteen defects and one control
 that held.
 
 That is the transferable part. The corpus is 10-K filings because they are
@@ -38,7 +38,8 @@ about SEC filings at all.
 
 ## The numbers
 
-Measured over 100 questions, 3 runs each, on 19 filings and 4,169 passages.
+Measured over 100 questions, 3 runs each, on 19 filings and 4,169 passages —
+the corpus this pipeline no longer reproduces, which is finding 15.
 
 | | Result | 95% CI |
 |---|---:|---|
@@ -48,6 +49,19 @@ Measured over 100 questions, 3 runs each, on 19 filings and 4,169 passages.
 | Refusal decision changed between runs | **0 / 100** | — |
 | Claims grounded in a cited passage | 97.4% | 680 of 694 decided; 11 absence, 3 judge failures |
 | Retrieval Recall@16 on the original 50 questions | 0.735 | [0.569, 0.854] |
+| The same measurement today, labels repaired | 0.794 | [0.632, 0.897] |
+
+**Why both retrieval figures are here.** 0.735 is 25 of 34 questions and 0.794
+is 27 of 34: the difference is two questions, one question moves this metric by
+2.9 points, and the intervals overlap over 22 of the 26 points each spans. The
+second figure rests on better evidence — all 62 of its labels verify by content,
+which was not checked in August — and it is **not** published as an improvement,
+because at this sample size it is the same figure measured twice, over a corpus
+that is not the same corpus. The rule in
+[`docs/decision-rule-ordering.md`](docs/decision-rule-ordering.md) that refuses
+to read an overlapping interval as support for the higher number was written for
+a different experiment, and it applies here too, including when the higher
+number is this project's own.
 
 Ten of the 31 unanswerable questions are written to bait an invention: a fiscal
 year the filings do not reach, a business segment that does not exist, an
@@ -68,7 +82,7 @@ Note what is not on this list: not one of them is a bug in retrieval or in
 generation. Every one is a defect in how those were being measured, and every one
 would have gone on producing a reasonable-looking figure indefinitely.
 
-Four causes account for all thirteen. **This table is an index, not an ordering.**
+Four causes account for all fifteen. **This table is an index, not an ordering.**
 The numbers are identifiers, fixed in the order the findings were found, and they
 are cited from outside this file — `tests/fixture.py` names finding 8 and
 `docs/measurement-honesty.md` names finding 9 — so they are never reshuffled to
@@ -78,9 +92,9 @@ finding 7 with a different subject.
 | Root cause | Findings |
 |---|---|
 | **The benchmark was built to be passed.** Labels selected for evidence a keyword search could already reach, scored against a baseline denied a capability the system had. | 1, 2 |
-| **Guarantees that were not being made.** A flag, an anchor check, a reproducible run, a checksum list: each looked satisfied, none was. | 5, 7, 10, 14 |
+| **Guarantees that were not being made.** A flag, an anchor check, a reproducible run, a checksum list, a benchmark gate: each looked satisfied, none was. | 5, 7, 10, 14, 15 |
 | **The unit of measurement was arbitrary.** Recall scored against one chunk where the evidence spans several, on boundaries that cut an argument from its heading. | 8, 9 |
-| **The published figure was not the figure measured.** An evaluator, a detector and a results page, each producing a number the data did not support. | 3, 11, 12, 13 |
+| **The published figure was not the figure measured.** An evaluator, a detector, a results page and a default argument, each producing a number the data did not support. | 3, 11, 12, 13, 16 |
 | *Not a defect.* The control that held. | 6 |
 
 **1 — The benchmark was inflating its own scores.** Half the questions were
@@ -145,7 +159,10 @@ question file with the reason each was left, and that count is gated in
 continuous integration and ratchets down like the threshold.
 
 **8 — Chunking cuts risk factors away from their content.** A 10-K risk factor
-opens with a one-sentence heading and develops over paragraphs. **243 of 4,169
+opens with a one-sentence heading and develops over paragraphs. Measured on the
+release corpus, and not recomputed since: the numerator was counted there too,
+so this is a figure to measure again rather than divide differently.
+**243 of 4,169
 chunks (5.8%) end just after such a heading, and 230 of those are in Item 1A** —
 the section every risk and comparison question asks about. Abercrombie's tariff
 risk is labelled on the chunk that ends *"Changes in tariff policy ... could
@@ -241,6 +258,62 @@ release and reproduce the bytes.
 [`FINAL_RELEASE_MANIFEST_ADDENDUM.md`](FINAL_RELEASE_MANIFEST_ADDENDUM.md)
 records it beside the frozen document it corrects, which cannot be edited
 without breaking the freeze it defines.
+
+**15 — The gate protecting the benchmark compared the labels against a copy of
+themselves.** `ci.yml` states the case for its own existence: a reload or a
+re-chunk silently repoints every gold label, no error is raised, and every
+Recall@k figure afterwards is measured against text that is not the answer. So
+it stands up Postgres, loads a corpus, confirms all 127 labels resolve, and
+concludes that a green build means the measurements can be trusted.
+
+The corpus it loads is `tests/fixture_corpus.json`, which `fixture.py --build`
+produced by extracting exactly the chunks the labels name. Once built it cannot
+disagree with them. **The gate was immune to the one failure it was written to
+catch**, and it stayed green for three weeks while the pipeline stopped
+producing the corpus every published figure was measured against.
+
+It surfaced by running the instructions under "Reproducing it" from a clean
+clone, which nothing had ever done — the one thing continuous integration does
+not do, because the filings are not in the repository. The clone built 4,124
+chunks where the release had 4,169, and 23 of 127 labels no longer held. Three
+searches settled what that meant: every one of the 23 had its anchor elsewhere
+in the same document, none was missing, and the text was byte-identical. Only
+the indices had moved, because 45 chunks fewer upstream shifts everything after
+them.
+
+The repair is in [`docs/relabel-log.md`](docs/relabel-log.md) and the rule was
+written before it ran: a label moved only where exactly one chunk of its
+document held content identical to the release text. Not the nearest — Q029's
+match is chunk 80 while the nearest candidate is 79, and Q001's anchor appears
+in five chunks of Urban Outfitters' filing, one of them a table rejected by hand
+in August. Across the fixture's 295 chunks, 294 have exactly one identical
+counterpart and none has two, so the mapping is injective and the repair is
+checkable rather than plausible. The 23 moved, nothing was left ambiguous, and
+all 127 labels now resolve with their content verified, which is a stronger
+statement than the one made in August.
+
+**The fixture turned out to be the only surviving record of the release corpus**
+— an accidental backup, committed for another reason — and it is preserved as
+`tests/fixture_corpus_release_20260817.json` because nothing else in the
+repository holds that text. **The gate itself is not fixed.** It is listed under
+Known limitations, because changing it changes what a green build means, and
+that is a release of its own.
+
+**16 — Every measurement run without an argument used the abandoned labels.**
+`config.EVAL_QUESTIONS` points at `eval/questions.yaml`: 88 labels, 31 of them
+with no anchor at all and 30 whose anchor matches more than eight chunks —
+`'Wayfair'` in 107, `'Etsy'` in 130. It is the pre-canonical file, the one
+finding 1 replaced and finding 7 describes as unable to fail. It is also the
+default for `--questions` in ten modules, and `make eval-retrieval` and
+`make sabotage` pass no `--questions` at all.
+
+So `make all` ends by measuring against labels the project abandoned, and
+returns a plausible number. It returned 0.912, which is the figure this
+README's own history attributes to the state before the canonical relabelling
+cost seventeen points. Reproducing a withdrawn figure exactly is the only reason
+it was caught: a number nobody recognised would have been believed. Both
+measurements are kept in `eval/results/` so the difference can be attributed
+rather than argued about.
 
 ## What measures what
 
@@ -521,6 +594,21 @@ published at the same size as the ones that argued for them.
   The continuous-integration threshold stays at 8 and the exception count at 4;
   neither ever rises to make a build pass.
 
+- **The corpus is not pinned, and the release corpus is not reproducible.**
+  `src/edgar.py` fetches the latest 10-K per ticker rather than named
+  accessions, and the pipeline now yields 4,124 chunks where the release had
+  4,169. Every figure above except the repaired retrieval line was measured on
+  the 4,169-chunk corpus. The accession numbers are immutable and
+  `data/manifest.json` records them, so pinning is possible and has not been
+  done; until it is, a clone measures its own corpus and not this one.
+
+- **The benchmark gate still cannot fail the way finding 15 describes.**
+  `tests/fixture.py --check` compares the labels against a fixture extracted
+  from the labels. The fix is for it to compare against `data/chunks.json`
+  whenever that file exists, and to gate the chunk count against a declared
+  value, so a corpus that stops reproducing fails the build instead of passing
+  it. It is not done, and doing it changes what a green build means.
+
 - **Chunk boundaries are a known defect and have not been changed.** Fixing them
   means re-chunking, which reissues every `chunk_id` and invalidates all 127
   labels and every published figure. It is the right next change and it is a
@@ -560,6 +648,13 @@ Retrieval costs nothing to run: no model is called. `LLM_PROVIDER=echo` exercise
 the whole generation path — prompt building, citation parsing, refusal detection
 — without spending a token.
 
+`psql` is not a dependency of this project and the instructions above assumed
+it: the container already has it, so
+`Get-Content sql/schema.sql -Raw | docker compose exec -T db psql -U secrag -d secrag`
+works with nothing installed. That and everything else the first clean clone
+hit is in [`docs/first-run-log.md`](docs/first-run-log.md), which is the
+instructions being executed rather than asserted.
+
 Continuous integration runs the tests, and separately stands up Postgres and
 confirms all 127 gold labels still resolve. A label is a claim about the corpus,
 and a re-chunk can falsify it silently.
@@ -580,6 +675,9 @@ and a re-chunk can falsify it silently.
 | `verify_release.py` | the frozen release artifacts, gated in CI |
 | `find_release_commit.py`, `find_release_blobs.py` | the searches behind finding 14 |
 | `analyse_ordering.py` | the paired analysis the decision rule specified |
+| `first_run.py` | the documented instructions, executed and logged |
+| `diagnose_labels.py`, `check_fixture_vs_corpus.py` | what broke in finding 15, and why the gate missed it |
+| `relabel_review.py`, `apply_relabel.py` | the repair, reviewable then applied by rule |
 | `docs/measurement-honesty.md` | the five measurement problems, in full |
 | `eval/questions_vnext.yaml` | 100 questions, 127 audited gold labels |
 | `demo/` | self-contained extract, its own database, no API key |
