@@ -459,6 +459,23 @@ the table rather than dropped from it.
 | Ask the groundedness judge the same claims twice | 97.2% self-agreement, against 97.4% groundedness reported | The figure is never quoted alone. The instrument's error is the size of the signal *(finding 4)* |
 | Re-measure the zero on 22 fresh unanswerable questions | 3.0% and 1.5%, not zero | Both published, inside the interval already given. The sealed holdout was not re-run to settle it *(finding 13)* |
 | Rewrite 24 gold anchors to name their passage | Anchors that identify nothing: 29 → 4, and **not one published figure changed** | Adopted and gated in CI at a threshold that only ratchets down. The unchanged figures are the test that this was verification and not tuning *(finding 7)* |
+| **Does better ordering produce better answers?** Hybrid against lexical, company filter held, 48 answerable questions × 3 runs, both generated fresh in one session | Correctness 0.927 against 0.889. **Paired difference +0.038, 95% CI [−0.003, +0.094]** | **Indistinguishable at this sample size, and that is the published result.** Decided by [`docs/decision-rule-ordering.md`](docs/decision-rule-ordering.md), written and committed before the run. Reproduce it with `python analyse_ordering.py` |
+
+**The last row is the only one decided in advance**, and the rule it was decided
+by is the reason it can be believed. It fixed the criterion — correctness, not
+groundedness, because groundedness is conditional on the excerpts that arrived
+and so rewards whichever branch risks least — and it fixed the analysis as
+paired, on the grounds that two aggregate rates over 48 questions have little
+power. The aggregate counts do show hybrid ahead. That is the comparison the
+rule declined in advance.
+
+Four questions separate the branches, and three of them were already named in
+[`docs/measurement-honesty.md`](docs/measurement-honesty.md) before this
+analysis existed: Q035 is an empty completion the harness counted as answered
+plus a labelling gap, Q081 is both branches missing the gold entirely, and
+hybrid's win on Q035 came without retrieving either labelled chunk. A difference
+built substantially out of labelling artefacts is not evidence about ordering,
+which is the same conclusion the interval reaches independently.
 
 **Three neural components, three negative results**, on a corpus dense with
 exact figures and proper nouns. That is a defensible finding about this domain,
@@ -481,8 +498,12 @@ published at the same size as the ones that argued for them.
   rule.
 - Two question types in the development split sit at 1.000 and are blind: they
   cannot register an improvement or a regression.
-- Whether better ordering produces better answers has not been measured. The
-  generation evaluation ran on one retrieval configuration only.
+- **Whether better ordering produces better answers is measured and
+  undecided.** The paired difference is +0.038 with a 95% interval of [−0.003,
+  +0.094], so the dense half is not shown to buy answers and not shown not to.
+  The rule written before the run names what settles it, and it is not a rerun:
+  the judge's 97.2% self-agreement is the binding constraint, so an independent
+  judge over a sample is the next measurement.
 
 - **Recall@16 understates operational retrieval.** It is measured against
   canonical labels; 46% of its misses retrieved an adjacent chunk from the same
@@ -558,6 +579,7 @@ and a re-chunk can falsify it silently.
 | `src/check_neighbours.py` | what arrived when a labelled chunk did not |
 | `verify_release.py` | the frozen release artifacts, gated in CI |
 | `find_release_commit.py`, `find_release_blobs.py` | the searches behind finding 14 |
+| `analyse_ordering.py` | the paired analysis the decision rule specified |
 | `docs/measurement-honesty.md` | the five measurement problems, in full |
 | `eval/questions_vnext.yaml` | 100 questions, 127 audited gold labels |
 | `demo/` | self-contained extract, its own database, no API key |
