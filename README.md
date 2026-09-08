@@ -471,7 +471,23 @@ and a re-chunk can falsify it silently.
 
 ## Licence
 
-Apache 2.0. The filings are public and fetched from EDGAR by `src/edgar.py`; they
-are not redistributed here. The labels are mine, assigned by reading the filings,
-and the criterion is stated because a recall figure without its labeling
-criterion is uninterpretable.
+Apache 2.0 covers the code. The labels are mine, assigned by reading the
+filings, and the criterion is stated because a recall figure without its
+labeling criterion is uninterpretable.
+
+**The filings themselves.** They are public 10-K documents filed with the SEC,
+and `src/edgar.py` fetches them; the nineteen annual reports are not
+redistributed here. Two extracts of filing text are, and this section used to
+say they were not:
+
+- `tests/fixture_corpus.json` — every chunk a gold label points at plus the
+  chunk either side, about 300 of 4,169, stored whole. It exists because
+  continuous integration was skipping the label check whenever the corpus was
+  absent, which was always. Without it the green build guarantees nothing.
+- `demo/demo_corpus.json` — the 295-chunk extract behind the three-command demo,
+  so the system can be watched running without an EDGAR download or an API key.
+
+Both are the minimum needed to reproduce a published check and to run the thing,
+which is a different act from republishing nineteen annual reports, and both are
+now named rather than left for a reader to find. Neither is used for any figure
+in this README.

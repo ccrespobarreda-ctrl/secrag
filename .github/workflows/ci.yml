@@ -34,13 +34,12 @@ jobs:
     name: unit tests and release integrity
     runs-on: ubuntu-latest
     steps:
-      # fetch-depth: 0 for the tags. The default shallow checkout has none, and
-      # the release-code half of SHA256SUMS.txt is verified against the tag the
-      # release was cut from, so without this the check reports the release as
-      # unrecoverable on every run.
+      # A shallow checkout is enough. This carried fetch-depth: 0 for one
+      # afternoon, when the release code was going to be verified against the
+      # tag it was cut from; that turned out to be impossible -- finding 14 --
+      # and the entries became `record`. Nothing here reads history now. A
+      # `#@ verify ref` section in SHA256SUMS.txt would need the tags back.
       - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-python@v6
         with:
