@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-08T23:56:43",
+ "generated": "2026-09-09T18:39:08",
  "measured_against": {
   "questions_file": "eval/questions_vnext_regression.yaml",
   "questions_sha256": "85bd4381cc6004dd763c43fa904bc6638c3e2e2c1862783f47833302861b9882",
@@ -8,7 +8,10 @@
   "n_labels": 62,
   "n_labels_with_anchor": 62,
   "n_chunks": 4124,
-  "n_documents": 19
+  "n_documents": 19,
+  "splits": {
+   "regression": 50
+  }
  },
  "broken_labels": 0,
  "k": 16,
