@@ -295,9 +295,26 @@ statement than the one made in August.
 **The fixture turned out to be the only surviving record of the release corpus**
 — an accidental backup, committed for another reason — and it is preserved as
 `tests/fixture_corpus_release_20260817.json` because nothing else in the
-repository holds that text. **The gate itself is not fixed.** It is listed under
-Known limitations, because changing it changes what a green build means, and
-that is a release of its own.
+repository holds that text.
+
+**What was done about it.** The corpus is now declared rather than discovered.
+[`eval/corpus_expected.yaml`](eval/corpus_expected.yaml) names the nineteen
+filings by accession number, which EDGAR never reuses, alongside the chunk count
+and the chunker settings that produce it — a count without its inputs would be
+finding 10 again. `src/edgar.py --pinned` fetches exactly those and makes no
+submissions request at all, because an accession and a document name are the
+whole address; the unpinned path still takes the latest filing per ticker and
+now says so. `src/pin_corpus.py --verify` compares the live corpus against the
+declaration and stops on a filing that changed, a filing that vanished, or a
+chunker that no longer matches.
+
+**And what the gate still cannot do.** The corpus is not in the repository, so
+the check in continuous integration compares the declaration against
+`data/manifest.json` and stops there: it catches a declaration edited without
+its source and a manifest regenerated over different filings, and it does not
+count the 4,124 chunks. Nothing in a build without a corpus can. The full check
+runs wherever the corpus is loaded, with the same command, and both halves say
+which one they are rather than leaving a reader to assume the wider claim.
 
 **16 — Every measurement run without an argument used the abandoned labels.**
 `config.EVAL_QUESTIONS` points at `eval/questions.yaml`: 88 labels, 31 of them
@@ -594,20 +611,22 @@ published at the same size as the ones that argued for them.
   The continuous-integration threshold stays at 8 and the exception count at 4;
   neither ever rises to make a build pass.
 
-- **The corpus is not pinned, and the release corpus is not reproducible.**
-  `src/edgar.py` fetches the latest 10-K per ticker rather than named
-  accessions, and the pipeline now yields 4,124 chunks where the release had
-  4,169. Every figure above except the repaired retrieval line was measured on
-  the 4,169-chunk corpus. The accession numbers are immutable and
-  `data/manifest.json` records them, so pinning is possible and has not been
-  done; until it is, a clone measures its own corpus and not this one.
+- **The current corpus is pinned; the release corpus is still not
+  reproducible.** `src/edgar.py --pinned` rebuilds the 4,124-chunk corpus
+  exactly, and `src/pin_corpus.py --verify` proves it did. What no command
+  rebuilds is the 4,169-chunk corpus the release was measured over: it predates
+  the re-parse of 14 August, and every figure above except the repaired
+  retrieval line was measured on it. The 295 chunks of it that survive are in
+  `tests/fixture_corpus_release_20260817.json`, which is enough to audit the
+  labels and not enough to re-measure anything.
 
-- **The benchmark gate still cannot fail the way finding 15 describes.**
-  `tests/fixture.py --check` compares the labels against a fixture extracted
-  from the labels. The fix is for it to compare against `data/chunks.json`
-  whenever that file exists, and to gate the chunk count against a declared
-  value, so a corpus that stops reproducing fails the build instead of passing
-  it. It is not done, and doing it changes what a green build means.
+- **`tests/fixture.py --check` still compares the labels against a fixture
+  extracted from the labels**, and on its own it cannot fail the way finding 15
+  describes. What closes the hole is beside it rather than inside it:
+  `src/pin_corpus.py --verify` gates the declared corpus on every push, and the
+  full chunk-count check runs where a corpus exists. Making the fixture check
+  compare against `data/chunks.json` when that file is present is still worth
+  doing, and would make a drifted corpus fail in two places instead of one.
 
 - **Chunk boundaries are a known defect and have not been changed.** Fixing them
   means re-chunking, which reissues every `chunk_id` and invalidates all 127
@@ -675,6 +694,8 @@ and a re-chunk can falsify it silently.
 | `verify_release.py` | the frozen release artifacts, gated in CI |
 | `find_release_commit.py`, `find_release_blobs.py` | the searches behind finding 14 |
 | `analyse_ordering.py` | the paired analysis the decision rule specified |
+| `src/pin_corpus.py` | declares the nineteen filings, and verifies the corpus against them |
+| `eval/corpus_expected.yaml` | the declaration itself, gated on every push |
 | `first_run.py` | the documented instructions, executed and logged |
 | `diagnose_labels.py`, `check_fixture_vs_corpus.py` | what broke in finding 15, and why the gate missed it |
 | `relabel_review.py`, `apply_relabel.py` | the repair, reviewable then applied by rule |
