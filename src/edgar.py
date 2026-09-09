@@ -2,7 +2,8 @@
 """
 Download 10-K filings from SEC EDGAR.
 
-    python src/edgar.py --out data/raw
+    python src/edgar.py                  # the latest 10-K of each ticker
+    python src/edgar.py --pinned         # exactly the filings that were measured
 
 Three things the SEC enforces, and each one returns a 403 rather than a helpful
 error if you get it wrong:
@@ -14,6 +15,21 @@ error if you get it wrong:
 The CIK map is cached to disk after the first run. It is a 10 MB file that
 changes rarely, and re-downloading it on every run is exactly the kind of
 carelessness the fair-access rules exist to prevent.
+
+WHY --pinned EXISTS
+
+Without it this asks EDGAR for the *latest* 10-K per ticker, which is a question
+whose answer changes. The release was measured over nineteen specific filings
+producing 4,169 chunks; the same command later produced 4,124, every chunk index
+after each difference shifted, and 23 gold labels stopped holding. That is
+finding 15, and its cause is that "the latest" was never written down.
+
+`eval/corpus_expected.yaml` writes it down. Accession numbers are immutable, so
+--pinned rebuilds the exact corpus the published figures were measured over --
+and it needs no submissions request at all, because the accession and the
+primary document are the whole address. That also recovers a filing EDGAR will
+no longer volunteer: SKX has no 10-K on record now, and unpinned runs report it
+as missing.
 """
 
 from __future__ import annotations
@@ -168,6 +184,49 @@ def latest_filing(cik: int, form_type: str = C.FORM_TYPE) -> dict | None:
     return None
 
 
+def pinned_filings(path: Path) -> list[dict]:
+    """The declared filings, read rather than discovered.
+
+    No request to the submissions endpoint: an accession number and a primary
+    document name are the complete address of a filing, so nothing here depends
+    on what EDGAR currently considers most recent. `company` is carried through
+    from the pin because the warehouse column is NOT NULL and there is no
+    lookup to supply it.
+    """
+    import yaml
+
+    if not path.is_file():
+        raise SystemExit(
+            f"{path} not found. Write it from a corpus you trust:\n"
+            f"  python src/pin_corpus.py --write")
+    pin = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    filings = pin.get("filings") or []
+    if not filings:
+        raise SystemExit(f"{path} declares no filings.")
+
+    out = []
+    for f in filings:
+        missing = [k for k in ("ticker", "cik", "accession", "document")
+                   if not f.get(k)]
+        if missing:
+            raise SystemExit(f"{path}: {f.get('ticker', '?')} is missing "
+                             f"{', '.join(missing)}")
+        out.append({
+            "cik": int(f["cik"]),
+            "company": f.get("company", ""),
+            "form_type": f.get("form_type", C.FORM_TYPE),
+            "accession": str(f["accession"]),
+            "accession_dashed": f.get("accession_dashed", ""),
+            "filed_date": f.get("filed_date"),
+            "report_date": f.get("report_date"),
+            "document": f["document"],
+            "fiscal_year": f.get("fiscal_year"),
+            "ticker": str(f["ticker"]).upper(),
+            "declared_raw_chars": f.get("raw_chars"),
+        })
+    return out
+
+
 def download_filing(filing: dict, out_dir: Path) -> Path:
     url = C.SEC_ARCHIVE.format(cik=filing["cik"], accession=filing["accession"],
                                document=filing["document"])
@@ -196,6 +255,13 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Download 10-K filings from EDGAR")
     ap.add_argument("--out", default=C.RAW_DIR, type=Path)
     ap.add_argument("--tickers", nargs="*", default=C.COMPANIES)
+    ap.add_argument("--pinned", action="store_true",
+                    help="download the filings declared in "
+                         "eval/corpus_expected.yaml instead of the latest, so "
+                         "the corpus is the one the figures were measured over")
+    ap.add_argument("--pin", type=Path,
+                    default=Path(__file__).resolve().parent.parent
+                    / "eval" / "corpus_expected.yaml")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
 
@@ -208,24 +274,41 @@ def main() -> int:
                   "without one.")
         return 2
 
-    cik_map = load_cik_map(Path(C.CIK_CACHE))
+    if args.pinned:
+        # No ticker index and no submissions request: the pin is the address.
+        planned = pinned_filings(args.pin)
+        log.info("pinned to %s: %d filings", args.pin.name, len(planned))
+    else:
+        cik_map = load_cik_map(Path(C.CIK_CACHE))
+        planned = []
+        for ticker in args.tickers:
+            entry = cik_map.get(ticker.upper())
+            if not entry:
+                log.warning("%-6s not found in the ticker index", ticker)
+                continue
+            cik, _name = entry
+            filing = latest_filing(cik)
+            if not filing:
+                log.warning("%-6s has no %s on record", ticker, C.FORM_TYPE)
+                continue
+            filing["ticker"] = ticker.upper()
+            planned.append(filing)
+        log.warning("Downloading the latest filing of each ticker. The corpus "
+                    "this produces\n  is whatever EDGAR holds today, not the "
+                    "one the published figures were\n  measured over. Use "
+                    "--pinned for that.")
 
-    manifest, missing = [], []
-    for ticker in args.tickers:
-        entry = cik_map.get(ticker.upper())
-        if not entry:
-            log.warning("%-6s not found in the ticker index", ticker)
-            missing.append(ticker)
-            continue
+    # What was asked for differs by mode, and the count at the end has to say
+    # so: --pinned requests the declared filings, not config.COMPANIES. An
+    # earlier version of this reported "19/4 filings" and named SKX as missing
+    # when SKX is not in the pin at all.
+    requested = ({f["ticker"] for f in planned} if args.pinned
+                 else {t.upper() for t in args.tickers})
+    manifest = []
+    missing = sorted(requested - {f["ticker"] for f in planned})
 
-        cik, name = entry
-        filing = latest_filing(cik)
-        if not filing:
-            log.warning("%-6s has no %s on record", ticker, C.FORM_TYPE)
-            missing.append(ticker)
-            continue
-
-        filing["ticker"] = ticker.upper()
+    for filing in planned:
+        ticker = filing["ticker"]
         path = download_filing(filing, args.out)
 
         # doc_id is recorded, not reconstructed downstream. src/load.py used to
@@ -239,17 +322,32 @@ def main() -> int:
         filing["doc_id"] = path.stem
         filing["local_path"] = path.as_posix()
         filing["raw_chars"] = path.stat().st_size
+
+        # A pinned filing whose bytes differ from the declaration is caught
+        # here, before parsing, chunking and embedding spend twenty minutes
+        # producing a corpus that is not the declared one.
+        declared = filing.pop("declared_raw_chars", None)
+        if declared is not None and int(declared) != filing["raw_chars"]:
+            log.error("%-6s is %d bytes, declared %d. The pin and the archive "
+                      "disagree;", ticker, filing["raw_chars"], int(declared))
+            log.error("       delete %s and re-run, or investigate before "
+                      "measuring.", path.name)
+            return 1
+
         manifest.append(filing)
 
     manifest_path = Path(args.out).parent / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=1), encoding="utf-8")
 
     log.info("Downloaded %d/%d filings; manifest -> %s",
-             len(manifest), len(args.tickers), manifest_path)
+             len(manifest), len(requested), manifest_path)
     if missing:
         log.warning("Missing: %s", ", ".join(missing))
         log.warning("Check the ticker on sec.gov/cgi-bin/browse-edgar — companies "
                     "that delisted or changed symbol will not resolve.")
+    if args.pinned and not missing:
+        log.info("Every declared filing is present. Verify the corpus once it "
+                 "is loaded:\n  python src/pin_corpus.py --verify")
     return 0
 
 
