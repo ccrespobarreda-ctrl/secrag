@@ -75,6 +75,31 @@ in finding 3.
 When comparing the two documents, `Recall@16 = 0.735` is the figure that means
 the same thing in both.
 
+## 4. The release figures cannot be audited question by question
+
+`eval/results/retrieval_final.json` reports Recall@16, MRR and coverage in
+aggregate and by question type. It has no `per_question` block, because that
+block was added afterwards, for a reason its own comment gives: so an aggregate
+can be audited rather than trusted. Two things are impossible without it — a
+bootstrap interval on coverage, which is a mean of fractions and not a
+proportion, and asking whether two strategies with the same recall missed the
+same questions.
+
+So `0.735` can be read and not taken apart. The interval published beside it,
+`[0.569, 0.854]`, is a Wilson interval on 25 of 34 questions and is reproducible
+from the aggregate alone; the coverage figure of `0.589` has no interval for
+exactly this reason. Every measurement taken since carries the per-question
+records.
+
+**What the manifest did record, and nobody read.** Line 19 of
+`FINAL_RELEASE_MANIFEST.json` declares
+`"benchmark_file": "eval/questions_canonical.yaml"`. On 8 September an
+afternoon went into establishing which question file the published figures were
+measured against, and the answer had been in the manifest since 18 August. The
+fact existed; it was in a document rather than in the output of the
+measurement, so nobody looked. That is why every result file now opens with
+`measured_against`.
+
 ---
 
 **The release tag.** `SECRAG-RRF40-2026-08-17` points at the commit that

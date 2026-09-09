@@ -1,728 +1,335 @@
-# An evaluation harness for document RAG, and the RAG it was built to test
+# Northlane Supply Co. — Profitability & Retention Analytics
 
-**Cristina Crespo Barreda** · data analytics, data science, ML engineering
-· [c.crespobarreda@gmail.com](mailto:c.crespobarreda@gmail.com)
+A US DTC apparel brand analysed end to end: synthetic data generation, a dbt
+transformation layer on Postgres, automated quality gates, and a
+reconciliation harness that proves the pipeline recovers the truth from a
+corrupted source export.
 
-**[See the results and every question →](https://ccrespobarreda-ctrl.github.io/secrag/)**
-· **[Run it yourself in three commands →](demo/README.md)**
+This module produces the **raw layer**: three years of deliberately messy
+e-commerce data for a fictional US outdoor-apparel brand, sized and calibrated
+so that a specific set of profitability problems is genuinely present in the
+data and genuinely discoverable through analysis.
+
+> **The data is synthetic.** Northlane Supply Co. does not exist. The generator
+> is included in full so the assumptions behind every number are inspectable.
+> Building it required modelling the actual economics of a DTC apparel
+> business — dimensional-weight shipping, returns disposition, cost drift,
+> platform over-attribution — which is why it is part of the portfolio rather
+> than hidden behind a CSV.
 
 ---
 
-If you put a language model in front of your documents, the risk is not that it
-answers badly. It is that it answers confidently when the document does not say
-what it claims, and nobody notices until the number is in a report.
-
-The usual answer is to build the system and quote a score. This repository is the
-other half: **the machinery that decides whether such a score can be believed**,
-and a working RAG over SEC 10-K filings as the thing it is pointed at.
-
-Both halves are here. The system retrieves from 19 annual reports, cites the
-passage behind every figure, verifies those citations in code, and declines when
-the documents do not support an answer. The harness measures all three, and then
-measures itself — which is where the interesting part is.
-
-**Fifteen measurement defects were found, and not one of them was in the RAG.** A
-benchmark that scored its own labelling method. A baseline denied a capability
-the system had. A verifier that could not fail, twice over. Two headline figures
-that rested on one borderline record. A page that asserted a figure it had never
-measured. Each produced a plausible number, none raised an error, and every one
-was found by checking rather than by anything breaking. Those five are the ones
-written up in full in [`docs/measurement-honesty.md`](docs/measurement-honesty.md);
-the list below holds all sixteen findings — fifteen defects and one control
-that held.
-
-That is the transferable part. The corpus is 10-K filings because they are
-public, dense with exact figures, and hard in ways that matter; the labelling
-rule, the split discipline, the ablations and the checks that fail loudly are not
-about SEC filings at all.
-
-## The numbers
-
-Measured over 100 questions, 3 runs each, on 19 filings and 4,169 passages —
-the corpus this pipeline no longer reproduces, which is finding 15.
-
-| | Result | 95% CI |
-|---|---:|---|
-| Questions with no answer in the corpus, correctly declined | **31 / 31** | [89.0%, 100%] |
-| Answers invented on those questions | **0** | [0%, 11.0%] |
-| Answerable questions wrongly refused, retrieval-adjusted | **0 / 69** | [0%, 5.3%] |
-| Refusal decision changed between runs | **0 / 100** | — |
-| Claims grounded in a cited passage | 97.4% | 680 of 694 decided; 11 absence, 3 judge failures |
-| Retrieval Recall@16 on the original 50 questions | 0.735 | [0.569, 0.854] |
-| The same measurement today, labels repaired | 0.794 | [0.632, 0.897] |
-
-**Why both retrieval figures are here.** 0.735 is 25 of 34 questions and 0.794
-is 27 of 34: the difference is two questions, one question moves this metric by
-2.9 points, and the intervals overlap over 22 of the 26 points each spans. The
-second figure rests on better evidence — all 62 of its labels verify by content,
-which was not checked in August — and it is **not** published as an improvement,
-because at this sample size it is the same figure measured twice, over a corpus
-that is not the same corpus. The rule in
-[`docs/decision-rule-ordering.md`](docs/decision-rule-ordering.md) that refuses
-to read an overlapping interval as support for the higher number was written for
-a different experiment, and it applies here too, including when the higher
-number is this project's own.
-
-Ten of the 31 unanswerable questions are written to bait an invention: a fiscal
-year the filings do not reach, a business segment that does not exist, an
-acquisition that never happened. None produced an answer in any run.
-
-**Why the intervals are there.** Zero inventions out of 31 questions is not the
-same claim as zero inventions out of a thousand. The interval says how much the
-sample supports, and a system evaluated this way should not overclaim in the act
-of measuring overclaiming.
-
-## What the harness found
-
-These are the results of auditing my own work, and they are the reason this
-repository is worth reading. A benchmark you cannot criticise is a benchmark you
-have not checked, so the defects are at the top rather than in an appendix.
-
-Note what is not on this list: not one of them is a bug in retrieval or in
-generation. Every one is a defect in how those were being measured, and every one
-would have gone on producing a reasonable-looking figure indefinitely.
-
-Four causes account for all fifteen. **This table is an index, not an ordering.**
-The numbers are identifiers, fixed in the order the findings were found, and they
-are cited from outside this file — `tests/fixture.py` names finding 8 and
-`docs/measurement-honesty.md` names finding 9 — so they are never reshuffled to
-read better. A reference that still resolves and points at the wrong thing is
-finding 7 with a different subject.
-
-| Root cause | Findings |
-|---|---|
-| **The benchmark was built to be passed.** Labels selected for evidence a keyword search could already reach, scored against a baseline denied a capability the system had. | 1, 2 |
-| **Guarantees that were not being made.** A flag, an anchor check, a reproducible run, a checksum list, a benchmark gate: each looked satisfied, none was. | 5, 7, 10, 14, 15 |
-| **The unit of measurement was arbitrary.** Recall scored against one chunk where the evidence spans several, on boundaries that cut an argument from its heading. | 8, 9 |
-| **The published figure was not the figure measured.** An evaluator, a detector, a results page and a default argument, each producing a number the data did not support. | 3, 11, 12, 13, 16 |
-| *Not a defect.* The control that held. | 6 |
-
-**1 — The benchmark was inflating its own scores.** Half the questions were
-labeled by searching the corpus for the answer string, and questions whose
-evidence could not be found that way were dropped. That selects for questions a
-plain keyword search already handles. Measured: a bare full-text search scores
-0.412 on the questions written first and 0.929 on those added later. The
-published retrieval figure is the lower one.
-
-**2 — My baseline was unfair, and fixing it cost me the result.** The first
-version of that analysis compared the full system against keyword search without
-the company filter, and credited a 32-point gap to retrieval quality. Holding the
-filtering constant, the dense retriever and the lexical baseline tie on
-Recall@16 across four splits, and the baseline leads on coverage. The embeddings
-contribute ordering, not reach. Full account in
-[`docs/measurement-honesty.md`](docs/measurement-honesty.md).
-
-**3 — Two parts of the evaluation contradicted each other.** One check counted a
-response as a refusal; another flagged that same response for stating figures
-inside a refusal. Both were describing a partial answer with its scope declared,
-which is the correct response when the evidence was not retrieved. Fixing the
-detection moved the apparent false-refusal rate from 2.9% to 0% without touching
-the model — the earlier figure was measuring the evaluator.
-
-**4 — The groundedness judge is as noisy as the thing it measures.** Asked the
-same claims twice, it agreed with itself 97.2% of the time. The groundedness it
-reports is 97.4%. The instrument's error is the size of the signal, so that
-figure is never quoted alone.
-
-**5 — `--no-cache` deleted the cache instead of bypassing it.** It started from
-an empty dictionary and saved it at the end, overwriting 300 real entries with
-no warning. Found by reading the harness while planning an unrelated run.
-
-**6 — The frozen release reproduces exactly.** Seven days later, from a question
-file rebuilt by a script, with the evaluation harness modified, on a reloaded
-environment: all twelve retrieval figures identical to the manifest of 17 August.
-
-**7 — The verifier that checks the benchmark could not fail, twice over.** Every
-gold label carries an anchor — a phrase that must still be inside the chunk it
-points at — and after each reload all 127 were reported as holding. Two separate
-defects made that guarantee empty.
-
-Nothing checked whether an anchor identified *one* chunk. `'Wayfair'` matched 108
-chunks written by Wayfair, and stayed satisfied wherever its label drifted. And
-when that check was added, its counting was wrong in two ways at once: `LIKE`
-reads the `%` of a percentage as a wildcard, so `'45%'` was never searched for as
-written, and the stored text keeps the line breaks of a filing's tables, so a
-multi-word anchor read off a printed chunk matched nothing while sitting plainly
-inside it. Three successive counts of the same property returned 44, 31 and 29.
-**Neither defect ever raised an error. Both produced a plausible number.**
-
-Anchor matches are now counted over whitespace-flattened text and gated in
-continuous integration, at a threshold that only ratchets down. Twenty-four
-anchors were rewritten to name their passage rather than a word that appears
-throughout the filing — `'Wayfair'` became `'of CastleGate and the Wayfair'`,
-`'4,966,370'` became `'(Note 10) $ 4,966,370'`. Anchors that cannot identify
-their chunk fell from 29 to 4, and **not one published figure changed**, which
-is the test that this was verification and not tuning. It reached 4 rather than 5
-by reading a chunk: Q029's chunk 83 carried the figure from its own labelled
-answer and only needed anchoring on it. The four that remain are named in the
-question file with the reason each was left, and that count is gated in
-continuous integration and ratchets down like the threshold.
-
-**8 — Chunking cuts risk factors away from their content.** A 10-K risk factor
-opens with a one-sentence heading and develops over paragraphs. Measured on the
-release corpus, and not recomputed since: the numerator was counted there too,
-so this is a figure to measure again rather than divide differently.
-**243 of 4,169
-chunks (5.8%) end just after such a heading, and 230 of those are in Item 1A** —
-the section every risk and comparison question asks about. Abercrombie's tariff
-risk is labelled on the chunk that ends *"Changes in tariff policy ... could
-adversely affect our business."*; the discussion that answers the question is in
-the chunk after it.
-
-**9 — Half the retrieval failures were not failures.** Of 24 missed gold chunks,
-**11 had an adjacent chunk from the same document retrieved instead**, and
-several of those answer the question better than the labelled chunk does. Crocs'
-gross profit appears in three chunks because the 60-token overlap duplicates it
-across two boundaries — labelling one and scoring the other two as misses
-measures an arbitrary choice. The gap between Recall@16 of 0.735 and measured
-answer correctness of 91.2% is not a curiosity: it is the size of this artefact,
-and it now has three independent measurements behind it.
-
-**10 — Reproducibility rested on a setting nobody had declared.** Vector search
-here is approximate: HNSW walks a graph rather than scanning all 4,169 vectors,
-and `hnsw.ef_search` decides how wide it walks. It is a database setting, not a
-property of the index, so anyone cloning this repository inherited whatever
-their pgvector build defaults to and could measure different numbers with
-nothing raising an error. It is now fixed at 40 in `sql/schema.sql` — the value
-every published figure was measured under. Raising it to 200 was tried on 14
-August and changed nothing: two runs seven minutes apart agree to six decimal
-places, because four thousand vectors is too small an index for the setting to
-matter. **This is the one finding whose fix moves no number: it turns an
-assumption into a declaration.**
-
-**11 — Two headline figures rested on one borderline record.** Two result files
-holding identical generated text disagreed on one of 210 records, and that single
-flip was the whole difference between 65/66 and 66/66 refusal, and between 1/66
-and 0/66 hallucination. The cause was a real improvement — refusal detection
-moved from a substring test to a rule about whether the limitation *is* the
-answer — but publishing the zero without saying which detector produced it was
-not. Zero with one detector, one with the other, on the same text.
-
-**12 — The page asserted a figure it had never measured.** Every number on the
-results page is read from the results files at build time, and the page says so.
-One note under a table was not: it claimed recall 1.000 and coverage 0.350 on
-comparatives, and neither figure exists in any results file. It sat four lines
-below a comment calling that exact defect the failure this project measures. It
-is computed now.
-
-**13 — A second measurement of the zero did not return zero.** Asked again later,
-on a different set of 22 unanswerable questions and generated fresh, the
-hallucination rate was 3.0% and 1.5% depending on the retriever — inside the
-published interval of [0%, 11.0%], and not zero. Both are reported. The sealed
-holdout is not re-run to settle it: a second execution prompted by a first result
-that was not liked destroys the only property a holdout has. The question that
-moves the figure is the same one every time, and
-[`docs/measurement-honesty.md`](docs/measurement-honesty.md) names it.
-
-**14 — The frozen release could not be checked, and then could not be
-reproduced.**
-`SHA256SUMS.txt` fixes the bytes of the frozen release. `.gitattributes` stores
-text with LF and checks it out however the platform wants, and the hashes were
-computed on Windows over CRLF. So a clone on Linux or macOS reproduces every
-artifact faithfully and mismatches all sixteen entries, and nothing in
-continuous integration was running the comparison — which is why the README's
-own entry could be false from 30 August onwards without anything noticing.
-
-The hashes are unchanged. The bytes they describe are recoverable by restoring
-CR to each line, and that is what the check does now, on every push. Regenerating
-them was the obvious fix and the wrong one: `FINAL_RELEASE_MANIFEST.md` carries
-twelve of them in the same form and is itself frozen, so recomputing would have
-traded a declarable convention for two published documents disagreeing about one
-artifact.
-
-Running it exposed a larger defect underneath, and the first two explanations
-were both wrong. Nine of the fourteen artifacts matched; the five that did not
-are the retriever and the three harness modules. The obvious reading was that
-the harness had simply moved on — findings 3, 7 and 11 are each an edit to one
-of those files — so the code should be verified against the commit the release
-was cut from rather than against the disk. That tag did not exist: the frozen
-release had been identified by nothing but a commit message. Creating it did not
-help, because the tagged blobs did not match either.
-
-**The bytes are in no commit, and in no blob.** Three searches, all kept in the
-repository so the claim can be re-tested rather than believed:
-`verify_release.py` finds them in neither the working tree nor the tag,
-`find_release_commit.py` finds them in none of the 42 commits, and
-`find_release_blobs.py` hashes all 195 blobs in the object database, orphaned
-ones included, and finds them nowhere. They were hashed from a working tree at
-17:42 on 17 August and the files were edited before anything was committed.
-
-So five entries in a list whose purpose is verification can never be satisfied,
-and are now marked `record`: the published value stays visible and nothing
-pretends to check it. What is still true is that those figures were produced by
-that code, that every results file is byte-identical to publication, and that
-finding 6 reproduced all twelve retrieval figures a week later from a modified
-harness — which is the stronger claim anyway. What was false, and implied by
-listing these five as release artifacts, is that a reader can check out the
-release and reproduce the bytes.
-[`FINAL_RELEASE_MANIFEST_ADDENDUM.md`](FINAL_RELEASE_MANIFEST_ADDENDUM.md)
-records it beside the frozen document it corrects, which cannot be edited
-without breaking the freeze it defines.
-
-**15 — The gate protecting the benchmark compared the labels against a copy of
-themselves.** `ci.yml` states the case for its own existence: a reload or a
-re-chunk silently repoints every gold label, no error is raised, and every
-Recall@k figure afterwards is measured against text that is not the answer. So
-it stands up Postgres, loads a corpus, confirms all 127 labels resolve, and
-concludes that a green build means the measurements can be trusted.
-
-The corpus it loads is `tests/fixture_corpus.json`, which `fixture.py --build`
-produced by extracting exactly the chunks the labels name. Once built it cannot
-disagree with them. **The gate was immune to the one failure it was written to
-catch**, and it stayed green for three weeks while the pipeline stopped
-producing the corpus every published figure was measured against.
-
-It surfaced by running the instructions under "Reproducing it" from a clean
-clone, which nothing had ever done — the one thing continuous integration does
-not do, because the filings are not in the repository. The clone built 4,124
-chunks where the release had 4,169, and 23 of 127 labels no longer held. Three
-searches settled what that meant: every one of the 23 had its anchor elsewhere
-in the same document, none was missing, and the text was byte-identical. Only
-the indices had moved, because 45 chunks fewer upstream shifts everything after
-them.
-
-The repair is in [`docs/relabel-log.md`](docs/relabel-log.md) and the rule was
-written before it ran: a label moved only where exactly one chunk of its
-document held content identical to the release text. Not the nearest — Q029's
-match is chunk 80 while the nearest candidate is 79, and Q001's anchor appears
-in five chunks of Urban Outfitters' filing, one of them a table rejected by hand
-in August. Across the fixture's 295 chunks, 294 have exactly one identical
-counterpart and none has two, so the mapping is injective and the repair is
-checkable rather than plausible. The 23 moved, nothing was left ambiguous, and
-all 127 labels now resolve with their content verified, which is a stronger
-statement than the one made in August.
-
-**The fixture turned out to be the only surviving record of the release corpus**
-— an accidental backup, committed for another reason — and it is preserved as
-`tests/fixture_corpus_release_20260817.json` because nothing else in the
-repository holds that text.
-
-**What was done about it.** The corpus is now declared rather than discovered.
-[`eval/corpus_expected.yaml`](eval/corpus_expected.yaml) names the nineteen
-filings by accession number, which EDGAR never reuses, alongside the chunk count
-and the chunker settings that produce it — a count without its inputs would be
-finding 10 again. `src/edgar.py --pinned` fetches exactly those and makes no
-submissions request at all, because an accession and a document name are the
-whole address; the unpinned path still takes the latest filing per ticker and
-now says so. `src/pin_corpus.py --verify` compares the live corpus against the
-declaration and stops on a filing that changed, a filing that vanished, or a
-chunker that no longer matches.
-
-**And what the gate still cannot do.** The corpus is not in the repository, so
-the check in continuous integration compares the declaration against
-`data/manifest.json` and stops there: it catches a declaration edited without
-its source and a manifest regenerated over different filings, and it does not
-count the 4,124 chunks. Nothing in a build without a corpus can. The full check
-runs wherever the corpus is loaded, with the same command, and both halves say
-which one they are rather than leaving a reader to assume the wider claim.
-
-**16 — Every measurement run without an argument used the abandoned labels.**
-`config.EVAL_QUESTIONS` points at `eval/questions.yaml`: 88 labels, 31 of them
-with no anchor at all and 30 whose anchor matches more than eight chunks —
-`'Wayfair'` in 107, `'Etsy'` in 130. It is the pre-canonical file, the one
-finding 1 replaced and finding 7 describes as unable to fail. It is also the
-default for `--questions` in ten modules, and `make eval-retrieval` and
-`make sabotage` pass no `--questions` at all.
-
-So `make all` ends by measuring against labels the project abandoned, and
-returns a plausible number. It returned 0.912, which is the figure this
-README's own history attributes to the state before the canonical relabelling
-cost seventeen points. Reproducing a withdrawn figure exactly is the only reason
-it was caught: a number nobody recognised would have been believed. Both
-measurements are kept in `eval/results/` so the difference can be attributed
-rather than argued about.
-
-## What measures what
-
-The pipeline below is the thing being measured. This is the machinery that
-measures it, and it is the part of this repository worth reusing.
-
-```text
-eval/questions_vnext.yaml — 100 questions, 127 gold labels, an anchor phrase each
-    │
-    ├─ derive_split.py ····· legacy 50 · development · sealed holdout
-    │                        splits derived from the master file, re-verified in
-    │                        CI, so a question cannot drift between them unseen
-    │
-    └─ verify_labels.py ···· does each anchor still identify ONE chunk?
-                             --max-anchor-matches 8  --max-exceptions 4
-                             thresholds ratchet down, never up  (findings 7, 8)
-    │
-    ▼
-  THREE MEASUREMENTS
-    │
-    ├─ evaluate_retrieval.py ···· Recall@16 · MRR · coverage · no model called
-    │      └─ --sabotage ········ degrade a component, confirm the metric moves
-    │
-    ├─ evaluate_generation.py ··· refusal · false refusal · groundedness
-    │      └─ 3 runs of the same questions; a decision that changes between
-    │         runs is instrument noise, not a result  (0 of 100 changed)
-    │
-    └─ evaluate_correctness.py ·· right, not merely present and well cited
-    │
-    ▼
-  FOUR CHECKS ON THE MEASUREMENTS THEMSELVES
-    │
-    ├─ compare_splits.py ······· does a bare keyword search score this split
-    │                            suspiciously well?  0.412 vs 0.929  (finding 1)
-    ├─ check_neighbours.py ····· when the labelled chunk missed, what arrived?
-    │                            11 of 24 were adjacent  (finding 9)
-    ├─ report_intervals.py ····· one observation per question, and the interval
-    │                            that says how little 31 questions support
-    └─ the judge against itself · 97.2% self-agreement, 97.4% groundedness
-                                 reported. The error is the size of the signal.
-    │
-    ▼
-  build_results_page.py → docs/index.html
-    every number read from a results file at build time, and the page says so
-    (finding 12 is the one line that was not)
-```
-
-Nothing above calls a language model except `evaluate_generation.py` and
-`evaluate_correctness.py`. Retrieval, labelling, the splits and every check cost
-nothing to run and need no API key, which is why they can be gated on every push:
-
-```text
-.github/workflows/ci.yml — six gates, no model call, no cost
-  1  verify_release.py ················ the 9 frozen artifacts, byte for byte
-  2  tests/test_*.py ·················· parser, chunking, citations, harness
-  3  tests/fixture.py --check ········· can the fixture support every label?
-  4  tests/fixture.py --load ·········· 300-chunk extract into a real Postgres
-  5  verify_labels.py ················· all 127 resolve, every anchor identifies
-  6  derive_split.py --verify ········· splits still match the master benchmark
-```
-
-Gate 3 exists because gate 5 used to be skipped whenever the corpus was absent,
-which was always: the step printed a notice and the build went green, and the
-guarantee this README makes about a green build was not being made. Gate 1 was
-added the same way — a checksum list nothing ran, with a false entry in it for
-six weeks.
-
-## How the system works
-
-```text
-SEC EDGAR filings
-    │
-    ├─ HTML parsing, section-aware chunking (420 tokens, 60 overlap)
-    ├─ local sentence-transformer embeddings (bge-small-en-v1.5)
-    └─ PostgreSQL + pgvector + full-text search
-              │
-              ├─ semantic retrieval          ─┐
-              ├─ lexical retrieval            ├─ reciprocal rank fusion, k=40
-              └─ company detection and quota ─┘
-                        │
-                        └─ top-16 numbered excerpts
-                                  │
-                                  ├─ generation with per-claim citations
-                                  ├─ citation verification in code
-                                  └─ refusal when the excerpts fall short
-```
-
-Every component in the pipeline has a measured contribution, including the ones
-whose contribution is zero. [`docs/measurement-honesty.md`](docs/measurement-honesty.md)
-records what each was worth and what it cost.
-
-Embeddings are computed locally. Only the generation call leaves the machine, and
-it sits behind a provider interface so it can be pointed at a locally served
-model without changing anything else.
-
-**Why refusal is measurable rather than judged.** The prompt permits refusal
-explicitly, with an exact marker, so a refusal can be counted instead of
-interpreted. A model told only to "answer from the context" will produce
-something for a question the context cannot answer, because producing text is
-what it does. Given a named way out, declining becomes an available move.
-
-**What the code checks, before any judge is involved.** Every cited excerpt
-number exists in what was actually sent. Every sentence carrying a figure has a
-citation. A refusal stands alone rather than decorating an answer given anyway.
-
-## What a question costs, and how long it takes
-
-Measured over four question types × 3 runs, medians rather than means because a
-cold connection makes the first call of each type an outlier.
-
-| | Median | Range |
-|---|---:|---:|
-| Retrieval — local, no API call | **0.21 s** | 0.14 – 0.46 s |
-| Generation — one API call | 3.09 s | 2.37 – 7.85 s |
-| **Total, question to cited answer** | **3.40 s** | 2.52 – 8.32 s |
-
-| | Median tokens |
-|---|---:|
-| Input — the sixteen excerpts and the prompt | **11,150** |
-| Output — the answer | 132 |
-
-**Cost is dominated by what is sent, not by what is written**, at a ratio of 84
-to 1. That makes `top_k` the only real cost lever: it was raised from 8 to 16 to
-lift coverage on comparison and multi-passage questions, and this is what that
-decision costs — roughly double the input tokens per query. The holdout run cost
-3 € in total, which is about 0.02 € per query at the rates in force when it was
-measured. Token counts are read from the API response rather than estimated from
-prompt size, so they can be reconverted at any later rate.
-
-**Declining is cheaper than answering.** An unanswerable question consumes 10,270
-input and 75 output tokens; a multi-passage answer, 10,952 and 577.
-
-Retrieval never leaves the machine and never costs anything. Only the generation
-call does, which is also the half that can be pointed at a locally served model.
-
-## Reading the retrieval numbers
-
-Retrieval is reported on the original 50 questions and never as a single average
-across splits, for the reason in finding 1. The three splits were defined on 18
-August, before the questions they assign were written and two days before any
-score existed — the commit history shows it.
-
-| Question set | n | Recall@16 | Coverage |
-|---|---:|---:|---:|
-| Original 50, written before the system | 34 | 0.735 | 0.589 |
-| Sealed holdout | 21 | 0.952 | 0.833 |
-| Added later, labeled by literal match | 14 | 0.929 | 0.857 |
-
-The holdout is sealed but not clean: it was built the same way as the third row,
-and its bare-keyword score of 0.810 sits far above the first row's 0.412. What
-sealing bought is that no parameter was ever chosen with it in view.
-
-### What each component is worth
-
-| Capability removed | Recall@16 | What it was worth |
-|---|---:|---:|
-| Nothing — the full system | 0.735 | — |
-| The company filter and quota | 0.559 | −0.176 |
-| The excerpt budget, 16 down to 1 | 0.147 | −0.588 |
-| **The dense retriever entirely** | **0.735** | **0.000** |
-
-Measured on the 34 answerable questions of the original 50. The first two are
-degradation runs; the third is a lexical baseline holding the company filter
-constant.
-
-**The company filter and the excerpt budget do the work. The embeddings and the
-rank fusion contribute ordering — MRR 0.310 against 0.280 — and no additional
-coverage.** Two further attempts confirmed it rather than reversing it: rewriting
-each comparison into per-company sub-queries moved four gold chunks up and one
-down, and a cross-encoder reranker over the same candidates left Recall@16
-unchanged, cost 0.012 coverage, and added 1.86s to a 3.40s query.
-
-Three neural components, three negative results, on a corpus of financial filings
-dense with exact figures and proper nouns. That is a defensible finding about
-this domain, and it is not the finding this project set out to make.
-
-### Where the headline figure came from
-
-Retrieval on this corpus was measured seven times between 14 and 17 August. The
-figure fell from 0.882 to 0.735 over that period, and every run is kept so the
-drop can be attributed rather than assumed.
-
-| Change | Recall@16 | Effect |
-|---|---:|---|
-| 14 August, RRF k=60 | 0.882 | starting point |
-| `hnsw.ef_search` 40 → 200 | 0.882 | **none, to six decimal places** |
-| Re-parse and company detection fix | 0.912 | +0.029 |
-| **Canonical re-labelling** | **0.735** | **−0.176** |
-| RRF k 60 → 40 | 0.735 | recall unchanged, coverage +0.015 |
-
-**The system did not get worse. The labelling got honest.** The single largest
-movement in this project's headline metric was reading the filings again and
-marking the passage that actually answers each question, and it cost seventeen
-points.
-
-A figure that only ever rises is a figure nobody has audited. This one fell,
-once, by a documented amount, for a documented reason.
-
-## Every component, and the evidence for it
-
-Twelve experiments, each with the number it produced and what was done about it.
-Three of them argue against components the system uses, and those are kept in
-the table rather than dropped from it.
-
-| Experiment | Result | Decision |
-|---|---|---|
-| `hnsw.ef_search` 40 → 200 | Identical to six decimal places, twice, seven minutes apart | Fixed at 40 in `sql/schema.sql`. Four thousand vectors is too small an index for it to matter, and an undeclared default is worse than a boring one *(finding 10)* |
-| RRF constant, k 60 → 40 | Recall unchanged, coverage +0.015 | Adopted. The sweep is `make eval-sweep`, so the constant is a measurement rather than a convention |
-| Re-parse and company-detection fix | 0.882 → 0.912 | Kept |
-| Canonical re-labelling of the original 50 | 0.912 → **0.735** | Published the lower figure. The largest movement in the headline metric was reading the filings again, and it cost 17 points *(finding 1)* |
-| Remove the company filter and quota | 0.735 → 0.559 | Kept. Worth −0.176, the largest contribution of any component |
-| Excerpt budget, 16 → 1 | 0.735 → 0.147 | `top_k` stays 16. Raising it from 8 doubled input tokens, and that is what the coverage on comparison questions costs |
-| Remove the dense retriever entirely, filter held constant | **0.735, unchanged.** Lexical leads on coverage | Kept for ordering only — MRR 0.310 against 0.280 — and the earlier claim that embeddings bought a 32-point gap was withdrawn *(finding 2)* |
-| Per-company sub-queries for comparisons | Four gold chunks up, one down | Not adopted. Not distinguishable from noise at this sample size |
-| Cross-encoder reranker over the same candidates | Recall@16 unchanged, coverage −0.012, +1.86 s on a 3.40 s query | Not adopted. It cost latency and coverage to buy nothing measurable |
-| Ask the groundedness judge the same claims twice | 97.2% self-agreement, against 97.4% groundedness reported | The figure is never quoted alone. The instrument's error is the size of the signal *(finding 4)* |
-| Re-measure the zero on 22 fresh unanswerable questions | 3.0% and 1.5%, not zero | Both published, inside the interval already given. The sealed holdout was not re-run to settle it *(finding 13)* |
-| Rewrite 24 gold anchors to name their passage | Anchors that identify nothing: 29 → 4, and **not one published figure changed** | Adopted and gated in CI at a threshold that only ratchets down. The unchanged figures are the test that this was verification and not tuning *(finding 7)* |
-| **Does better ordering produce better answers?** Hybrid against lexical, company filter held, 48 answerable questions × 3 runs, both generated fresh in one session | Correctness 0.927 against 0.889. **Paired difference +0.038, 95% CI [−0.003, +0.094]** | **Indistinguishable at this sample size, and that is the published result.** Decided by [`docs/decision-rule-ordering.md`](docs/decision-rule-ordering.md), written and committed before the run. Reproduce it with `python analyse_ordering.py` |
-
-**The last row is the only one decided in advance**, and the rule it was decided
-by is the reason it can be believed. It fixed the criterion — correctness, not
-groundedness, because groundedness is conditional on the excerpts that arrived
-and so rewards whichever branch risks least — and it fixed the analysis as
-paired, on the grounds that two aggregate rates over 48 questions have little
-power. The aggregate counts do show hybrid ahead. That is the comparison the
-rule declined in advance.
-
-Four questions separate the branches, and three of them were already named in
-[`docs/measurement-honesty.md`](docs/measurement-honesty.md) before this
-analysis existed: Q035 is an empty completion the harness counted as answered
-plus a labelling gap, Q081 is both branches missing the gold entirely, and
-hybrid's win on Q035 came without retrieving either labelled chunk. A difference
-built substantially out of labelling artefacts is not evidence about ordering,
-which is the same conclusion the interval reaches independently.
-
-**Three neural components, three negative results**, on a corpus dense with
-exact figures and proper nouns. That is a defensible finding about this domain,
-and it is not the finding this project set out to make. What the table is really
-for is the last column: every component here is present or absent because of a
-number, and the numbers that argued against the interesting components were
-published at the same size as the ones that argued for them.
-
-## Known limitations
-
-- **Q064** is the one answerable question in the sealed set the system declined.
-  The evidence exists in the filings; retrieval did not surface it, and a simpler
-  lexical baseline does. The refusal was correct, the retrieval failure was not.
-- Groundedness is judged by the same model family that wrote the answers. It is
-  not independent external validation, and the self-agreement figure above is the
-  reason to treat it as approximate.
-- **Comparison questions cannot yet decide anything.** At n=5 on the original
-  set, the metric moves in steps of 0.2. No retrieval change will be accepted or
-  rejected against it until that type is expanded under the corrected labeling
-  rule.
-- Two question types in the development split sit at 1.000 and are blind: they
-  cannot register an improvement or a regression.
-- **Whether better ordering produces better answers is measured and
-  undecided.** The paired difference is +0.038 with a 95% interval of [−0.003,
-  +0.094], so the dense half is not shown to buy answers and not shown not to.
-  The rule written before the run names what settles it, and it is not a rerun:
-  the judge's 97.2% self-agreement is the binding constraint, so an independent
-  judge over a sample is the next measurement.
-
-- **Recall@16 understates operational retrieval.** It is measured against
-  canonical labels; 46% of its misses retrieved an adjacent chunk from the same
-  document. The figure to compare across systems is 0.735; the figure that
-  describes what reaches the model is higher, and answer correctness of 91.2% is
-  the closer proxy. Both are published rather than the more flattering one.
-
-- **Four gold anchors still cannot identify their chunk, deliberately.** None
-  has an extension carrying a figure from its labelled answer, so a longer anchor
-  would buy position at the cost of content. Q029's chunk 55 is the clearest
-  case: its only `'2025'` sits inside the filing's page footer, so no window
-  around it says anything about the chunk. Each is named in the question file
-  with its reason, and records the anchor text it forgives, so an anchor
-  rewritten later loses its pardon rather than inheriting one nobody reviewed.
-  The continuous-integration threshold stays at 8 and the exception count at 4;
-  neither ever rises to make a build pass.
-
-- **The current corpus is pinned; the release corpus is still not
-  reproducible.** `src/edgar.py --pinned` rebuilds the 4,124-chunk corpus
-  exactly, and `src/pin_corpus.py --verify` proves it did. What no command
-  rebuilds is the 4,169-chunk corpus the release was measured over: it predates
-  the re-parse of 14 August, and every figure above except the repaired
-  retrieval line was measured on it. The 295 chunks of it that survive are in
-  `tests/fixture_corpus_release_20260817.json`, which is enough to audit the
-  labels and not enough to re-measure anything.
-
-- **`tests/fixture.py --check` still compares the labels against a fixture
-  extracted from the labels**, and on its own it cannot fail the way finding 15
-  describes. What closes the hole is beside it rather than inside it:
-  `src/pin_corpus.py --verify` gates the declared corpus on every push, and the
-  full chunk-count check runs where a corpus exists. Making the fixture check
-  compare against `data/chunks.json` when that file is present is still worth
-  doing, and would make a drifted corpus fail in two places instead of one.
-
-- **Chunk boundaries are a known defect and have not been changed.** Fixing them
-  means re-chunking, which reissues every `chunk_id` and invalidates all 127
-  labels and every published figure. It is the right next change and it is a
-  release of its own, not a patch.
-
-## Reproducing it
-
-The full pipeline fetches nineteen filings from EDGAR and embeds four thousand
-passages, which takes a while. To watch the system run first, `demo/` holds a
-295-chunk extract with its vectors and needs no download and no API key:
+## Quick start
 
 ```bash
-docker compose -f demo/docker-compose.yml up -d
-python demo/load_demo.py
-LLM_PROVIDER=echo python src/generate.py "What brands does Gap Inc. operate?"
+make setup       # install dependencies
+make all         # generate -> validate -> load -> build -> reconcile
 ```
 
-Retrieval over that extract is an easier problem than over the corpus, so its
-results are not comparable to the figures above and none of them come from it.
-[`demo/README.md`](demo/README.md) says so up front.
+Each stage runs on its own:
 
-The whole thing:
+| Command | What it does | Result |
+|---|---|---|
+| `make generate` | Synthetic raw layer, deliberately messy | 3s, ~59 MB |
+| `make validate` | Are the planted findings still present? | **20/20 checks** |
+| `make load` | Raw CSVs into Postgres schema `raw` | 2s |
+| `make build` | staging → intermediate → marts, with tests | **100/100 models and tests** |
+| `make reconcile` | Does the pipeline recover the truth? | **15/15 metrics** |
+| `make golden` | Values Power BI must reproduce | 45 measures |
+| `make dashboard` | Rebuild the static demo page | `docs/index.html` |
 
-```powershell
-docker compose up -d                              # Postgres with pgvector
-$env:DATABASE_URL = "postgresql://secrag:secrag@localhost:5433/secrag"
-psql $env:DATABASE_URL -f sql/schema.sql
+Requires a Postgres connection in `DATABASE_URL`. Free tiers (Neon, Supabase)
+are sufficient. Fully deterministic — the same seed produces byte-identical
+output.
 
-python src/edgar.py                               # fetch filings from EDGAR
-python src/parse.py; python src/chunk.py; python src/embed.py; python src/load.py
+---
 
-python src/verify_labels.py --questions eval/questions_vnext.yaml
-python src/evaluate_retrieval.py --questions eval/questions_vnext_regression.yaml
+## The result that matters
+
+The generator knows the ground truth. The pipeline only ever sees the corrupted
+export. `make reconcile` runs both and compares:
+
+```
+  [PASS] FY2025 gross revenue         $10,017,805.50  $10,017,805.50  +0.000%
+  [PASS] FY2025 net revenue (returns) $ 6,971,458.67  $ 6,971,458.67  +0.000%
+  [PASS] FY2025 refunds               $ 1,962,393.16  $ 1,962,393.16  +0.000%
+  [PASS] FY2025 CM2                   $ 2,358,596.72  $ 2,358,763.83  +0.007%
+  [PASS] F1 defect-SKU CM2            $  -153,630.69  $  -153,630.69  -0.000%
+
+15/15 metrics reconcile within 0.5%
 ```
 
-Retrieval costs nothing to run: no model is called. `LLM_PROVIDER=echo` exercises
-the whole generation path — prompt building, citation parsing, refusal detection
-— without spending a token.
+The residual 0.007% on CM2 is not noise: it is the five imputed unit costs,
+traceable to the row. A pipeline that loads without errors but quietly drops 3%
+of revenue looks identical to a correct one until someone checks. This is that
+check.
 
-`psql` is not a dependency of this project and the instructions above assumed
-it: the container already has it, so
-`Get-Content sql/schema.sql -Raw | docker compose exec -T db psql -U secrag -d secrag`
-works with nothing installed. That and everything else the first clean clone
-hit is in [`docs/first-run-log.md`](docs/first-run-log.md), which is the
-instructions being executed rather than asserted.
+It also confirms the analysis rediscovers the two problem SKUs from their return
+behaviour alone, without ever touching the `is_defect_sku` label:
 
-Continuous integration runs the tests, and separately stands up Postgres and
-confirms all 127 gold labels still resolve. A label is a claim about the corpus,
-and a re-chunk can falsify it silently.
+```
+Finding 1 -- two worst SKUs by CM2, discovered from the dirty data:
+        sku  units  return_rate      cm1        cm2
+NL-OUT-0023   4038        0.461 14328.28 -100810.87
+NL-OUT-0017   2434        0.459 15043.40  -52819.82
+  planted SKUs:    ['NL-OUT-0017', 'NL-OUT-0023']
+  discovered SKUs: ['NL-OUT-0017', 'NL-OUT-0023']
+  match: YES
+```
 
-## Repository
+---
 
-| | |
+## What it produces
+
+| File | Rows | Grain |
+|---|---|---|
+| `raw_orders.csv` | 98,693 | one per order |
+| `raw_order_lines.csv` | 173,930 | one per order × SKU × line |
+| `raw_returns.csv` | 38,729 | one per return line |
+| `raw_ad_spend.csv` | 14,210 | date × channel × campaign |
+| `raw_products.csv` | 540 | one per SKU **cost version** (SCD2) |
+| `raw_customers.csv` | 72,000 | one per customer |
+| `raw_geography.csv` | 51 | one per state + DC |
+| `injected_defects.csv` | 8 | manifest of deliberate corruptions |
+
+FY2025: **$10.0M gross revenue**, 48,531 orders, $184 AOV, 20.3% unit return rate.
+
+---
+
+## Modelled economics
+
+Not decoration — each of these changes a number a client would care about.
+
+- **SCD Type 2 unit costs.** Costs step up twice over the history. Orders are
+  priced against the cost version valid on the order date, so historical margin
+  is not silently rewritten by today's supplier pricing.
+- **Dimensional-weight shipping.** Carriers bill `max(actual, dimensional)`
+  weight. A boxed parka to Zone 8 costs multiples of a t-shirt to Zone 2. This
+  is what makes geography an economic variable rather than a map colour.
+- **Returns as a process, not a rate.** Log-normal delay (median ~12 days),
+  disposition split across restock / liquidate / destroy, partial COGS recovery,
+  return shipping and restock labour, and reason codes that concentrate on
+  sizing for defective SKUs.
+- **Discount-driven return uplift.** Deeper discounts attract bracket-buyers.
+  Return probability scales with discount depth.
+- **Platform over-attribution, per channel.** Search reports ~1.15× true
+  revenue; view-through-heavy social reports up to 2.0×. The gap between
+  `platform_reported_revenue` and real order revenue is itself analysable.
+- **Channel-specific retention.** Lifetime order count is drawn from a
+  channel-specific geometric distribution, producing realistic cohort curves
+  rather than a hard-coded LTV table.
+- **Sales tax carried but excluded from revenue.** Present in the raw data so
+  the transformation layer has to handle it correctly.
+
+---
+
+## Deliberate data quality defects
+
+Clean synthetic data is the clearest possible signal of a portfolio project.
+The raw layer ships broken, with a manifest:
+
+| Defect | Table | Rows |
+|---|---|---|
+| Inconsistent product name casing / abbreviation | `raw_order_lines` | 38,300 |
+| Three date formats in one column | orders / lines / returns | 48,873 |
+| Mixed state format (`CA`, `California`, `ca.`) | `raw_orders` | 8,816 |
+| Duplicate orders (checkout retry) | orders / lines | 393 |
+| Null `unit_cost` on newly onboarded SKUs | `raw_products` | 5 |
+| Orphaned returns (no matching order line) | `raw_returns` | 295 |
+| Decimal-point typo in price feed | `raw_order_lines` | 93 |
+| Untrimmed / uppercased emails | `raw_customers` | 2,165 |
+
+Every one has a matching test and a documented resolution with its dollar
+impact in [`docs/data_quality_report.md`](docs/data_quality_report.md). The
+orphaned returns are **quarantined rather than deleted** — deleting them would
+have improved every margin figure, which is exactly why it would have been
+wrong. The disclosed exposure is $25,222, or 0.52% of CM2.
+
+---
+
+## Transformation layer
+
+Four layers, strictly separated. The discipline is the point: a reviewer can see
+where each kind of logic lives.
+
+| Layer | Materialised | Rule |
+|---|---|---|
+| `raw` | tables, all TEXT | Lossless copy. A source that emits three date formats must be *storable*. |
+| `staging` | views | Casts, renames, string cleaning. **No joins, no business logic.** |
+| `intermediate` | views | Joins and cleaning that needs context: SCD2 range join, deduplication, imputation, typo correction. |
+| `marts` | tables | Star schema. The only layer Power BI touches. |
+
+Deciding *where* a fix belongs is most of the work. The decimal-point typo
+correction cannot live in staging because detecting it requires `list_price`
+from the product dimension — so it lives in intermediate, and that constraint is
+what makes the layer boundary real rather than decorative.
+
+### Three models worth reading
+
+**`int_order_lines_enriched`** — the consequential one. Joins unit cost on the
+SCD2 version valid on the *order date*:
+
+```sql
+inner join products p
+    on p.sku = l.sku
+   and o.order_date between p.valid_from and p.valid_to
+```
+
+Joining the current version instead would apply 2025 supplier pricing to 2023
+orders and quietly rewrite two years of margin history. This is also why
+`valid_to` is coerced to `9999-12-31` in staging: with NULL, `BETWEEN` silently
+drops every current-version row.
+
+**`fct_order_lines`** — the CM1/CM2 waterfall at line grain. Returns are joined
+*pre-aggregated*, because a line with three return records must still produce one
+fact row. Fanning out a fact table on returns is the most common margin bug in
+e-commerce models, and it is invisible in aggregate.
+
+**`fct_channel_economics_monthly`** — the only model that computes CM3, because
+channel-month is the only grain at which ad spend is actually measured. There is
+no state-level CM3 in this project. Producing one would be an allocation
+presented as a measurement.
+
+---
+
+## Quality gates
+
+`dbt build` runs **100 models and tests**, all passing. Beyond the standard
+`unique` / `not_null` / `relationships` coverage:
+
+| Test | What it catches |
 |---|---|
-| `src/retrieve.py` | fusion, company detection, per-company quotas |
-| `src/generate.py` | prompt, citation verification, refusal detection |
-| `src/evaluate_*.py` | retrieval, groundedness, correctness harnesses |
-| `src/compare_splits.py` | cross-split comparison and construction-bias diagnostic |
-| `src/report_intervals.py` | confidence intervals, one observation per question |
-| `src/check_db_settings.py` | the database settings retrieval depends on |
-| `src/fix_anchors.py` | two-phase anchor strengthening, reviewed by a person |
-| `src/derive_split.py` | derives split files from the master benchmark |
-| `src/check_neighbours.py` | what arrived when a labelled chunk did not |
-| `verify_release.py` | the frozen release artifacts, gated in CI |
-| `find_release_commit.py`, `find_release_blobs.py` | the searches behind finding 14 |
-| `analyse_ordering.py` | the paired analysis the decision rule specified |
-| `src/pin_corpus.py` | declares the nineteen filings, and verifies the corpus against them |
-| `eval/corpus_expected.yaml` | the declaration itself, gated on every push |
-| `first_run.py` | the documented instructions, executed and logged |
-| `diagnose_labels.py`, `check_fixture_vs_corpus.py` | what broke in finding 15, and why the gate missed it |
-| `relabel_review.py`, `apply_relabel.py` | the repair, reviewable then applied by rule |
-| `docs/measurement-honesty.md` | the five measurement problems, in full |
-| `eval/questions_vnext.yaml` | 100 questions, 127 audited gold labels |
-| `demo/` | self-contained extract, its own database, no API key |
-| `docs/decision-rule-ordering.md` | a decision rule written and committed before the run it decides |
+| `assert_lines_reconcile_to_order_header` | Join fan-out *and* dropped lines, in one test |
+| `assert_scd2_windows_do_not_overlap` | Duplicate cost versions silently doubling revenue |
+| `assert_net_revenue_identity` | A price correction applied to the wrong column, or twice |
+| `assert_returns_are_plausible` | Returns before the sale, or beyond the 60-day window |
+| `assert_orphan_returns_within_tolerance` | Quarantine growing past 2% of refunds (warn) |
 
-## Licence
+Orchestration is GitHub Actions on a daily cron, running against a throwaway
+Postgres service container so a pull request can never touch the warehouse the
+dashboard reads from. A single daily batch does not justify Airflow.
 
-Apache 2.0 covers the code. The labels are mine, assigned by reading the
-filings, and the criterion is stated because a recall figure without its
-labeling criterion is uninterpretable.
+---
 
-**The filings themselves.** They are public 10-K documents filed with the SEC,
-and `src/edgar.py` fetches them; the nineteen annual reports are not
-redistributed here. Two extracts of filing text are, and this section used to
-say they were not:
+## Layout
 
-- `tests/fixture_corpus.json` — every chunk a gold label points at plus the
-  chunk either side, about 300 of 4,169, stored whole. It exists because
-  continuous integration was skipping the label check whenever the corpus was
-  absent, which was always. Without it the green build guarantees nothing.
-- `demo/demo_corpus.json` — the 295-chunk extract behind the three-command demo,
-  so the system can be watched running without an EDGAR download or an API key.
+```
+src/
+├── generate_data.py        # CLI orchestrator
+├── validate_findings.py    # self-test: are the findings still there?
+├── load_to_postgres.py     # COPY into schema `raw`, with row reconciliation
+├── reconcile_marts.py      # ground truth vs pipeline output
+└── datagen/
+    ├── config.py           # every constant in the project
+    ├── catalog.py          # products (SCD2) + geography + shipping curves
+    ├── customers.py        # cohorts, channels, order calendar
+    ├── orders.py           # baskets, discounts, landed-cost allocation
+    ├── returns.py          # timing, disposition, reasons
+    ├── marketing.py        # spend, campaigns, attribution inflation
+    └── dirty.py            # deliberate corruption layer
 
-Both are the minimum needed to reproduce a published check and to run the thing,
-which is a different act from republishing nineteen annual reports, and both are
-now named rather than left for a reader to find. Neither is used for any figure
-in this README.
+dbt/
+├── macros/                 # mixed-date parsing, state normalisation, surrogate keys
+├── models/{staging,intermediate,marts}/
+└── tests/                  # six singular integrity tests
+
+docs/
+├── business_rules.md       # decisions that change the numbers
+└── data_quality_report.md  # every defect, its fix, its dollar impact
+```
+
+No `dbt_utils` dependency: the date spine uses `generate_series` and surrogate
+keys use `md5`. One fewer thing to break.
+
+---
+
+## Documentation
+
+- [`FINDINGS.md`](FINDINGS.md) — the four findings with measured figures
+- [`docs/business_rules.md`](docs/business_rules.md) — CM1/CM2/CM3 definitions, attribution rules, allocation bases
+- [`docs/data_quality_report.md`](docs/data_quality_report.md) — every defect, its resolution, its margin impact
+
+---
+
+## Live demo
+
+**[View the dashboard →](https://YOUR-USERNAME.github.io/northlane-analytics/)**
+
+A single self-contained page, hand-built SVG, no charting library, no build step.
+Works on a phone and offline. Deploying it is one setting: GitHub → Settings →
+Pages → Source: `main` branch, `/docs` folder. That is why the page lives in
+`docs/`.
+
+```bash
+REPO_URL=https://github.com/you/northlane-analytics make dashboard
+make serve      # preview at localhost:8000
+```
+
+Three things worth knowing about how it is built:
+
+**No figure is typed into the HTML.** `src/export_dashboard_data.py` queries the
+marts into a JSON payload; `src/build_dashboard.py` injects it into
+`docs/index.template.html`. Even the prose is derived — an early draft asserted
+that "several months fall below zero", and the data says exactly one does, so the
+sentence now counts them. A refresh is `make dashboard`, not an editing session.
+
+**The data is embedded, not fetched.** No CORS, no loading state, no failure mode
+to design around. The page opens from `file://` as readily as from Pages.
+
+**A broken chart cannot blank the page.** Each renderer runs inside its own
+try/catch, `.reveal` only hides content once JavaScript is confirmed running, and
+a timeout reveals anything still hidden after 2.5s. Verified against five
+scenarios: intact payload, two kinds of corrupted payload, an environment with no
+`matchMedia` or `IntersectionObserver`, and JavaScript disabled entirely. The
+page renders in all five.
+
+---
+
+## Report layer
+
+The `.pbix` is built by hand in Power BI Desktop — there is no reliable way to
+author one programmatically. Everything that makes building it mechanical is
+specified:
+
+| Document | Contents |
+|---|---|
+| [`powerbi/data_model.md`](powerbi/data_model.md) | Relationships with cardinality, which columns to hide and why, the inactive returns-to-calendar relationship, satellite-table handling, page-by-page visual spec |
+| [`powerbi/dax_measures.md`](powerbi/dax_measures.md) | 45 measures with the business logic behind each |
+| [`powerbi/golden_values.md`](powerbi/golden_values.md) | Expected value for every measure, regenerated by `make golden` |
+
+Two modelling decisions worth reading:
+
+**`fct_returns[return_date_key] → dim_date` is inactive.** Returns reach the
+calendar through `fct_order_lines`, giving the *original order date* — correct
+for margin. A cash-basis view activates the second path explicitly with
+`USERELATIONSHIP`. Two active paths would make every refund figure ambiguous.
+
+**`[CM3]` returns blank when filtered by state, category or SKU.** Ad spend is
+not reported at those grains, so `[CM2] - [Ad Spend]` sliced by category would
+silently subtract *all* spend from *each* row. The measure guards against it and
+returns nothing rather than something plausible and wrong.
+
+Power BI has no unit tests. `golden_values.md` is the substitute — check every
+measure against it before building a single visual.
+
+---
+
+## Findings
+
+The client-facing deliverable is a one-page memo:
+[`docs/findings_memo.md`](docs/findings_memo.md).
+
+**$201,033/yr of recoverable contribution against FY2025 CM3 of $721,075 — 28%
+of contribution margin, with no additional acquisition spend.**
+
+The headline is margin compression: revenue tripled over three years while CM3
+margin fell from 14.8% to 10.2%.
+
+---
+
+## Next stage
+
+Build the `.pbix` in Power BI Desktop from `powerbi/data_model.md`, and record a
+90-second walkthrough. Power BI Service requires an organisational email domain
+to publish — see `powerbi/data_model.md` §1. The demo page above covers the gap
+in the meantime and is the better link to send from a phone regardless.

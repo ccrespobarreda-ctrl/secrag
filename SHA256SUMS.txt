@@ -52,7 +52,6 @@
 # is not a new hash.
 #@ verify tree
 
-5FAACC51771D19B437391E1EB1344922094FD243E548BFCEDF108BA659256DAD ./src/config.py
 8F40D8387DC52A072DEC0F4204D0DAFF2C499F05A42F00B4A027F952A3CA6429 ./eval/questions_canonical.yaml
 2F2080B657E78397A6A5DF481C689F8BED077B9404D074BB4D401264953B83D9 ./eval/results/retrieval_final.json
 015DE847646DE2E25D1BA78144185A144EBE3E844B4CA58AAC1D182FE2545C11 ./eval/results/generation_final_rrf40.json
@@ -61,11 +60,32 @@
 822559303C27B4E6F5585B52033D32AED6328293FBACE0FDFC0F6C000B1546DB ./eval/results/final_evaluation_rrf40.json
 5949DDE284AEADC08B19ED937E0EDE1CACB25797D4A9850678F087141AB48E03 ./FINAL_RELEASE_MANIFEST.json
 07B66812FA960811CC39BC3284CA89C6446C6D8C6E6B1440E309699FAE89B18D ./FINAL_RELEASE_MANIFEST.md
+#
+# src/config.py joined them on 8 September. It was in the verified section
+# above until then, and only because nobody had edited it in three weeks: it is
+# the sixth source file on this list and the same argument applies to it.
+#
+# What changed is EVAL_QUESTIONS, which pointed at eval/questions.yaml and now
+# points at the master benchmark. That default was not what the release
+# measured: FINAL_RELEASE_MANIFEST.json line 19 declares
+# `"benchmark_file": "eval/questions_canonical.yaml"`, and the command in
+# docs/handoff-final-es.md passes it explicitly. The published figures are
+# measured over the 62 canonical labels. The default was wrong for anything that
+# did not pass --questions, which is `make sabotage` and anyone following the
+# README, and that is the whole of finding 16.
+#
+# Moving it here rather than recomputing its hash is the same decision as for
+# the five: the recorded bytes stay recorded, and nothing pretends to check a
+# file that is meant to keep changing. The cost is real -- configuration is not
+# harness code, and changing it changes what an unqualified run measures -- so
+# the value it held on 17 August stays written here rather than left to be
+# recovered from git.
 
 # Recorded, not verifiable. Kept because these are the values the release
 # published, removed from verification because nothing can satisfy them.
 #@ verify record
 
+5FAACC51771D19B437391E1EB1344922094FD243E548BFCEDF108BA659256DAD ./src/config.py
 13E6ABE14D23641BB48F638532D6D536F99C67962204CF0FC3126B988EB8B850 ./src/retrieve.py
 FA8513B75C8F1B5BA1BC11147DB0E1FDAC0C1856EB64E26435E321EA962465AC ./src/generate.py
 AAE9CB188B532745FC9D0DD0864344273F80EFCC009B503B6F9205B59C6A54D4 ./src/evaluate_retrieval.py
