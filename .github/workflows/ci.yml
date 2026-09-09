@@ -60,6 +60,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # After the install, because this one needs pyyaml. And it checks less
+      # than its name suggests, which is written here rather than left for a
+      # reader to find out: the corpus is not in the repository, so it compares
+      # eval/corpus_expected.yaml against data/manifest.json and stops there.
+      # That catches a declaration edited without its source and a manifest
+      # regenerated over different filings -- the drift that cost 23 gold
+      # labels. It does not check the 4,124 chunks. Nothing here can: that
+      # happens wherever the corpus is loaded, with the same command.
+      - name: The declared corpus and the manifest still agree
+        run: python src/pin_corpus.py --verify
+
       - name: Run the tests
         run: |
           for t in tests/test_*.py; do
