@@ -90,15 +90,33 @@ verify-release:          ## the frozen release artifacts, byte for byte
 search:                  ## compare the three retrieval paths: make search Q="..."
 	$(PY) src/search.py "$(Q)" --compare
 
+# The split is named rather than left to config.EVAL_QUESTIONS, and the output
+# is named after what it measures. Both were defects on 8 September.
+#
+# The default was eval/questions.yaml -- 88 pre-canonical labels -- so an
+# unqualified run returned 0.912, a figure this project withdrew. It now points
+# at the master benchmark, which is correct and still wrong here: a run over the
+# master averages the three splits into one number, and the README reports
+# retrieval on the original 50 "and never as a single average across splits, for
+# the reason in finding 1". Naming the split is what stops the next change of
+# default from mattering.
+#
+# And eval/results/retrieval.json is not written any more. That file holds a
+# measurement from 14 August with rrf_k=60, a constant the project has since
+# replaced; it is dated evidence of an earlier configuration, and it was the
+# destination of both targets below, so `make all` would have overwritten it.
 eval-retrieval:          ## Recall@k and MRR, no language model needed
-	$(PY) src/evaluate_retrieval.py --save eval/results/retrieval.json
+	$(PY) src/evaluate_retrieval.py \
+	      --questions eval/questions_vnext_regression.yaml \
+	      --save eval/results/retrieval_regression.json
 
 eval-sweep:              ## which fusion constant is right for this corpus
 	$(PY) src/evaluate_retrieval.py --sweep
 
 sabotage:                ## degrade the retriever, confirm the metrics move
 	$(PY) src/evaluate_retrieval.py --sabotage \
-	      --save eval/results/retrieval.json
+	      --questions eval/questions_vnext_regression.yaml \
+	      --save eval/results/retrieval_regression.json
 
 # ── generation and the harness ───────────────────────────────────────
 eval-generation:         ## refusal, false refusal and groundedness
