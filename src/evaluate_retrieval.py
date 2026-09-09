@@ -350,6 +350,9 @@ def main() -> int:
 
     if args.save:
         args.save.parent.mkdir(parents=True, exist_ok=True)
+        moved = P.preserve(args.save)
+        if moved:
+            print(f"\n  existing result moved to {moved.name}")
         payload = {
             "generated": datetime.now().isoformat(timespec="seconds"),
             # First, because it is the first thing a reader of this file needs

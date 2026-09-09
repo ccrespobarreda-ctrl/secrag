@@ -165,6 +165,12 @@ def main() -> int:
     # Which questions, and which generation run produced the answers being
     # judged. The release manifest reports 91.2% fully correct, and the
     # generation file those answers came from is recorded nowhere.
+    # No cursor here: this module reads a generation result file and never
+    # opens the warehouse, so the corpus counts come back null. They are not a
+    # gap -- `judged_from` names the generation file, and that file records the
+    # corpus its answers were produced against. Provenance travels down the
+    # chain rather than being re-derived at each step, which is why the
+    # generation file's hash is the field that matters here.
     provenance = P.describe(args.questions)
     judged_from = P.file_digest(args.generation)
     log.info(P.summarise(provenance))
@@ -271,6 +277,9 @@ def main() -> int:
             print(f"    generated: {' '.join(r['generated'].split())[:110]}")
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    moved = P.preserve(args.out)
+    if moved:
+        print(f"\n  existing result moved to {moved.name}")
     args.out.write_text(json.dumps({
         "generated": datetime.now().isoformat(timespec="seconds"),
         "measured_against": provenance,

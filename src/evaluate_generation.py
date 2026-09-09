@@ -542,6 +542,9 @@ def main() -> int:
             print(f"    {r['id']} run {r['run']}: {r['problems'][0][:60]}")
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    moved = P.preserve(args.out)
+    if moved:
+        print(f"\n  existing result moved to {moved.name}")
     args.out.write_text(json.dumps({
         "generated": datetime.now().isoformat(timespec="seconds"),
         "measured_against": provenance,

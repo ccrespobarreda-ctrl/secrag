@@ -32,6 +32,15 @@ WHAT IS RECORDED, AND WHY EACH
                     of finding 15
   n_documents       19 or fewer: a filing that failed to download changes the
                     denominator silently
+  splits            which of the three splits the measured questions belong to.
+                    The README reports retrieval on the original 50 "and never
+                    as a single average across splits, for the reason in
+                    finding 1": the questions added later score 0.929 with a
+                    bare keyword search against 0.412 for the ones written
+                    first. A run over the master file mixes them, and the
+                    resulting figure is not comparable with anything published.
+                    Recorded rather than warned about, because a warning
+                    scrolls past and a field does not
 
 None of it is derived or estimated. If the database is unavailable the corpus
 fields say so rather than guessing, because a missing fact recorded as missing
@@ -66,6 +75,58 @@ def _labels(path: Path) -> dict:
         "n_labels": len(labels),
         "n_labels_with_anchor": sum(1 for g in labels if g.get("contains")),
     }
+
+
+def _splits(questions) -> dict:
+    """Which splits the measured questions come from, by their ids."""
+    root = Path(__file__).resolve().parent.parent
+    path = root / "eval" / "vnext_splits.yaml"
+    if yaml is None or not path.is_file():
+        return {}
+    try:
+        spec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except OSError:
+        return {}
+
+    member = {}
+    for name, ids in spec.items():
+        if isinstance(ids, list):
+            for qid in ids:
+                member[str(qid)] = name
+
+    seen = {}
+    for q in questions:
+        seen.setdefault(member.get(str(q.get("id")), "unassigned"), 0)
+        seen[member.get(str(q.get("id")), "unassigned")] += 1
+
+    out = {"splits": dict(sorted(seen.items()))}
+    if len(seen) > 1:
+        out["splits_note"] = (
+            "More than one split. A single average across splits is not "
+            "comparable with the published retrieval figure, which is reported "
+            "on the original 50 questions only, for the reason in finding 1."
+        )
+    return out
+
+
+def preserve(path) -> Path | None:
+    """Move an existing result file aside instead of overwriting it.
+
+    On 8 September a free `--provider echo` smoke run overwrote
+    eval/results/correctness.json with 0% correct and 94% judge errors. The file
+    was not tracked, so nothing was lost, and the next one would have been.
+
+    A --force flag would have been the obvious answer and the wrong one: a flag
+    that has to be passed on every legitimate re-run gets passed reflexively,
+    and then it is not a guard. Moving the old file costs nothing, needs no
+    argument, and keeps the evidence.
+    """
+    path = Path(path)
+    if not path.exists():
+        return None
+    prev = path.with_name(f"{path.stem}.prev{path.suffix}")
+    path.replace(prev)
+    return prev
 
 
 def _corpus(cur) -> dict:
@@ -110,12 +171,19 @@ def describe(questions_path, cur=None) -> dict:
     except OSError:
         digest = None
 
-    return {
+    block = {
         "questions_file": path.as_posix(),
         "questions_sha256": digest,
         **_labels(path),
         **_corpus(cur),
     }
+    if yaml is not None:
+        try:
+            block.update(_splits(yaml.safe_load(
+                path.read_text(encoding="utf-8")) or []))
+        except OSError:
+            pass
+    return block
 
 
 def summarise(block: dict) -> str:

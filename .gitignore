@@ -44,3 +44,4 @@ eval/questions.yaml.bak
 eval/questions.yaml.bak
 eval/cache.json
 eval/cache*.json
+eval/results/*.prev.json
