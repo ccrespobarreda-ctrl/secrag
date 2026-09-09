@@ -348,6 +348,25 @@ def main() -> int:
         hits = search(cur, q["question"], qv, args.k)
         excerpt_ids = [h.chunk_id for h in hits]
 
+        # chunk_id is a serial and is reissued by every reload: the id 3453 in
+        # the August results and the id 3453 in the warehouse today are not the
+        # same passage, which is finding 15 seen from the generation side. So
+        # each excerpt is also recorded by document and section, which survive a
+        # reload, and a record can be read without the database that produced it.
+        #
+        # Not the text: those are other companies' annual reports. The two
+        # extracts this repository does ship each have a reason written in the
+        # licence, and "so the results file reads without opening another one"
+        # is not one. tests/fixture_corpus.json already holds the gold evidence
+        # for all 69 answerable questions.
+        #
+        # Not chunk_index either: it is not in retrieve.py's queries, and adding
+        # it would mean editing the SQL of three search functions in a module
+        # listed as a recorded release artifact, to store something the passage
+        # text already locates.
+        excerpts = [{"chunk_id": h.chunk_id, "doc_id": h.doc_id,
+                     "item_section": h.item_section} for h in hits]
+
         for run in range(args.runs):
             key = cache_key(q["question"], excerpt_ids, run, model)
             if key in cache:
@@ -384,6 +403,9 @@ def main() -> int:
                 "run": run, "text": text, "refused": refused,
                 "cited": cited, "problems": problems,
                 "excerpt_ids": excerpt_ids,
+                # Kept beside excerpt_ids, not replacing it: published result
+                # files use it and evaluate_correctness.py reads it.
+                "excerpts": excerpts,
                 "gold_chunk_ids": q.get("gold_chunk_ids") or [],
             })
 
