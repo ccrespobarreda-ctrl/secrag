@@ -1,0 +1,193 @@
+# Which filings this corpus is built from, and what they should produce.
+#
+# Accession numbers are immutable, so this file is what makes the corpus
+# reproducible. src/edgar.py --pinned fetches exactly these and never asks EDGAR
+# for the latest; src/pin_corpus.py --verify compares the live corpus against
+# them.
+#
+# Written by src/pin_corpus.py --write. Do not edit by hand: a pin edited to
+# match a corpus that drifted is the corpus declaring itself correct, which is
+# the failure recorded as finding 15.
+#
+# The chunker settings are here because the chunk count cannot be checked
+# without them. 4,169 and 4124 are both correct counts of
+# different corpora, and the difference is why 23 gold labels stopped holding.
+version: 1
+corpus:
+  n_chunks: 4124
+  n_documents: 19
+  chunk_tokens: 420
+  chunk_overlap_tokens: 60
+  min_chunk_tokens: 50
+filings:
+- ticker: ANF
+  cik: 1018840
+  accession: 000101884026000012
+  document: anf-20260131.htm
+  filed_date: '2026-03-26'
+  report_date: '2026-01-31'
+  fiscal_year: 2026
+  company: ABERCROMBIE & FITCH CO /DE/
+  raw_chars: 2507062
+- ticker: CHWY
+  cik: 1766502
+  accession: '000176650226000034'
+  document: chwy-20260201.htm
+  filed_date: '2026-03-25'
+  report_date: '2026-02-01'
+  fiscal_year: 2026
+  company: Chewy, Inc.
+  raw_chars: 1781992
+- ticker: COLM
+  cik: 1050797
+  accession: 000105079726000028
+  document: colm-20251231.htm
+  filed_date: '2026-02-25'
+  report_date: '2025-12-31'
+  fiscal_year: 2025
+  company: COLUMBIA SPORTSWEAR CO
+  raw_chars: 2495280
+- ticker: CROX
+  cik: 1334036
+  accession: '000133403626000006'
+  document: crox-20251231.htm
+  filed_date: '2026-02-12'
+  report_date: '2025-12-31'
+  fiscal_year: 2025
+  company: Crocs, Inc.
+  raw_chars: 2239922
+- ticker: DECK
+  cik: 910521
+  accession: 000162828026037664
+  document: deck-20260331.htm
+  filed_date: '2026-05-22'
+  report_date: '2026-03-31'
+  fiscal_year: 2026
+  company: DECKERS OUTDOOR CORP
+  raw_chars: 5260149
+- ticker: ETSY
+  cik: 1370637
+  accession: 000137063726000019
+  document: etsy-20251231.htm
+  filed_date: '2026-02-19'
+  report_date: '2025-12-31'
+  fiscal_year: 2025
+  company: ETSY INC
+  raw_chars: 2719612
+- ticker: FIGS
+  cik: 1846576
+  accession: 000162828026012333
+  document: figs-20251231.htm
+  filed_date: '2026-02-26'
+  report_date: '2025-12-31'
+  fiscal_year: 2025
+  company: FIGS, Inc.
+  raw_chars: 1683823
+- ticker: GAP
+  cik: 39911
+  accession: 000162828026018573
+  document: gap-20260131.htm
+  filed_date: '2026-03-17'
+  report_date: '2026-01-31'
+  fiscal_year: 2026
+  company: GAP INC
+  raw_chars: 1755098
+- ticker: HNST
+  cik: 1530979
+  accession: 000162828026011634
+  document: hnst-20251231.htm
+  filed_date: '2026-02-25'
+  report_date: '2025-12-31'
+  fiscal_year: 2025
+  company: Honest Company, Inc.
+  raw_chars: 1830012
+- ticker: LEVI
+  cik: 94845
+  accession: 000009484526000008
+  document: lvis-20251130.htm
+  filed_date: '2026-01-28'
+  report_date: '2025-11-30'
+  fiscal_year: 2025
+  company: LEVI STRAUSS & CO
+  raw_chars: 3728842
+- ticker: LULU
+  cik: 1397187
+  accession: 000139718726000020
+  document: lulu-20260201.htm
+  filed_date: '2026-03-17'
+  report_date: '2026-02-01'
+  fiscal_year: 2026
+  company: lululemon athletica inc.
+  raw_chars: 2341775
+- ticker: NKE
+  cik: 320187
+  accession: 000032018726000088
+  document: nke-20260531.htm
+  filed_date: '2026-07-15'
+  report_date: '2026-05-31'
+  fiscal_year: 2026
+  company: NIKE, Inc.
+  raw_chars: 2824360
+- ticker: PTON
+  cik: 1639825
+  accession: 000163982526000038
+  document: pton-20260630.htm
+  filed_date: '2026-08-06'
+  report_date: '2026-06-30'
+  fiscal_year: 2026
+  company: PELOTON INTERACTIVE, INC.
+  raw_chars: 2370016
+- ticker: RVLV
+  cik: 1746618
+  accession: 000119312526071307
+  document: rvlv-20251231.htm
+  filed_date: '2026-02-25'
+  report_date: '2025-12-31'
+  fiscal_year: 2025
+  company: Revolve Group, Inc.
+  raw_chars: 4034572
+- ticker: UAA
+  cik: 1336917
+  accession: 000133691726000073
+  document: ua-20260331.htm
+  filed_date: '2026-05-19'
+  report_date: '2026-03-31'
+  fiscal_year: 2026
+  company: Under Armour, Inc.
+  raw_chars: 2446740
+- ticker: URBN
+  cik: 912615
+  accession: 000119312526137916
+  document: urbn-20260131.htm
+  filed_date: '2026-04-01'
+  report_date: '2026-01-31'
+  fiscal_year: 2026
+  company: URBAN OUTFITTERS INC
+  raw_chars: 4451373
+- ticker: W
+  cik: 1616707
+  accession: '000161670726000027'
+  document: w-20251231.htm
+  filed_date: '2026-02-19'
+  report_date: '2025-12-31'
+  fiscal_year: 2025
+  company: Wayfair Inc.
+  raw_chars: 2269078
+- ticker: WRBY
+  cik: 1504776
+  accession: '000150477626000006'
+  document: wrby-20251231.htm
+  filed_date: '2026-02-26'
+  report_date: '2025-12-31'
+  fiscal_year: 2025
+  company: Warby Parker Inc.
+  raw_chars: 1743611
+- ticker: YETI
+  cik: 1670592
+  accession: 000167059226000013
+  document: yeti-20260103.htm
+  filed_date: '2026-02-27'
+  report_date: '2026-01-03'
+  fiscal_year: 2026
+  company: YETI Holdings, Inc.
+  raw_chars: 1810784
