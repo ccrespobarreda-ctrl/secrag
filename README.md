@@ -443,10 +443,48 @@ prompt, so the model has been told the wrong Item for some of what it was shown.
 correct for the corpus they were measured over, and reproduce on it exactly.
 What changes is what can be claimed about why they rose.
 
-**Not fixed, and now it has a name.** Reloading the warehouse from the corrected
-corpus would move every published figure, and for the first time it is known
-exactly which change is being measured: section boundaries, alone. That is a new
-evaluation version, and it belongs in one.
+**And then it was measured.** Two things had to be true first, and both were
+checked rather than assumed. The corpus in the warehouse was copied out to disk
+with `src/dump_warehouse.py`, because 4,169 vectors existed in Postgres and in
+no file. Then the parser from commit `2dc9a47` — the one that precedes the fix —
+was run over the same nineteen filings, pinned by accession number, in a clean
+clone: **4,169 chunks, byte-identical to the dump at every position.** The corpus
+behind every published figure is not an artefact that survived. It rebuilds from
+immutable filings and committed code.
+
+Measuring it there gave Recall@16 **0.735**, MRR **0.310** and coverage
+**0.589**, and every figure by question type, on a different machine, a
+different Postgres and embeddings generated that afternoon. `retrieval_rebuilt_prerefactor.json`
+holds it.
+
+**So the experiment finding 18 says was never run had in fact been run in two
+halves.** The corrected parse produces the 4,124-chunk corpus, and measured
+against the labels that belong to it that corpus gives **0.794**
+(`retrieval_vnext_regression.json`). Same code, same filings, same questions,
+one commit between them:
+
+| Section boundaries | Chunks | Recall@16 | MRR | Coverage |
+|---|---:|---:|---:|---:|
+| as measured, uncorrected | 4,169 | 0.735 | 0.310 | 0.589 |
+| corrected | 4,124 | 0.794 | 0.321 | 0.633 |
+
+Two questions out of 34, with intervals that overlap over most of their width,
+so this is a direction and not a result: correcting the boundaries does not make
+retrieval measurably better at this sample size. What it does is remove a defect
+from the corpus, and the figure moving at all is the evidence that
+`item_section` reaches retrieval rather than decorating it.
+
+**The 0.794 is rehabilitated as something other than what this page claimed
+yesterday.** It was described as a measurement resting on better evidence, then
+withdrawn as a measurement of a different corpus. It is neither: it is the
+isolated effect of a parse fix, which is the only reading the numbers support
+and the one nobody had produced.
+
+**Still not fixed.** The warehouse holds the uncorrected corpus, and reloading
+it would move every published figure — retrieval by the amount above, and
+generation and correctness by amounts nobody has measured. That is a new
+evaluation version. What has changed is that it is now a decision with numbers
+attached rather than an unknown.
 
 ## What measures what
 
