@@ -21,14 +21,14 @@ passage behind every figure, verifies those citations in code, and declines when
 the documents do not support an answer. The harness measures all three, and then
 measures itself — which is where the interesting part is.
 
-**Sixteen measurement defects were found, and not one of them was in the RAG.** A
+**Seventeen measurement defects were found, and not one of them was in the RAG.** A
 benchmark that scored its own labelling method. A baseline denied a capability
 the system had. A verifier that could not fail, twice over. Two headline figures
 that rested on one borderline record. A page that asserted a figure it had never
 measured. Each produced a plausible number, none raised an error, and every one
 was found by checking rather than by anything breaking. Those five are the ones
 written up in full in [`docs/measurement-honesty.md`](docs/measurement-honesty.md);
-the list below holds all seventeen findings — sixteen defects and one control
+the list below holds all eighteen findings — seventeen defects and one control
 that held.
 
 That is the transferable part. The corpus is 10-K filings because they are
@@ -89,7 +89,7 @@ Note what is not on this list: not one of them is a bug in retrieval or in
 generation. Every one is a defect in how those were being measured, and every one
 would have gone on producing a reasonable-looking figure indefinitely.
 
-Four causes account for all sixteen. **This table is an index, not an ordering.**
+Four causes account for all seventeen. **This table is an index, not an ordering.**
 The numbers are identifiers, fixed in the order the findings were found, and they
 are cited from outside this file — `tests/fixture.py` names finding 8 and
 `docs/measurement-honesty.md` names finding 9 — so they are never reshuffled to
@@ -101,7 +101,7 @@ finding 7 with a different subject.
 | **The benchmark was built to be passed.** Labels selected for evidence a keyword search could already reach, scored against a baseline denied a capability the system had. | 1, 2 |
 | **Guarantees that were not being made.** A flag, an anchor check, a reproducible run, a checksum list, a benchmark gate, a warehouse nobody named: each looked satisfied, none was. | 5, 7, 10, 14, 15, 17 |
 | **The unit of measurement was arbitrary.** Recall scored against one chunk where the evidence spans several, on boundaries that cut an argument from its heading. | 8, 9 |
-| **The published figure was not the figure measured.** An evaluator, a detector, a results page and a default argument, each producing a number the data did not support. | 3, 11, 12, 13, 16 |
+| **The published figure was not the figure measured.** An evaluator, a detector, a results page, a default argument and a fix that never reached the warehouse, each producing a number the data did not support. | 3, 11, 12, 13, 16, 18 |
 | *Not a defect.* The control that held. | 6 |
 
 **1 — The benchmark was inflating its own scores.** Half the questions were
@@ -389,12 +389,13 @@ for the container and none of it for this project. The searches that concluded
 the release corpus was unrecoverable read files, commits and 195 blobs; not one
 opened a database connection.
 
-**The cause of the 45-chunk difference is now decidable.** `src/parse.py` and
-`src/chunk.py` have two commits between them, both before the release, and the
-documents are pinned by accession number and immutable. Same code, same input,
-45 chunks fewer — so the difference is `lxml` and `beautifulsoup4`, which
-`requirements.txt` constrains with floors and no ceilings. The warehouse was
-loaded under August's versions and the clone installed September's.
+**The first explanation offered here was wrong.** It said the 45-chunk gap came
+from `lxml` and `beautifulsoup4` being unpinned. It does not: `data/chunks.json`
+written on 14 August and a clean clone's on 8 September, on `lxml` 6.1.3 against
+August's version, hold **4,124 chunks with byte-identical text at every
+position**. The pipeline is deterministic and the libraries are not the cause.
+The real one is finding 18, and pinning those versions would have fixed
+nothing.
 
 **What caught it was the gates written the day before.**
 `src/pin_corpus.py --verify` reported 4,169 chunks against 4,124 declared, and
@@ -414,6 +415,38 @@ one the figures come from is not enough: `requirements.txt` has to pin the parse
 dependencies, and then a container has to be shown to produce 4,169 chunks. Until
 it does, `src/inspect_warehouse.py` says which corpus is on the other end of
 `DATABASE_URL` before anything is measured against it.
+
+**18 — A fix that never reached the warehouse is credited with the improvement
+it could not have made.** The table below reports `Re-parse and company
+detection fix — 0.882 → 0.912, +0.029`. Both halves are in one commit,
+`4001782`, and only one of them could have moved anything.
+
+The times settle it. `eval/results/retrieval_postrecarga.json` is 14 August at
+18:30 and reports 0.882: the warehouse had just been reloaded. `data/chunks.json`
+was written at 19:39 with 4,124 chunks and the corrected section boundaries.
+`eval/results/retrieval_tanda2.json` is 22:45 and reports 0.912. The commit is
+23:01. **The re-parse output was written to disk after the reload and never
+loaded**, so the corpus the 0.912 was measured over — and every figure since —
+carries the section boundaries the commit was written to fix. The gain belongs
+to the other half, company detection, which lives in `src/retrieve.py` and needs
+no reload; the README's own ablation puts that capability at 0.118.
+
+`src/compare_warehouse_to_disk.py` measures what is still uncorrected there:
+45 chunks fewer on disk, and **115 of 4,124 shared positions carrying a
+different `item_section`** — `Item 3` where the corrected parse says `Item 7`,
+`Item 7` where it says `Item 7A`. That is not cosmetic. `item_section` is read
+in five places in `src/retrieve.py` and three in `src/search.py`: it drives the
+`--section` filter and the provenance label every excerpt carries into the
+prompt, so the model has been told the wrong Item for some of what it was shown.
+
+**What does not change.** Recall@16 0.735, MRR 0.310 and coverage 0.589 are
+correct for the corpus they were measured over, and reproduce on it exactly.
+What changes is what can be claimed about why they rose.
+
+**Not fixed, and now it has a name.** Reloading the warehouse from the corrected
+corpus would move every published figure, and for the first time it is known
+exactly which change is being measured: section boundaries, alone. That is a new
+evaluation version, and it belongs in one.
 
 ## What measures what
 
@@ -622,7 +655,7 @@ the table rather than dropped from it.
 |---|---|---|
 | `hnsw.ef_search` 40 → 200 | Identical to six decimal places, twice, seven minutes apart | Fixed at 40 in `sql/schema.sql`. Four thousand vectors is too small an index for it to matter, and an undeclared default is worse than a boring one *(finding 10)* |
 | RRF constant, k 60 → 40 | Recall unchanged, coverage +0.015 | Adopted. The sweep is `make eval-sweep`, so the constant is a measurement rather than a convention |
-| Re-parse and company-detection fix | 0.882 → 0.912 | Kept |
+| Re-parse and company-detection fix | 0.882 → 0.912 | Kept. **The re-parse half never reached the warehouse and cannot account for any of it** — finding 18. The gain is company detection, which the ablation values at 0.118 |
 | Canonical re-labelling of the original 50 | 0.912 → **0.735** | Published the lower figure. The largest movement in the headline metric was reading the filings again, and it cost 17 points *(finding 1)* |
 | Remove the company filter and quota | 0.735 → 0.559 | Kept. Worth −0.176, the largest contribution of any component |
 | Excerpt budget, 16 → 1 | 0.735 → 0.147 | `top_k` stays 16. Raising it from 8 doubled input tokens, and that is what the coverage on comparison questions costs |
