@@ -302,18 +302,31 @@ statement than the one made in August.
 **That last sentence was wrong, and finding 17 is why.** The release corpus was
 never lost: it is in the warehouse this project measures against, all 4,169
 chunks with their vectors. The three searches looked at files, at commits and at
-195 blobs, and not one of them looked in a database. `tests/fixture_corpus.json`
-turned out to be a second copy of 295 of those chunks rather than the only one,
-and it is preserved as `tests/fixture_corpus_release_20260817.json` anyway,
-because a repository that holds its own evidence does not depend on a hosted
-database still being there.
+195 blobs, and not one of them opened a database connection.
+`tests/fixture_corpus.json` is a second copy of 295 of those chunks rather than
+the only one, and it stays in the repository regardless, because a project that
+holds its own evidence should not depend on a hosted database still being there.
 
 **And the repair described below was for a different corpus.** The 23 labels were
 moved to positions correct in the 4,124-chunk corpus a clean clone builds, and
 wrong in the one every published figure was measured over. They have been
-restored. `docs/relabel-log.md` stays: it is the repair a reader needs if they
-rebuild the corpus from scratch today, and it is the evidence that gold labels
-are a property of a corpus and not of a benchmark.
+restored, and `docs/relabel-log.md` stays: it is the repair a reader needs if
+they rebuild the corpus from scratch today.
+
+[`tests/fixture_corpus_clone_20260908.json`](tests/fixture_corpus_clone_20260908.json)
+is its counterpart — the same 295 positions as they come out of a clean clone.
+**61 of the 295 hold different text**, in consecutive runs of three, which is
+the shape a fixture takes when it stores each labelled chunk plus the chunk
+either side: 23 labels times three positions, less the overlaps where two labels
+sit close together. The other 234 are byte-identical, because only the indices
+after a lost chunk shift. Two files, one difference, and together they are the
+evidence that a gold label is a property of a corpus rather than of a benchmark.
+
+That file was called `fixture_corpus_release_20260817.json` for a day. It was
+copied on 8 September from a fixture rebuilt against the clone's corpus, so the
+name asserted a provenance the contents did not have — the same defect as
+`eval/results/retrieval.json` holding a measurement taken under `rrf_k=60`. A
+name is a claim.
 
 **What was done about it.** The corpus is now declared rather than discovered.
 [`eval/corpus_expected.yaml`](eval/corpus_expected.yaml) names the nineteen
