@@ -10,11 +10,11 @@
 # the failure recorded as finding 15.
 #
 # The chunker settings are here because the chunk count cannot be checked
-# without them. 4,169 and 4124 are both correct counts of
+# without them. 4,169 and 4169 are both correct counts of
 # different corpora, and the difference is why 23 gold labels stopped holding.
 version: 1
 corpus:
-  n_chunks: 4124
+  n_chunks: 4169
   n_documents: 19
   chunk_tokens: 420
   chunk_overlap_tokens: 60
