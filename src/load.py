@@ -215,6 +215,30 @@ def main() -> int:
         return 0
 
     if args.truncate:
+        # Which database, said out loud, before it is emptied. On 10 September
+        # `DATABASE_URL` was still pointing at the hosted warehouse in a session
+        # opened for a different clone, and this command was one line away from
+        # truncating the corpus every published figure was measured over. It
+        # would have printed the same three warnings it always prints, none of
+        # which name a host.
+        import re
+        url = os.environ["DATABASE_URL"]
+        where = re.sub(r"//[^@/]+@", "//", url)
+        cur.execute("select count(*) from chunks")
+        have_chunks = cur.fetchone()[0]
+        cur.execute("select count(*) from documents")
+        have_docs = cur.fetchone()[0]
+        log.warning("About to empty %s", where)
+        log.warning("  %s chunks and %d documents will be deleted, and %s "
+                    "chunks loaded from %s",
+                    f"{have_chunks:,}", have_docs, f"{len(chunks):,}",
+                    args.chunks)
+        if have_chunks and have_chunks != len(chunks):
+            log.warning("  The warehouse holds a different number of chunks "
+                        "than the file being")
+            log.warning("  loaded. That is a corpus being replaced, not "
+                        "refreshed.")
+
         # restart identity is kept deliberately. The load is deterministic --
         # src/chunk.py walks the parsed files in sorted order, and the inserts
         # below follow that order -- so an unchanged chunks.json reproduces the
@@ -224,8 +248,11 @@ def main() -> int:
         # at different text with no error anywhere. Hence the warning and
         # src/verify_labels.py.
         log.warning("Emptying chunks and documents, and restarting chunk_id at 1")
-        log.warning("  The 88 gold labels in %s are chunk_ids. They survive only "
-                    "if chunks.json is unchanged.", C.EVAL_QUESTIONS)
+        log.warning("  The gold labels in %s resolve by document and index. "
+                    "They survive a", C.EVAL_QUESTIONS)
+        log.warning("  reload only if the chunking is unchanged; a corpus with "
+                    "different boundaries")
+        log.warning("  repoints them silently.")
         log.warning("  Run src/verify_labels.py after this load, before "
                     "trusting any retrieval metric.")
         cur.execute("truncate chunks, documents restart identity cascade")

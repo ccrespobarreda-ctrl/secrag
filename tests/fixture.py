@@ -34,6 +34,23 @@ dimensions would add half a megabyte of numbers that verify nothing. Retrieval
 is not what this fixture tests. The insert below writes the same two tables with
 the same columns, leaving `embedding` null.
 
+WHY IT RECORDS THE HASH OF THE QUESTION FILE
+
+This fixture is derived from the labels, so the two move together or they
+describe different corpora. On 8 and 10 September they came apart three times
+and the build went red each time -- which was the good case. The bad case
+happened once and went green: a fixture rebuilt against the wrong warehouse
+agrees with the labels perfectly and describes a corpus the project does not
+use. Nothing could tell the two apart, because `--check` only ever compared the
+fixture against the questions, and a fixture built from those questions cannot
+disagree with them.
+
+So the build records the SHA-256 of the question file, and `--check` fails when
+it no longer matches. That does not prove the fixture came from the right
+warehouse -- `src/pin_corpus.py --verify` is what says which corpus is on the
+other end of DATABASE_URL -- but it does prove the two files were made from the
+same labels, which is the pair that kept drifting.
+
 ON PUBLISHING FILING TEXT
 
 The repository deliberately does not redistribute the corpus; `src/edgar.py`
@@ -45,6 +62,7 @@ described as such in the README rather than left for a reader to notice.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import logging
 import os
@@ -56,6 +74,11 @@ sys.path.insert(0, str(ROOT / "src"))
 
 FIXTURE = ROOT / "tests" / "fixture_corpus.json"
 log = logging.getLogger("fixture")
+
+
+def questions_digest(path: Path) -> str:
+    """Of the bytes, not the parsed YAML: a reordered file is a changed file."""
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def build(cur, questions_path: Path, neighbours: int) -> dict:
@@ -101,6 +124,7 @@ def build(cur, questions_path: Path, neighbours: int) -> dict:
                  "tests/fixture.py --build; not a substitute for the corpus, "
                  "which src/edgar.py fetches."),
         "questions_file": questions_path.name,
+        "questions_sha256": questions_digest(questions_path),
         "neighbours": neighbours,
         "documents": documents,
         "chunks": chunks,
@@ -122,6 +146,25 @@ def check(data: dict, questions_path: Path) -> int:
     longer to say so.
     """
     import yaml
+
+    # Before anything else. A fixture built from different labels can still
+    # pass every check below -- that is what makes this the first one.
+    recorded = data.get("questions_sha256")
+    current = questions_digest(questions_path)
+    if recorded is None:
+        print("This fixture predates the hash check and cannot be matched to a\n"
+              "question file. Rebuild it:  python tests/fixture.py --build\n")
+    elif recorded != current:
+        print(f"{questions_path.name} is not the file this fixture was built "
+              f"from.\n"
+              f"  fixture built from  {recorded[:16]}\n"
+              f"  file on disk        {current[:16]}\n\n"
+              f"One of the two moved. The labels and the fixture describe the "
+              f"same corpus\nor they describe none, so rebuild against the "
+              f"warehouse the labels belong to:\n"
+              f"  python src/pin_corpus.py --verify\n"
+              f"  python tests/fixture.py --build\n")
+        return 1
 
     questions = yaml.safe_load(questions_path.read_text(encoding="utf-8"))
     have = {(c["doc_id"], c["chunk_index"]): c["content"]

@@ -1,6 +1,7 @@
 {
  "note": "Minimum corpus extract for the label check. Every chunk a gold label points at, plus its immediate neighbours. Built by tests/fixture.py --build; not a substitute for the corpus, which src/edgar.py fetches.",
  "questions_file": "questions_vnext.yaml",
+ "questions_sha256": "e9cde5d2650b2416476d45025eab9ecf8615608f21c33747ee29dc04f42e7499",
  "neighbours": 1,
  "documents": [
   {

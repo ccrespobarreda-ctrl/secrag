@@ -21,14 +21,14 @@ passage behind every figure, verifies those citations in code, and declines when
 the documents do not support an answer. The harness measures all three, and then
 measures itself — which is where the interesting part is.
 
-**Seventeen measurement defects were found, and not one of them was in the RAG.** A
+**Eighteen measurement defects were found, and not one of them was in the RAG.** A
 benchmark that scored its own labelling method. A baseline denied a capability
 the system had. A verifier that could not fail, twice over. Two headline figures
 that rested on one borderline record. A page that asserted a figure it had never
 measured. Each produced a plausible number, none raised an error, and every one
 was found by checking rather than by anything breaking. Those five are the ones
 written up in full in [`docs/measurement-honesty.md`](docs/measurement-honesty.md);
-the list below holds all eighteen findings — seventeen defects and one control
+the list below holds all nineteen findings — eighteen defects and one control
 that held.
 
 That is the transferable part. The corpus is 10-K filings because they are
@@ -89,7 +89,7 @@ Note what is not on this list: not one of them is a bug in retrieval or in
 generation. Every one is a defect in how those were being measured, and every one
 would have gone on producing a reasonable-looking figure indefinitely.
 
-Four causes account for all seventeen. **This table is an index, not an ordering.**
+Four causes account for all eighteen. **This table is an index, not an ordering.**
 The numbers are identifiers, fixed in the order the findings were found, and they
 are cited from outside this file — `tests/fixture.py` names finding 8 and
 `docs/measurement-honesty.md` names finding 9 — so they are never reshuffled to
@@ -99,7 +99,7 @@ finding 7 with a different subject.
 | Root cause | Findings |
 |---|---|
 | **The benchmark was built to be passed.** Labels selected for evidence a keyword search could already reach, scored against a baseline denied a capability the system had. | 1, 2 |
-| **Guarantees that were not being made.** A flag, an anchor check, a reproducible run, a checksum list, a benchmark gate, a warehouse nobody named: each looked satisfied, none was. | 5, 7, 10, 14, 15, 17 |
+| **Guarantees that were not being made.** A flag, an anchor check, a reproducible run, a checksum list, a benchmark gate, a warehouse nobody named, a fixture that could not disagree: each looked satisfied, none was. | 5, 7, 10, 14, 15, 17, 19 |
 | **The unit of measurement was arbitrary.** Recall scored against one chunk where the evidence spans several, on boundaries that cut an argument from its heading. | 8, 9 |
 | **The published figure was not the figure measured.** An evaluator, a detector, a results page, a default argument and a fix that never reached the warehouse, each producing a number the data did not support. | 3, 11, 12, 13, 16, 18 |
 | *Not a defect.* The control that held. | 6 |
@@ -485,6 +485,36 @@ it would move every published figure — retrieval by the amount above, and
 generation and correctness by amounts nobody has measured. That is a new
 evaluation version. What has changed is that it is now a decision with numbers
 attached rather than an unknown.
+
+**19 — Five files have to move together and nothing said so.** The gold labels,
+the four derived split files, the fixture and the corpus in the warehouse are
+one state in five places. Each gate checks a pair of them. No gate checked the
+set, and over two days they came apart three times — once because a `git
+checkout` staged for a reload that never happened sat on disk for three hours,
+and nothing remembered to undo it.
+
+Those three were the good case: the build went red and said which labels no
+longer held, and the list of them named the cause. **The bad case happened once
+and went green.** On 8 September the fixture was rebuilt against a warehouse
+holding a different corpus. It agreed with the labels perfectly, because
+`fixture.py --build` extracts the chunks the labels name and `--check` then
+confirms the labels are in it — a file compared against a copy of itself, which
+is finding 15 in a second place.
+
+`tests/fixture_corpus.json` now records the SHA-256 of the question file it was
+built from, and `--check` fails on a mismatch before it looks at a single label.
+That fixes the pair that kept drifting and **it does not fix the green case**:
+a fixture built from the right labels against the wrong warehouse still passes.
+`src/pin_corpus.py --verify` is what says which corpus is on the other end of
+`DATABASE_URL`, and the docstring says so rather than leaving the new check
+looking broader than it is.
+
+`src/load.py --truncate` now names the host it is about to empty, with the
+password stripped, and how many rows go and how many arrive. On 10 September
+`DATABASE_URL` was still pointing at the hosted warehouse in a session opened
+for a different clone, and that command was one line away from truncating the
+corpus every published figure was measured over. It would have printed the three
+warnings it always prints, and not one of them names a database.
 
 ## What measures what
 
