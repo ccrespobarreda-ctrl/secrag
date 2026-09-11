@@ -77,8 +77,23 @@ log = logging.getLogger("fixture")
 
 
 def questions_digest(path: Path) -> str:
-    """Of the bytes, not the parsed YAML: a reordered file is a changed file."""
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    """Of the bytes, normalised to LF, not of the parsed YAML.
+
+    The bytes, because a reordered file is a changed file and YAML would not
+    notice. Normalised, because .gitattributes stores text with LF and checks it
+    out per platform: the same file hashes one way on Windows and another on a
+    Linux runner, and the first version of this check did neither -- it recorded
+    the CRLF digest, continuous integration computed the LF one, and the gate
+    written to catch a corpus mismatch failed the build over a line ending.
+
+    That is finding 14 committed inside the fix for finding 19, with the lesson
+    two days old. verify_release.py had already solved it the other way round,
+    by restoring CR before hashing; here LF is the right direction, because this
+    digest describes a file in the repository rather than bytes that were
+    published.
+    """
+    return hashlib.sha256(
+        path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def build(cur, questions_path: Path, neighbours: int) -> dict:
