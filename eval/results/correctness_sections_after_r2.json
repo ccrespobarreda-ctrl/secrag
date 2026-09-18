@@ -1,0 +1,975 @@
+{
+ "generated": "2026-09-18T22:25:01",
+ "measured_against": {
+  "questions_file": "eval/questions_sections_after.yaml",
+  "questions_sha256": "85bd4381cc6004dd763c43fa904bc6638c3e2e2c1862783f47833302861b9882",
+  "n_questions": 50,
+  "n_answerable": 34,
+  "n_labels": 62,
+  "n_labels_with_anchor": 62,
+  "n_chunks": null,
+  "n_documents": null,
+  "note": "no database connection at write time",
+  "splits": {
+   "regression": 50
+  }
+ },
+ "judged_from": {
+  "path": "eval/results/generation_sections_after.json",
+  "sha256": "4b4e16f46a37f670afb204bf796ac3293360cac8d73834a37e76432796af08ad",
+  "bytes": 592868
+ },
+ "judge": "claude-sonnet-5",
+ "run_judged": 2,
+ "n_answerable": 34,
+ "counts": {
+  "CORRECT": 30,
+  "REFUSED": 1,
+  "PARTIALLY_CORRECT": 3,
+  "INCORRECT": 0,
+  "NO_REFERENCE": 0,
+  "JUDGE_ERROR": 0
+ },
+ "correct_rate": 0.8823529411764706,
+ "incorrect_rate": 0.0,
+ "note": "Correctness compares the generated answer against a reference written by reading the filing. It is not groundedness: an answer can be fully supported by the excerpt it cites and still state a different fact than the question asked for.",
+ "results": [
+  {
+   "id": "Q001",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Matches reference figure of $6,165,376 thousand.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Matches reference figure of $6,165,376 thousand.\"}",
+   "reference": "$6,165,376 thousand",
+   "generated": "Urban Outfitters' total net sales for the fiscal year ended January 31, 2026 were $6,165,376 (in thousands) [4][15].",
+   "gold_chunk_ids": [
+    3414
+   ],
+   "gold_retrieved": [
+    3414
+   ],
+   "cited": [
+    4,
+    15
+   ],
+   "cited_chunk_ids": [
+    3414,
+    3479
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q002",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Matches reference figure of $4,966,370 thousand for fiscal 2026 net revenues.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Matches reference figure of $4,966,370 thousand for fiscal 2026 net revenues.\"}",
+   "reference": "$4,966,370 thousand",
+   "generated": "Under Armour's net revenues for Fiscal 2026 (year ended March 31, 2026) were $4,966,370 thousand, a decrease of $197,940 thousand, or 3.8%, from $5,164,310 thousand in Fiscal 2025 [1][3][8].",
+   "gold_chunk_ids": [
+    3200
+   ],
+   "gold_retrieved": [
+    3200
+   ],
+   "cited": [
+    1,
+    3,
+    8
+   ],
+   "cited_chunk_ids": [
+    3161,
+    3200,
+    3154
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q003",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Includes point-of-sale recognition for stores and receipt-based recognition for e-commerce/wholesale, matching reference, with extra non-contradictory detail.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Includes point-of-sale recognition for stores and receipt-based recognition for e-commerce/wholesale, matching reference, with extra non-contradictory detail.\"}",
+   "reference": "Revenue is recognized when performance obligations are satisfied through the transfer of control. Company-operated store revenue is recognized at the point of sale, while e-commerce and wholesale revenue is recognized upon receipt by the customer.",
+   "generated": "Lululemon recognizes revenue when performance obligations are satisfied through the transfer of control of promised goods or services to customers, which occurs once a customer has the ability to direct the use of, and obtain substantially all of the benefits from, the product\u2014encompassing the transfer of legal title, physical possession, risks and rewards of ownership, and customer acceptance [1][2]. Specifically, revenue from company-operated stores and other retail locations is recognized at the point of sale, while e-commerce revenue, sales to wholesale accounts, and in-home fitness hardware sales are recognized upon receipt by the customer [1][2]. In arrangements where payment is received before the customer receives the promised good, these payments are initially recorded as deferred revenue and recognized as revenue only when control transfers to the customer [1][2]. Revenue is reported net of markdowns and discounts, sales taxes collected on behalf of taxing authorities, and returns [1]. Revenue is also presented net of an allowance for estimated returns, with a corresponding liability for sales return refunds recognized within accrued liabilities and an asset for expected returned inventory recognized within other prepaid expenses and other current assets [2]. Additionally, shipping fees billed to customers are recorded as revenue in the same period as the related product revenue, and gift card proceeds are deferred until redemption or recognized under a redemption recognition method for balances not expected to be redeemed [2].",
+   "gold_chunk_ids": [
+    2288
+   ],
+   "gold_retrieved": [
+    2288
+   ],
+   "cited": [
+    1,
+    2
+   ],
+   "cited_chunk_ids": [
+    2287,
+    2288
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q004",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Both state Nike's fiscal 2026 inventory was $7.5 billion.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Both state Nike's fiscal 2026 inventory was $7.5 billion.\"}",
+   "reference": "$7.5 billion",
+   "generated": "Nike's inventories as of May 31, 2026 were $7.5 billion, flat compared to the prior year, primarily reflecting an increase in units, offset by product mix [1].",
+   "gold_chunk_ids": [
+    2418
+   ],
+   "gold_retrieved": [
+    2418
+   ],
+   "cited": [
+    1
+   ],
+   "cited_chunk_ids": [
+    2418
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q005",
+   "type": "extractive",
+   "verdict": "REFUSED",
+   "reason": "declined to answer",
+   "raw": "",
+   "reference": "Deloitte & Touche LLP",
+   "generated": "INSUFFICIENT_CONTEXT\n\nThe excerpts reference the \"Consent of Deloitte & Touche LLP\" as Exhibit 23.1 [10], but this is a consent filing, not the actual signed audit report, which does not name the auditor within the provided excerpts; the full audit report with the auditor's signature (Item 8, Report of Independent Registered Public Accounting Firm) would contain this information.",
+   "gold_chunk_ids": [
+    723
+   ],
+   "gold_retrieved": [],
+   "cited": [
+    10
+   ],
+   "cited_chunk_ids": [
+    717
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q006",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "States Nike's fiscal year ends May 31, matching the reference.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"States Nike's fiscal year ends May 31, matching the reference.\"}",
+   "reference": "May 31",
+   "generated": "Nike's fiscal year ends on May 31 [1]. For example, fiscal years 2026, 2025, and 2024 refer to years ended May 31, 2026, May 31, 2025, and May 31, 2024, respectively [1].",
+   "gold_chunk_ids": [
+    2335
+   ],
+   "gold_retrieved": [
+    2335
+   ],
+   "cited": [
+    1
+   ],
+   "cited_chunk_ids": [
+    2335
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q007",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Matches reference figure of $12,601.5 million for fiscal 2025 net sales.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Matches reference figure of $12,601.5 million for fiscal 2025 net sales.\"}",
+   "reference": "$12,601.5 million ($12.6 billion)",
+   "generated": "Chewy's net sales for Fiscal Year 2025 were $12,601.5 million (approximately $12.6 billion), an increase of $740.2 million, or 6.2%, compared to $11,861.3 million in Fiscal Year 2024 [4][6][10].",
+   "gold_chunk_ids": [
+    316
+   ],
+   "gold_retrieved": [
+    316
+   ],
+   "cited": [
+    4,
+    6,
+    10
+   ],
+   "cited_chunk_ids": [
+    316,
+    335,
+    314
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q008",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Generated answer includes HOKA, UGG, and Teva matching the reference, with extra non-contradictory detail.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Generated answer includes HOKA, UGG, and Teva matching the reference, with extra non-contradictory detail.\"}",
+   "reference": "HOKA, UGG y Teva",
+   "generated": "Deckers Outdoor Corporation's three proprietary brands include HOKA\u00ae, UGG\u00ae, and Teva\u00ae [10]. The company is also phasing out standalone operations for the Koolaburra by UGG\u00ae brand and the AHNU\u00ae brand, and previously sold the Sanuk brand [1][4].",
+   "gold_chunk_ids": [
+    800
+   ],
+   "gold_retrieved": [],
+   "cited": [
+    1,
+    4,
+    10
+   ],
+   "cited_chunk_ids": [
+    909,
+    911,
+    817
+   ],
+   "correct_without_gold": true
+  },
+  {
+   "id": "Q009",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Matches store count and date exactly.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Matches store count and date exactly.\"}",
+   "reference": "Warby Parker had 323 retail stores as of December 31, 2025.",
+   "generated": "Warby Parker operated 323 retail stores as of December 31, 2025 [1][12].",
+   "gold_chunk_ids": [
+    3861
+   ],
+   "gold_retrieved": [],
+   "cited": [
+    1,
+    12
+   ],
+   "cited_chunk_ids": [
+    3708,
+    3862
+   ],
+   "correct_without_gold": true
+  },
+  {
+   "id": "Q010",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Matches the reference figure of $12,457 million.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Matches the reference figure of $12,457 million.\"}",
+   "reference": "$12,457 million",
+   "generated": "Wayfair's net revenue for the year ended December 31, 2025 was $12,457 million (in millions) [5][3].",
+   "gold_chunk_ids": [
+    3630
+   ],
+   "gold_retrieved": [
+    3630
+   ],
+   "cited": [
+    3,
+    5
+   ],
+   "cited_chunk_ids": [
+    3613,
+    3630
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q011",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Matches reference's two main revenue sources: subscriptions and Connected Fitness Products sales, with added non-contradictory detail.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Matches reference's two main revenue sources: subscriptions and Connected Fitness Products sales, with added non-contradictory detail.\"}",
+   "reference": "Suscripciones recurrentes y venta de Connected Fitness Products",
+   "generated": "Peloton's primary sources of revenue are its recurring content Subscription revenue and revenue from sales of its Connected Fitness Products and related accessories, including Precor-branded fitness products, delivery and installation services [7]. Connected Fitness Products Revenue also includes Peloton Bike portfolio rental products, extended warranty agreements, branded apparel, and commercial service contracts [2][3]. Subscription Revenue primarily consists of revenue generated from Paid Connected Fitness Subscriptions and Paid Peloton App Subscriptions, offered on a month-to-month or annual prepaid basis, as well as revenue generated from content licensing arrangements [2][3]. For fiscal year 2026, Connected Fitness Products revenue was $770.4 million and Subscription revenue was $1,675.6 million, together comprising total revenue of $2,446.0 million [10].",
+   "gold_chunk_ids": [
+    2687,
+    2694
+   ],
+   "gold_retrieved": [
+    2687
+   ],
+   "cited": [
+    2,
+    3,
+    7,
+    10
+   ],
+   "cited_chunk_ids": [
+    2695,
+    2765,
+    2762,
+    2743
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q012",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Matches the reference figure of $1.7 billion ($1,700,753 thousand).",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Matches the reference figure of $1.7 billion ($1,700,753 thousand).\"}",
+   "reference": "$1.7 billion ($1,700,753 thousand)",
+   "generated": "Lululemon's inventory balance was $1,700,753 thousand (net of provisions) as of February 1, 2026, compared to $1,442,081 thousand as of February 2, 2025 [10][7]. This reflects gross inventories at cost of $1,789,576 thousand less inventory provisions and reserves of $(88,823) thousand for fiscal 2025 [7]. The MD&A also notes this balance as approximately $1.7 billion, representing an 18% increase from the prior year [11].",
+   "gold_chunk_ids": [
+    2270
+   ],
+   "gold_retrieved": [
+    2270
+   ],
+   "cited": [
+    7,
+    10,
+    11
+   ],
+   "cited_chunk_ids": [
+    2300,
+    2270,
+    2257
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q013",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "All four brands match the reference; extra details do not contradict it.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"All four brands match the reference; extra details do not contradict it.\"}",
+   "reference": "Old Navy, Gap, Banana Republic y Athleta",
+   "generated": "Gap Inc. operates four brands: Old Navy, Gap, Banana Republic, and Athleta [1][2].\n\n- Old Navy is a North American value apparel brand offering on-trend fashion, opened its first store in 1994 in Colma, California [1][2].\n- Gap, founded in San Francisco in 1969, is the company's namesake casual American style brand, also offering GapKids, babyGap, Gap Maternity, GapBody, and GapFit collections [2].\n- Banana Republic, founded in 1978 and acquired by Gap Inc. in 1983, is a storyteller's brand offering high-quality, expertly crafted collections [2].\n- Athleta, founded in 1998 and acquired by Gap Inc. in 2008, is a premium performance lifestyle brand certified as a benefit corporation (\"B Corp\") focused on women and girls [2][7].",
+   "gold_chunk_ids": [
+    1473
+   ],
+   "gold_retrieved": [
+    1473
+   ],
+   "cited": [
+    1,
+    2,
+    7
+   ],
+   "cited_chunk_ids": [
+    1473,
+    1474,
+    1475
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q014",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Correctly identifies Deloitte & Touche LLP as the auditor.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Correctly identifies Deloitte & Touche LLP as the auditor.\"}",
+   "reference": "Deloitte & Touche LLP",
+   "generated": "Deloitte & Touche LLP audited Urban Outfitters, Inc.'s consolidated financial statements and internal control over financial reporting as of and for the periods ended January 31, 2026 [7][15]. The firm has served as the Company's auditor since 2005 [7].",
+   "gold_chunk_ids": [
+    3412
+   ],
+   "gold_retrieved": [],
+   "cited": [
+    7,
+    15
+   ],
+   "cited_chunk_ids": [
+    3413,
+    3401
+   ],
+   "correct_without_gold": true
+  },
+  {
+   "id": "Q015",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Matches reference figure of $2,357,055 thousand gross profit for fiscal 2025.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Matches reference figure of $2,357,055 thousand gross profit for fiscal 2025.\"}",
+   "reference": "$2,357,055 thousand",
+   "generated": "Crocs, Inc.'s gross profit for fiscal year ended December 31, 2025 was $2,357,055 (in thousands), compared to $2,410,258 (in thousands) in 2024, a decrease of $53,203 (in thousands), or 2.2% [2][9].",
+   "gold_chunk_ids": [
+    723
+   ],
+   "gold_retrieved": [],
+   "cited": [
+    2,
+    9
+   ],
+   "cited_chunk_ids": [
+    724,
+    658
+   ],
+   "correct_without_gold": true
+  },
+  {
+   "id": "Q017",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "States Europe and Asia combined equal 45% of net revenues, matching reference.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"States Europe and Asia combined equal 45% of net revenues, matching reference.\"}",
+   "reference": "45%",
+   "generated": "Europe and Asia businesses, collectively, contributed 45% of net revenues in fiscal year 2025, the same percentage (45%) as in fiscal year 2024 [4][5].",
+   "gold_chunk_ids": [
+    1980,
+    1981
+   ],
+   "gold_retrieved": [
+    1980,
+    1981
+   ],
+   "cited": [
+    4,
+    5
+   ],
+   "cited_chunk_ids": [
+    1981,
+    1980
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q018",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Lists North America, EMEA, Asia-Pacific, and Latin America as segments, matching reference; extra detail on Corporate Other does not contradict.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Lists North America, EMEA, Asia-Pacific, and Latin America as segments, matching reference; extra detail on Corporate Other does not contradict.\"}",
+   "reference": "North America, EMEA, Asia-Pacific y Latin America",
+   "generated": "Under Armour discloses four reportable geographic segments: North America, EMEA (Europe, the Middle East and Africa), Asia-Pacific, and Latin America [3][6]. In addition, the Company reports a \"Corporate Other\" category that excludes certain corporate items from segment profitability measures, including general and administrative expenses not allocated to an operating segment, restructuring and related charges, certain foreign currency hedge gains and losses, and operating results from the MapMyFitness digital platform (sold in the second quarter of Fiscal 2025) [3][4].",
+   "gold_chunk_ids": [
+    3291
+   ],
+   "gold_retrieved": [
+    3291
+   ],
+   "cited": [
+    3,
+    4,
+    6
+   ],
+   "cited_chunk_ids": [
+    3290,
+    3291,
+    3082
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q019",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Matches the $1.20 per share dividend figure from the reference.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Matches the $1.20 per share dividend figure from the reference.\"}",
+   "reference": "$1.20 por accion",
+   "generated": "Columbia Sportswear paid cash dividends of $1.20 per share for the year ended December 31, 2025 [1].",
+   "gold_chunk_ids": [
+    490,
+    491,
+    492
+   ],
+   "gold_retrieved": [
+    490,
+    492
+   ],
+   "cited": [
+    1
+   ],
+   "cited_chunk_ids": [
+    492
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q020",
+   "type": "extractive",
+   "verdict": "CORRECT",
+   "reason": "Matches reference: FIGS sells scrubwear/non-scrubwear to healthcare professionals via direct-to-consumer digital platform, with added non-contradictory detail.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Matches reference: FIGS sells scrubwear/non-scrubwear to healthcare professionals via direct-to-consumer digital platform, with added non-contradictory detail.\"}",
+   "reference": "FIGS sells scrubwear and non-scrubwear designed for healthcare professionals, primarily through its direct-to-consumer digital platform.",
+   "generated": "FIGS, Inc. is a direct-to-consumer healthcare apparel and lifestyle brand company that designs and sells scrubwear and non-scrubwear products, such as outerwear, underscrubs, footwear, compression socks, lab coats, loungewear and other apparel [1]. Its target customers are healthcare professionals, and the company describes itself as the first digitally native lifestyle brand outfitting this group [5]. Sales are primarily generated through the Company's digital platforms and marketed mainly in the United States [1], with an international strategy that ships to numerous countries across North America, Central America, South America, Europe, Asia and the Middle East [7]. In addition to individual consumers, FIGS also sells to institutional customers through its B2B custom platform called TEAMS, which partners with healthcare administrators, institutional departments, medical offices and concierge clinics seeking to standardize and professionalize their organizations' uniforms [7].",
+   "gold_chunk_ids": [
+    1223
+   ],
+   "gold_retrieved": [],
+   "cited": [
+    1,
+    5,
+    7
+   ],
+   "cited_chunk_ids": [
+    1432,
+    1226,
+    1232
+   ],
+   "correct_without_gold": true
+  },
+  {
+   "id": "Q021",
+   "type": "multi_chunk",
+   "verdict": "CORRECT",
+   "reason": "Generated answer covers all key risks from reference (limited supply capabilities, inability to replace lost suppliers, product safety failures, dependence on suppliers outside the U.S.) with added detail, no contradictions.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Generated answer covers all key risks from reference (limited supply capabilities, inability to replace lost suppliers, product safety failures, dependence on suppliers outside the U.S.) with added detail, no contradictions.\"}",
+   "reference": "Chewy identifies risks associated with suppliers and outsourcing partners, including inability to source or retain suppliers, suppliers with limited supply capabilities, inability to replace lost suppliers, product safety failures, and dependence on suppliers and outsourcing partners outside the U.S.",
+   "generated": "Chewy identifies several supplier-related risks. A significant portion of suppliers for its private brand and non-consumable business are located in China, and disruptions from political/economic instability, natural disasters, tariffs, trade restrictions, currency exchange rates, and other factors beyond the company's control could adversely affect these suppliers and, in turn, Chewy's business [4]. Chewy also purchases significant amounts of products from suppliers with limited supply capabilities, and there is no assurance current suppliers can accommodate anticipated growth or continue supplying at preferential prices; the company notes it has experienced disruptions where existing suppliers were unable to supply products in a timely or cost-effective manner [8]. If significant pet product suppliers discontinue selling to Chewy or discontinue preferential pricing/exclusive incentives, this could negatively impact the business, and it can be challenging to persuade pet food buyers to switch products, exacerbating the impact of losing a supplier [8]. Chewy also faces competitive risk if it cannot identify new suppliers or replace lost ones, and notes that premium pet food brands becoming more widely available through supermarkets, warehouse clubs, or mass merchants (potentially at lower prices) could hurt its competitive position and margins [6]. Additionally, a reduction or discontinuance of supplier-provided incentives like trade allowances and cooperative advertising funds could reduce profitability, and suppliers offering preferential terms to competitors could reduce Chewy's competitive advantage [6]. Separately, Chewy notes safety/quality risks tied to suppliers, including that suppliers (including private brand manufacturers) might not adhere to product safety requirements or quality control standards, potentially leading to recalls, litigation, or loss of consumer confidence [7].",
+   "gold_chunk_ids": [
+    232,
+    233,
+    234,
+    253,
+    254
+   ],
+   "gold_retrieved": [
+    233,
+    234,
+    253,
+    254
+   ],
+   "cited": [
+    4,
+    6,
+    7,
+    8
+   ],
+   "cited_chunk_ids": [
+    254,
+    234,
+    253,
+    233
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q022",
+   "type": "multi_chunk",
+   "verdict": "PARTIALLY_CORRECT",
+   "reason": "Segment names and revenue figures match, but the generated answer omits the specific revenue growth percentages (Americas +3.0%, Europe +5.0%, Asia +4.8%, Beyond Yoga +15.4% with $151.3M) and instead gives operating income growth figures instead.",
+   "raw": "{\"verdict\": \"PARTIALLY_CORRECT\", \"reason\": \"Segment names and revenue figures match, but the generated answer omits the specific revenue growth percentages (Americas +3.0%, Europe +5.0%, Asia +4.8%, Beyond Yoga +15.4% with $151.3M) and instead gives operating income growth figures instead.\"}",
+   "reference": "Tres segmentos: Americas ($3,297.0M, +3.0%), Europe ($1,699.3M, +5.0%) y Asia ($1,134.4M, +4.8%). Beyond Yoga ($151.3M, +15.4%) se presenta aparte por no alcanzar los umbrales cuantitativos.",
+   "generated": "Levi Strauss & Co. manages its business according to three reportable segments\u2014Americas, Europe, and Asia\u2014which together comprise the Levi's Brands business, including the Levi's\u00ae, Levi Strauss SignatureTM and Denizen\u00ae brands [5][6][11]. The Beyond Yoga\u00ae business is managed separately and does not meet the quantitative thresholds for reportable segments but is presented separately for transparency [5][6][11]. Dockers\u00ae was historically presented as a separate operating segment under \"Other Brands,\" but following the definitive agreement to sell the business and the July 31, 2025 closing of the sale of Dockers\u00ae intellectual property and operations in the U.S. and Canada, it has been classified as discontinued operations and excluded from segment results for all periods presented [6][10][11].\n\nFor fiscal year 2025 performance, Americas segment net revenues were $3,297.0 million with operating income of $722.9 million (21.9% of net revenues), up 3.7% from $697.0 million in the prior year [1][15]. Europe segment net revenues were $1,699.3 million with operating income of $366.7 million (21.6% of net revenues), up 14.7% from $319.6 million [1][15]. Asia segment net revenues were $1,134.4 million with operating income of $148.6 million (13.1% of net revenues), up 10.2% from $134.9 million [1][15]. Total Levi's Brands operating income was $1,238.2 million (20.2% of net revenues), up 7.5% from $1,151.5 million, while the separately-presented Beyond Yoga\u00ae business had an operating loss of $(13.6) million, an improvement from a loss of $(20.0) million in the prior year [1][15].",
+   "gold_chunk_ids": [
+    1978,
+    1996,
+    1997
+   ],
+   "gold_retrieved": [
+    1978
+   ],
+   "cited": [
+    1,
+    5,
+    6,
+    10,
+    11,
+    15
+   ],
+   "cited_chunk_ids": [
+    2167,
+    1977,
+    2166,
+    2066,
+    2067,
+    2005
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q023",
+   "type": "multi_chunk",
+   "verdict": "CORRECT",
+   "reason": "All reference facts present, with additional non-contradictory detail.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"All reference facts present, with additional non-contradictory detail.\"}",
+   "reference": "Nike periodically discovers counterfeit reproductions and other products that infringe its intellectual property rights. Failure to enforce those rights could adversely affect sales and the Nike brand.",
+   "generated": "Nike states that it periodically discovers counterfeit reproductions of its products or products that otherwise infringe its intellectual property rights, and that if it is unsuccessful in enforcing these rights, continued sales of such infringing products could adversely affect its sales and brand and could shift consumer preference away from its products [5]. It also notes that its actions to establish and protect intellectual property may not adequately prevent imitation of its products by others, and it may be unable to prevent others from seeking to block sales of its products as violations of proprietary rights [5]. Additionally, Nike may be subject to liability if third parties successfully claim it infringes their intellectual property rights, which could result in costly and time-consuming defense, costly license agreements, or significant damages or injunctions against development, manufacturing, use, importation and/or sale of certain products [5][6]. Nike also cautions that laws in certain countries may not protect or allow enforcement of intellectual property rights to the same extent as U.S. laws, increasing expenses and liability risk internationally [6]. It further notes emerging risks from new technologies such as generative AI, which may give rise to intellectual property infringement claims or harm to reputation or brand image [6][9]. Finally, Nike describes internal measures such as non-disclosure agreements and confidentiality training to prevent unauthorized use or disclosure of its intellectual property, while acknowledging these controls might not always be effective [6].",
+   "gold_chunk_ids": [
+    2404
+   ],
+   "gold_retrieved": [
+    2404
+   ],
+   "cited": [
+    5,
+    6,
+    9
+   ],
+   "cited_chunk_ids": [
+    2404,
+    2405,
+    2406
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q024",
+   "type": "multi_chunk",
+   "verdict": "CORRECT",
+   "reason": "Generated answer includes all reference facts (international supplier dependence, Taiwan concentration risk, trade restrictions/tariffs impact) plus extra non-contradictory detail.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Generated answer includes all reference facts (international supplier dependence, Taiwan concentration risk, trade restrictions/tariffs impact) plus extra non-contradictory detail.\"}",
+   "reference": "Lululemon depends on international suppliers and faces supply-chain disruption risks, including geopolitical and sourcing concentration risk in Taiwan. Trade restrictions, tariffs and customs changes can also disrupt the supply chain, increase costs, delay shipments and compress margins.",
+   "generated": "Lululemon discloses several supply chain and manufacturing risks in its 10-K. First, its supply chain is heavily dependent on international suppliers concentrated in a limited number of regions\u2014during 2025, approximately 40% of products were manufactured in Vietnam, 18% in Cambodia, 11% in Sri Lanka, 11% in Indonesia, and 7% in Bangladesh, and approximately 34% of fabric originated from Taiwan, 29% from China Mainland, 10% from South Korea, and 10% from Vietnam, creating exposure to geopolitical risks such as military conflict, trade restrictions, or disruptions affecting those regions, particularly Taiwan [1][2][12]. The company relies on a relatively small number of vendors and fabric suppliers, with approximately 47% of products manufactured by its top five vendors (largest producing 15%) and approximately 48% of fabrics produced by its top five suppliers (largest producing 20%), and it has no long-term contracts with suppliers or manufacturers, meaning the loss of a key vendor could adversely affect the business [10][14]. Supply chain disruptions could also arise from trade restrictions, political instability, war, terrorism, severe weather, natural disasters, public health crises, labor supply shortages or stoppages, financial or operational instability of suppliers, and changes in diplomatic or trade relationships including sanctions, tariffs, and de minimis threshold changes [2][12]. Additional risks include reliance on suppliers of technically advanced specialty fabrics available from only one or a limited number of sources in the short term, difficulty and added costs in training new suppliers/manufacturers if sourcing needs to shift, and rising freight capacity and shipping cost issues [4][10]. The company also faces risks from manufacturing or design defects in products, which could harm its reputation and lead to lost revenue, recalls, or regulatory exposure, and risks that suppliers/manufacturers may fail to comply with its Vendor Code of Ethics or applicable laws, potentially causing reputational and legal harm [3][4]. Finally, climate change poses",
+   "gold_chunk_ids": [
+    2204,
+    2210
+   ],
+   "gold_retrieved": [
+    2210
+   ],
+   "cited": [
+    1,
+    2,
+    3,
+    4,
+    10,
+    12,
+    14
+   ],
+   "cited_chunk_ids": [
+    2211,
+    2210,
+    2192,
+    2213,
+    2212,
+    2203,
+    2182
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q025",
+   "type": "multi_chunk",
+   "verdict": "PARTIALLY_CORRECT",
+   "reason": "Revenue figures and operating income dollar amounts match, but the percentage changes in operating income (e.g., -29.7%, +30.1%, +15.4%, -37.1%) are omitted.",
+   "raw": "{\"verdict\": \"PARTIALLY_CORRECT\", \"reason\": \"Revenue figures and operating income dollar amounts match, but the percentage changes in operating income (e.g., -29.7%, +30.1%, +15.4%, -37.1%) are omitted.\"}",
+   "reference": "Ingresos: North America $2,859,420 (-7.9%), EMEA $1,180,510 (+8.6%), Asia-Pacific $719,134 (-4.8%), Latin America $234,191 (+8.7%). Resultado operativo: North America $442,503 (-29.7%), EMEA $191,487 (+30.1%), Asia-Pacific $84,466 (+15.4%), Latin America $29,901 (-37.1%).",
+   "generated": "In Fiscal 2026, North America net revenues decreased by $246.2 million, or 7.9%, driven by declines in both wholesale and direct-to-consumer channels, including lower e-commerce and owned/operated retail store sales [15]. EMEA net revenues increased by $93.9 million, or 8.6%, driven by growth in wholesale, direct-to-consumer (owned/operated retail stores, partially offset by lower e-commerce), and license revenues, with a positive impact from foreign exchange rates [15]. Asia-Pacific net revenues decreased by $36.3 million, or 4.8% [15][11]. Latin America net revenues increased by $18.8 million, or 8.7% [15][11]. In terms of operating income, Total Reportable Segments generated operating income with North America at $442,503 (in thousands), EMEA at $191,487 (in thousands), Asia-Pacific at $84,466 (in thousands), and Latin America at $29,901 (in thousands) [8]. Overall, total net revenues decreased 3.8% during Fiscal 2026, with challenging market conditions particularly noted in North America and Asia-Pacific due to lower consumer demand [11][15].",
+   "gold_chunk_ids": [
+    3161,
+    3162
+   ],
+   "gold_retrieved": [
+    3161
+   ],
+   "cited": [
+    8,
+    11,
+    15
+   ],
+   "cited_chunk_ids": [
+    3291,
+    3147,
+    3161
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q026",
+   "type": "multi_chunk",
+   "verdict": "CORRECT",
+   "reason": "Generated answer covers all reference points: policy/enforcement risks, fraud/negative buyer experiences, and failure to attract/retain/engage buyers and sellers, with added detail not contradicting reference.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Generated answer covers all reference points: policy/enforcement risks, fraud/negative buyer experiences, and failure to attract/retain/engage buyers and sellers, with added detail not contradicting reference.\"}",
+   "reference": "Etsy identifies risks including policy and enforcement decisions perceived as arbitrary or inconsistent, fraudulent transactions and negative buyer experiences, and failure to attract, retain and maintain engagement among buyers and sellers.",
+   "generated": "Etsy discloses several risks tied to seller and buyer behavior. Its financial performance depends on attracting, retaining, and driving engagement with active buyers and sellers, and both active buyer counts and GMS per active buyer on a trailing-twelve-month basis have declined year-over-year [8]. If existing buyers have negative experiences\u2014such as uncompetitive shipping charges, delayed shipping, inadequate customer service, buyer fees, or declining interest in seller offerings\u2014they may purchase less and refer fewer new buyers, since many new buyers and sellers are acquired through word of mouth [8]. Similarly, if existing sellers are dissatisfied or find more attractive alternatives, they may stop listing items, stop using Etsy's services, and stop referring others, negatively impacting financial performance [8]. Etsy also notes that broader trends supporting self-employment and supplemental income could reverse, which could reduce the number of sellers and listings on the platform [8]. Additionally, the company is exposed to fraud and illegal activity risks, as bad actors target buyers and sellers through tactics like phishing, spoofing, and social engineering, sometimes amplified by AI, and Etsy's detection tools may not keep pace with evolving techniques [13][15]. Finally, enforcement of marketplace policies\u2014including prohibiting certain item sales\u2014can be negatively perceived by buyers, sellers, or other stakeholders, potentially harming brand reputation and financial performance [4].",
+   "gold_chunk_ids": [
+    1026,
+    1029,
+    1067
+   ],
+   "gold_retrieved": [
+    1026,
+    1067
+   ],
+   "cited": [
+    4,
+    8,
+    13,
+    15
+   ],
+   "cited_chunk_ids": [
+    1067,
+    1026,
+    1025,
+    1080
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q027",
+   "type": "multi_chunk",
+   "verdict": "CORRECT",
+   "reason": "All comp sales and net sales figures match the reference exactly.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"All comp sales and net sales figures match the reference exactly.\"}",
+   "reference": "Fiscal 2025 comparable sales were Old Navy Global +3%, Gap Global +6%, Banana Republic Global +3% and Athleta Global -9%. Fiscal 2025 net sales were $8,657 million for Old Navy, $3,501 million for Gap, $1,916 million for Banana Republic and $1,219 million for Athleta.",
+   "generated": "Based on the excerpts, Gap Inc.'s brand performance for fiscal 2025 varied significantly:\n\n**Comp Sales growth by brand (fiscal 2025 vs. prior year):**\n- Old Navy Global: 3% [13]\n- Gap Global: 6% [13]\n- Banana Republic Global: 3% [13]\n- Athleta Global: (9)% (decline) [13]\n- Overall Gap, Inc.: 3% [13]\n\n**Net sales by brand (fiscal 2025):**\n- Old Navy Global: $8,657 million [16]\n- Gap Global: $3,501 million [16]\n- Banana Republic Global: $1,916 million [16]\n- Athleta Global: $1,219 million [16]\n\nOverall, net sales for fiscal 2025 increased $280 million, or 2 percent, compared with fiscal 2024, driven primarily by an increase in online sales, with the increase \"primarily related to Old Navy Global and Gap Global, our two largest brands, partially offset by Athleta Global\" [9]. Store counts also shifted, with Old Navy North America decreasing by 7 stores, Gap North America increasing by 6, Banana Republic North America decreasing by 22, and Athleta North America decreasing by 8, ending fiscal 2025 [13].",
+   "gold_chunk_ids": [
+    1528,
+    1572
+   ],
+   "gold_retrieved": [
+    1528,
+    1572
+   ],
+   "cited": [
+    9,
+    13,
+    16
+   ],
+   "cited_chunk_ids": [
+    1529,
+    1528,
+    1572
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q028",
+   "type": "multi_chunk",
+   "verdict": "CORRECT",
+   "reason": "All key facts from reference (CastleGate, WDN, CGF, drop-ship network, two-day delivery to majority of US population, CGF inbound freight/trucking/ocean from Asia) are present; extra details don't contradict.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"All key facts from reference (CastleGate, WDN, CGF, drop-ship network, two-day delivery to majority of US population, CGF inbound freight/trucking/ocean from Asia) are present; extra details don't contradict.\"}",
+   "reference": "La red logistica de Wayfair consta de CastleGate y la Wayfair Delivery Network (WDN), mas CastleGate Forwarding para servicios de entrada. CastleGate permite a los proveedores posicionar inventario por adelantado en sus almacenes, con entrega en dos dias o menos a la mayoria de la poblacion de EE UU. El metodo principal de cumplimiento es una red de envio directo integrada con la tecnologia de los proveedores. CGF ofrece flete de entrada, transporte terrestre y servicios oceanicos desde Asia.",
+   "generated": "Wayfair's logistics network was built specifically for the home category, where items can be bulky, heavy and prone to damage, with the primary fulfillment method being a drop-ship network integrated into suppliers' back-end technology infrastructure to send orders directly to supplier warehouses [1][11]. Shipment from the supplier's loading dock to the customer's home occurs via FedEx for small parcel products or third-party line haul trucking companies and last mile home delivery agents for large parcel products [1][11]. Wayfair has grown the percentage of orders shipped from its CastleGate warehouses, supported by CastleGate Forwarding services offering inbound freight, drayage, and ocean services for suppliers shipping from Asia directly to CastleGate locations, and the majority of large parcel items are delivered through the Wayfair Delivery Network (WDN), which includes consolidation centers, cross docks, and last mile delivery facilities [1][4]. CastleGate facilities allow suppliers to forward-position inventory in Wayfair's warehouses to enable faster delivery, and for items shipped from CastleGate warehouses, Wayfair can deliver many products to a majority of the U.S. population in two days or less [4][12]. Wayfair also complements its e-commerce logistics with 12 physical retail stores (excluding outlets) across 4 states as of December 31, 2025 [4]. The company notes it primarily relies on a single carrier, FedEx, for small parcel deliveries, and on third-party national, regional and local transportation companies, including through the WDN, for large parcel deliveries, and acknowledges dependence on suppliers and other third parties such as logistics providers, customs brokers and carriers to perform certain services [9].",
+   "gold_chunk_ids": [
+    3482,
+    3485,
+    3487,
+    3490,
+    3644
+   ],
+   "gold_retrieved": [
+    3482,
+    3485,
+    3487,
+    3490
+   ],
+   "cited": [
+    1,
+    4,
+    9,
+    11,
+    12
+   ],
+   "cited_chunk_ids": [
+    3490,
+    3482,
+    3535,
+    3489,
+    3485
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q029",
+   "type": "multi_chunk",
+   "verdict": "CORRECT",
+   "reason": "All reference facts present: risk from overseas manufacturing/retaliatory tariffs, mitigation via product cost management, opex reduction, AUR growth, and $90M/170bps impact in Fiscal 2025; extra details do not contradict.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"All reference facts present: risk from overseas manufacturing/retaliatory tariffs, mitigation via product cost management, opex reduction, AUR growth, and $90M/170bps impact in Fiscal 2025; extra details do not contradict.\"}",
+   "reference": "Abercrombie identifies tariff risk because a predominant portion of its merchandise is manufactured outside the U.S.; retaliatory tariffs can also disrupt global trade. Mitigation includes managing product costs, reducing operating expenses and pursuing average unit retail growth. Tariffs reduced Fiscal 2025 operating income by about $90 million, or 170 basis points of net sales.",
+   "generated": "Abercrombie & Fitch identifies significant uncertainty from changing tariff rates and shifting U.S. trade policies, noting that retaliatory tariffs from other countries could further disrupt global trade flows and adversely affect its business [1]. If tariffs on goods from sourcing countries remain elevated, merchandise costs could rise, negatively impacting margins and consumer demand, and potentially leading to reputational harm if the company cannot deliver products on expected timelines [1]. The company notes that, after mitigation, tariffs in effect through January 31, 2026 negatively impacted operating income by $90 million or 170 basis points as a percent of net sales during Fiscal 2025, and it expects an approximately $40 million incremental impact (about 70 basis points) in Fiscal 2026 due in part to an anticipated 15% tariff on all U.S. imports [2][7]. It also discloses a subsequent event in which the U.S. Supreme Court struck down certain IEEPA tariffs and a new 10% global tariff was announced under Section 122 of the Trade Act of 1974, with uncertain impact including possible refunds of previously paid IEEPA tariffs [3]. To mitigate these risks, the company describes a \"playbook\" of strategies including evaluating its supply chain/sourcing footprint, negotiating with vendors, managing product costs, pursuing average unit retail (AUR) growth, and considering operating expense reductions, while cautioning these efforts may be costly, slow to implement, or insufficient to fully offset tariff impacts [1][6][7][9].",
+   "gold_chunk_ids": [
+    54,
+    56,
+    57,
+    81
+   ],
+   "gold_retrieved": [
+    56,
+    57,
+    81
+   ],
+   "cited": [
+    1,
+    2,
+    3,
+    6,
+    7,
+    9
+   ],
+   "cited_chunk_ids": [
+    56,
+    81,
+    191,
+    57,
+    80,
+    78
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q030",
+   "type": "multi_chunk",
+   "verdict": "CORRECT",
+   "reason": "Matches product categories, channel mix, and Honest.com discontinuation as stated in reference, with extra non-contradictory detail.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Matches product categories, channel mix, and Honest.com discontinuation as stated in reference, with extra non-contradictory detail.\"}",
+   "reference": "Categorias: wipes, personal care, diapers y beauty. Canal: venta a traves de retailers y sus websites, third-party ecommerce sites y, antes del 31 de diciembre de 2025, Honest.com. Desde esa fecha Honest.com dejo de ser un canal de shipping/fulfillment.",
+   "generated": "Honest Company describes itself as a personal care company offering products spanning wipes, personal care, diapers, and beauty for babies to adults [1][2]. In terms of product-level performance, point of sale consumption growth in 2025 significantly outpaced the industry in wipes (31% vs. 5% industry) and baby personal care (12% vs. 3% industry), while diaper consumption declined 15% versus a 1% industry decline [12]. The company also had an apparel product line, but this relationship (with Butterblu) was lost, negatively impacting apparel revenue [11], and apparel was exited as part of Transformation 2.0: Powering Honest Growth [10][14].\n\nRegarding channel mix, Honest sells through leading retailers (including Amazon, Target, and Walmart) and their websites, third-party ecommerce sites, and, prior to December 31, 2025, through Honest.com as a direct-to-consumer channel [1][11][15]. Revenue generated from Honest.com was 10%, 13%, and 17% of total revenue for the years ended December 31, 2025, 2024, and 2023, respectively [6]. Effective December 31, 2025, the company discontinued Honest.com as a shipping and fulfillment channel, retaining it only as an educational resource that drives consumers to purchase through retailers and third-party ecommerce sites, as part of the Powering Honest Growth initiative [1][4][15].",
+   "gold_chunk_ids": [
+    1602,
+    1773
+   ],
+   "gold_retrieved": [
+    1602,
+    1773
+   ],
+   "cited": [
+    1,
+    2,
+    4,
+    6,
+    10,
+    11,
+    12,
+    14,
+    15
+   ],
+   "cited_chunk_ids": [
+    1760,
+    1602,
+    1766,
+    1830,
+    1605,
+    1773,
+    1609,
+    1761,
+    1604
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q031",
+   "type": "comparative",
+   "verdict": "CORRECT",
+   "reason": "Both facts confirmed that Nike and Under Armour cite foreign currency exchange rate risk, matching the reference; extra details do not contradict it.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Both facts confirmed that Nike and Under Armour cite foreign currency exchange rate risk, matching the reference; extra details do not contradict it.\"}",
+   "reference": "Si, ambos. Nike lo declara en Item 1A: 'We transact in various currencies, which creates exposure to fluctuations in foreign currency exchange rates relative to the U.S. Dollar'. Under Armour tambien en Item 1A: 'our results of operations could be adversely impacted by changes in foreign currency exchange rates'.",
+   "generated": "Yes. Both companies discuss foreign currency exchange rate risk. NIKE describes its foreign exchange risk management program and its exposure arising from transactions denominated in non-functional currencies and the translation of foreign currency results into U.S. Dollars [1][3][7]. Under Armour similarly discloses that its financial results could be adversely impacted by currency exchange rate fluctuations, noting it generated approximately 48% of its consolidated net revenues outside the United States during Fiscal 2026 and is exposed to translation and transaction gains/losses [4]. Under Armour also details its foreign exchange risk management program, including designated cash flow hedges and undesignated hedges for various currency pairs [6][14].",
+   "gold_chunk_ids": [
+    2362,
+    3132
+   ],
+   "gold_retrieved": [
+    3132
+   ],
+   "cited": [
+    1,
+    3,
+    4,
+    6,
+    7,
+    14
+   ],
+   "cited_chunk_ids": [
+    2445,
+    2444,
+    3132,
+    3188,
+    2446,
+    3190
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q032",
+   "type": "comparative",
+   "verdict": "CORRECT",
+   "reason": "Both facts about Nike Direct and Lululemon's store/e-commerce revenue are correctly stated, with extra non-contradictory detail on Converse.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Both facts about Nike Direct and Lululemon's store/e-commerce revenue are correctly stated, with extra non-contradictory detail on Converse.\"}",
+   "reference": "Yes. Lululemon reports company-operated store and e-commerce net revenue as direct sales channels, while Nike reports NIKE Direct operations, comprised of Nike-owned retail stores and digital platforms.",
+   "generated": "Yes. Nike sells through its NIKE Direct operations, comprised of NIKE-owned retail stores and sales through digital platforms (\"NIKE Brand Digital\") [2][4][8]. Its Converse subsidiary also reports direct-to-consumer operations, including digital commerce [6][12]. Lululemon similarly operates an omni-channel model that includes company-operated stores and e-commerce via its websites, mobile apps, and third-party online marketplaces [15], and reports both company-operated store net revenue and e-commerce net revenue as distinct components [5]. Thus, both companies report a direct-to-consumer channel encompassing owned retail and digital/e-commerce sales [2][4][5][15].",
+   "gold_chunk_ids": [
+    2287,
+    2335
+   ],
+   "gold_retrieved": [
+    2335
+   ],
+   "cited": [
+    2,
+    4,
+    5,
+    6,
+    8,
+    12,
+    15
+   ],
+   "cited_chunk_ids": [
+    2418,
+    2336,
+    2235,
+    2337,
+    2335,
+    2338,
+    2199
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q033",
+   "type": "comparative",
+   "verdict": "PARTIALLY_CORRECT",
+   "reason": "Chewy's risk is captured correctly, but Wayfair's described risk is misrepresented as expansion into new markets/brands rather than the reference's stated risk of failing to acquire, reactivate, or retain customers cost-effectively.",
+   "raw": "{\"verdict\": \"PARTIALLY_CORRECT\", \"reason\": \"Chewy's risk is captured correctly, but Wayfair's described risk is misrepresented as expansion into new markets/brands rather than the reference's stated risk of failing to acquire, reactivate, or retain customers cost-effectively.\"}",
+   "reference": "Yes. Chewy says failure to acquire and retain new customers cost-effectively could harm growth and profitability. Wayfair similarly says failure to acquire new customers, reactivate prior customers or retain existing customers cost-effectively could harm its business.",
+   "generated": "Yes. Chewy describes risk related to its ability to acquire and retain new customers cost-effectively, noting it must compete against traditional retailers, competitor websites, and suppliers' own sites, and may need to incur significantly higher marketing expenses to do so [13]. Wayfair, meanwhile, discusses risks tied to expanding its business into new brands, channels, and geographic markets\u2014including substantial upfront investment in marketing and the risk that it may not generate satisfactory net revenue to offset these costs\u2014as part of its customer/market expansion efforts [6]. Both companies therefore address risks connected to growing or maintaining their customer base, though Chewy's disclosure focuses more directly on customer acquisition costs and competition [13], while Wayfair's is framed around broader business expansion risks including new offerings like Muse [6].",
+   "gold_chunk_ids": [
+    226,
+    3502
+   ],
+   "gold_retrieved": [
+    226
+   ],
+   "cited": [
+    6,
+    13
+   ],
+   "cited_chunk_ids": [
+    3510,
+    226
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q034",
+   "type": "comparative",
+   "verdict": "CORRECT",
+   "reason": "Both companies confirmed to identify tariffs as a risk factor, matching the reference; additional details do not contradict it.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Both companies confirmed to identify tariffs as a risk factor, matching the reference; additional details do not contradict it.\"}",
+   "reference": "Yes. Gap states that trade matters, including U.S. tariffs, have had and could continue to have an adverse effect on its business. Abercrombie similarly states that changes in tariff policy affecting merchandise and raw materials have and could continue to adversely affect its business.",
+   "generated": "Yes. Gap Inc. identifies tariffs as a risk factor, noting that \"during fiscal 2025, the United States enacted significant changes to its trade policy and imposed substantial tariffs on imported goods from most countries, which increased cost of goods sold during fiscal 2025,\" and discusses this under a dedicated risk factor titled \"Trade matters, including the imposition of tariffs by the United States, have had, and could continue to have, an adverse effect on our business\" [15][3]. Abercrombie & Fitch similarly identifies tariffs as a risk, describing how \"certain countries have imposed retaliatory tariffs on U.S. exports\" and that \"changing tariff rates and shifting trade policies have created, and may continue to create, significant uncertainty\" [2]. Both companies also address tariffs in their MD&A/subsequent events sections, noting the Supreme Court's invalidation of IEEPA-based tariffs in February 2026 and subsequent new tariffs imposed under alternative statutory authority [3][8]. Abercrombie also quantified the tariff impact, stating tariffs \"negatively impacted operating income by $90 million or 170 basis points as a percent of net sales, during Fiscal 2025\" [10].",
+   "gold_chunk_ids": [
+    54,
+    1490
+   ],
+   "gold_retrieved": [
+    1490
+   ],
+   "cited": [
+    2,
+    3,
+    8,
+    10,
+    15
+   ],
+   "cited_chunk_ids": [
+    56,
+    1526,
+    191,
+    81,
+    1490
+   ],
+   "correct_without_gold": false
+  },
+  {
+   "id": "Q035",
+   "type": "comparative",
+   "verdict": "CORRECT",
+   "reason": "Matches reference figures, companies, and fiscal year note.",
+   "raw": "{\"verdict\": \"CORRECT\", \"reason\": \"Matches reference figures, companies, and fiscal year note.\"}",
+   "reference": "Deckers Outdoor, con $5,472,296 miles frente a los $4,040,647 miles de Crocs. Deckers cierra el ejercicio el 31 de marzo de 2026 y Crocs el 31 de diciembre de 2025, por lo que los periodos no son identicos.",
+   "generated": "Deckers Outdoor Corporation reports higher net revenues than Crocs, Inc. For the year ended March 31, 2026, Deckers reported total net sales of $5,472,296 (in thousands) [14], while Crocs, Inc. reported total consolidated revenues of $4,040,647 (in thousands) for the year ended December 31, 2025 [15]. Note that these figures correspond to different fiscal year-end periods (Deckers' fiscal year ends March 31, while Crocs' fiscal year ends December 31) [14][15].",
+   "gold_chunk_ids": [
+    723,
+    903
+   ],
+   "gold_retrieved": [],
+   "cited": [
+    14,
+    15
+   ],
+   "cited_chunk_ids": [
+    933,
+    668
+   ],
+   "correct_without_gold": true
+  }
+ ]
+}

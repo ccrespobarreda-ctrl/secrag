@@ -1,0 +1,665 @@
+{
+ "generated": "2026-09-18T23:10:38",
+ "rule": [
+  "docs/decision-rule-sections.md",
+  "docs/decision-rule-sections-amendment-1.md",
+  "docs/decision-rule-sections-amendment-2.md"
+ ],
+ "sources": {
+  "uncorrected": [
+   {
+    "file": "correctness_sections_before_r0.json",
+    "run_judged": 0,
+    "judged_from": "eval/results/generation_sections_before.json",
+    "questions_sha256": "2f180d9004be187b778f65aa97d0ac400b37d6142785c7b352d02ed5ac678972",
+    "n_chunks": null
+   },
+   {
+    "file": "correctness_sections_before_r1.json",
+    "run_judged": 1,
+    "judged_from": "eval/results/generation_sections_before.json",
+    "questions_sha256": "2f180d9004be187b778f65aa97d0ac400b37d6142785c7b352d02ed5ac678972",
+    "n_chunks": null
+   },
+   {
+    "file": "correctness_sections_before_r2.json",
+    "run_judged": 2,
+    "judged_from": "eval/results/generation_sections_before.json",
+    "questions_sha256": "2f180d9004be187b778f65aa97d0ac400b37d6142785c7b352d02ed5ac678972",
+    "n_chunks": null
+   }
+  ],
+  "corrected": [
+   {
+    "file": "correctness_sections_after_r0.json",
+    "run_judged": 0,
+    "judged_from": "eval/results/generation_sections_after.json",
+    "questions_sha256": "85bd4381cc6004dd763c43fa904bc6638c3e2e2c1862783f47833302861b9882",
+    "n_chunks": null
+   },
+   {
+    "file": "correctness_sections_after_r1.json",
+    "run_judged": 1,
+    "judged_from": "eval/results/generation_sections_after.json",
+    "questions_sha256": "85bd4381cc6004dd763c43fa904bc6638c3e2e2c1862783f47833302861b9882",
+    "n_chunks": null
+   },
+   {
+    "file": "correctness_sections_after_r2.json",
+    "run_judged": 2,
+    "judged_from": "eval/results/generation_sections_after.json",
+    "questions_sha256": "85bd4381cc6004dd763c43fa904bc6638c3e2e2c1862783f47833302861b9882",
+    "n_chunks": null
+   }
+  ]
+ },
+ "scoring": "CORRECT scores 1 per run, every other verdict 0; JUDGE_ERROR excluded from the denominator",
+ "excluded": {
+  "by_rule": [
+   "Q016"
+  ],
+  "no_legible_verdict": [],
+  "one_side_only": []
+ },
+ "n_questions": 34,
+ "judge_errors": {
+  "before": 1,
+  "after": 0
+ },
+ "correctness": {
+  "uncorrected": 0.8823529411764706,
+  "corrected": 0.9019607843137255
+ },
+ "paired_difference": 0.019607843137254905,
+ "bootstrap_95": [
+  0.0,
+  0.049019607843137254
+ ],
+ "resamples": 10000,
+ "seed": 20260918,
+ "sign_test": {
+  "up": 2,
+  "down": 0,
+  "unchanged": 32
+ },
+ "questions_changed": [
+  {
+   "id": "Q025",
+   "before": 0.0,
+   "after": 0.3333333333333333,
+   "diff": 0.3333333333333333,
+   "before_verdicts": [
+    "PARTIALLY_CORRECT",
+    "PARTIALLY_CORRECT",
+    "PARTIALLY_CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "PARTIALLY_CORRECT",
+    "PARTIALLY_CORRECT"
+   ]
+  },
+  {
+   "id": "Q029",
+   "before": 0.6666666666666666,
+   "after": 1.0,
+   "diff": 0.33333333333333337,
+   "before_verdicts": [
+    "CORRECT",
+    "PARTIALLY_CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  }
+ ],
+ "per_question": [
+  {
+   "id": "Q001",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q002",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q003",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q004",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q005",
+   "before": 0.0,
+   "after": 0.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "REFUSED",
+    "REFUSED",
+    "REFUSED"
+   ],
+   "after_verdicts": [
+    "REFUSED",
+    "REFUSED",
+    "REFUSED"
+   ]
+  },
+  {
+   "id": "Q006",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q007",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q008",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q009",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q010",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q011",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q012",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q013",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q014",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q015",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q017",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q018",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q019",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q020",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q021",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q022",
+   "before": 0.3333333333333333,
+   "after": 0.3333333333333333,
+   "diff": 0.0,
+   "before_verdicts": [
+    "PARTIALLY_CORRECT",
+    "PARTIALLY_CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "PARTIALLY_CORRECT",
+    "PARTIALLY_CORRECT"
+   ]
+  },
+  {
+   "id": "Q023",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q024",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q025",
+   "before": 0.0,
+   "after": 0.3333333333333333,
+   "diff": 0.3333333333333333,
+   "before_verdicts": [
+    "PARTIALLY_CORRECT",
+    "PARTIALLY_CORRECT",
+    "PARTIALLY_CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "PARTIALLY_CORRECT",
+    "PARTIALLY_CORRECT"
+   ]
+  },
+  {
+   "id": "Q026",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q027",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q028",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q029",
+   "before": 0.6666666666666666,
+   "after": 1.0,
+   "diff": 0.33333333333333337,
+   "before_verdicts": [
+    "CORRECT",
+    "PARTIALLY_CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q030",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q031",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q032",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q033",
+   "before": 0.0,
+   "after": 0.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "PARTIALLY_CORRECT",
+    "JUDGE_ERROR",
+    "INCORRECT"
+   ],
+   "after_verdicts": [
+    "PARTIALLY_CORRECT",
+    "INCORRECT",
+    "PARTIALLY_CORRECT"
+   ]
+  },
+  {
+   "id": "Q034",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  },
+  {
+   "id": "Q035",
+   "before": 1.0,
+   "after": 1.0,
+   "diff": 0.0,
+   "before_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ],
+   "after_verdicts": [
+    "CORRECT",
+    "CORRECT",
+    "CORRECT"
+   ]
+  }
+ ]
+}
