@@ -21,15 +21,15 @@ passage behind every figure, verifies those citations in code, and declines when
 the documents do not support an answer. The harness measures all three, and then
 measures itself — which is where the interesting part is.
 
-**Eighteen measurement defects were found, and not one of them was in the RAG.** A
+**Twenty measurement defects were found, and not one of them was in the RAG.** A
 benchmark that scored its own labelling method. A baseline denied a capability
 the system had. A verifier that could not fail, twice over. Two headline figures
 that rested on one borderline record. A page that asserted a figure it had never
 measured. Each produced a plausible number, none raised an error, and every one
 was found by checking rather than by anything breaking. Those five are the ones
 written up in full in [`docs/measurement-honesty.md`](docs/measurement-honesty.md);
-the list below holds all nineteen findings — eighteen defects and one control
-that held.
+the list below holds all twenty-one findings — twenty defects and one
+control that held.
 
 That is the transferable part. The corpus is 10-K filings because they are
 public, dense with exact figures, and hard in ways that matter; the labelling
@@ -89,7 +89,7 @@ Note what is not on this list: not one of them is a bug in retrieval or in
 generation. Every one is a defect in how those were being measured, and every one
 would have gone on producing a reasonable-looking figure indefinitely.
 
-Four causes account for all eighteen. **This table is an index, not an ordering.**
+Four causes account for all twenty. **This table is an index, not an ordering.**
 The numbers are identifiers, fixed in the order the findings were found, and they
 are cited from outside this file — `tests/fixture.py` names finding 8 and
 `docs/measurement-honesty.md` names finding 9 — so they are never reshuffled to
@@ -99,9 +99,9 @@ finding 7 with a different subject.
 | Root cause | Findings |
 |---|---|
 | **The benchmark was built to be passed.** Labels selected for evidence a keyword search could already reach, scored against a baseline denied a capability the system had. | 1, 2 |
-| **Guarantees that were not being made.** A flag, an anchor check, a reproducible run, a checksum list, a benchmark gate, a warehouse nobody named, a fixture that could not disagree: each looked satisfied, none was. | 5, 7, 10, 14, 15, 17, 19 |
+| **Guarantees that were not being made.** A flag, an anchor check, a reproducible run, a checksum list, a benchmark gate, a warehouse nobody named, a fixture that could not disagree: each looked satisfied, none was. | 5, 7, 10, 14, 15, 17, 19, 21 |
 | **The unit of measurement was arbitrary.** Recall scored against one chunk where the evidence spans several, on boundaries that cut an argument from its heading. | 8, 9 |
-| **The published figure was not the figure measured.** An evaluator, a detector, a results page, a default argument and a fix that never reached the warehouse, each producing a number the data did not support. | 3, 11, 12, 13, 16, 18 |
+| **The published figure was not the figure measured.** An evaluator, a detector, a results page, a default argument and a fix that never reached the warehouse, each producing a number the data did not support. | 3, 11, 12, 13, 16, 18, 20 |
 | *Not a defect.* The control that held. | 6 |
 
 **1 — The benchmark was inflating its own scores.** Half the questions were
@@ -480,11 +480,12 @@ withdrawn as a measurement of a different corpus. It is neither: it is the
 isolated effect of a parse fix, which is the only reading the numbers support
 and the one nobody had produced.
 
-**Still not fixed.** The warehouse holds the uncorrected corpus, and reloading
-it would move every published figure — retrieval by the amount above, and
-generation and correctness by amounts nobody has measured. That is a new
-evaluation version. What has changed is that it is now a decision with numbers
-attached rather than an unknown.
+**Now measured.** The warehouse was reloaded with the corrected corpus on
+18 September, into a separate Neon branch so the uncorrected one survives. Both
+sides were measured for generation and correctness, three runs each, under a
+rule written beforehand. The result is below: a paired difference of +2.0% with
+a 95% interval of [+0.0%, +4.9%] — indistinguishable at this sample size. The
+corrected corpus was adopted anyway, because the boundaries were wrong.
 
 **19 — Five files have to move together and nothing said so.** The gold labels,
 the four derived split files, the fixture and the corpus in the warehouse are
@@ -515,6 +516,217 @@ password stripped, and how many rows go and how many arrive. On 10 September
 for a different clone, and that command was one line away from truncating the
 corpus every published figure was measured over. It would have printed the three
 warnings it always prints, and not one of them names a database.
+
+**20 — Three of the four headline generation figures were single runs of a
+system that varies**
+
+The release reports 100% refusal on unanswerable questions, 0% false refusal and
+0% hallucination. Each is the value one run produced.
+
+Measured over three runs of the same corpus, on the same split those figures are
+quoted for, they are 95.8%, 2.9% and 4.2%. Every one of those differences is the
+same question. Q016 asks *"In how many countries are YETI products sold?"* —
+YETI states no number, Columbia states "115 countries", and the retriever returns
+Columbia's figure at rank 5: the right number for the wrong company, in the
+format the question asked for. Across three runs the system refused it once and
+answered it twice. Run 0 was the one that was published.
+
+The 0% hallucination rate is therefore not a miscount. It is a sample from a
+distribution, reported as a constant, and the harness printed the reason on every
+run it made: *without temperature=0 a single run is a sample, not a constant.*
+
+Finding 11 recorded that two headline figures rested on one borderline record and
+on which detector counted it. This is the layer underneath: they also rested on
+**which run was looked at**.
+
+Correctness varies too, and by more. On the uncorrected corpus, run 1 scores
+85.3% and run 2 scores 91.2% over the same 34 questions — three questions change
+verdict between identical calls. Q022 is the clearest case: it scores 1 of 3
+correct runs on both corpora of the sections experiment, and not one of its three
+runs agrees across them. A single run would have reported that question as a gain
+or a loss depending on which run was taken.
+
+The correction is not to re-run until the numbers settle. It is that any figure
+from this harness carries how many runs it averages, and that a comparison
+between two configurations is judged on all of them —
+[`docs/decision-rule-sections-amendment-1.md`](docs/decision-rule-sections-amendment-1.md)
+is where that became a rule rather than a preference.
+
+**21 — The field that exists to make two measurements comparable is
+platform-dependent**
+
+`provenance.describe()` records `questions_sha256`, the hash of the question file
+a figure was measured against. It is the decisive field of that block: two runs
+of the same file are comparable by construction, and two runs of different files
+can no longer be mistaken for each other. Findings 15 and 16 are both
+consequences of it not existing earlier.
+
+It hashes the file as it sits in the working tree. `.gitattributes` stores these
+files with LF, Windows checks them out as CRLF, and the same committed blob
+therefore yields a different hash depending on the platform that measured it:
+`2f180d90…` here, `551a14f3…` for the same content on Linux. Two runs of the
+same file on different machines appear to be runs of different files, which is
+exactly the confusion the field was added to prevent — inverted.
+
+It surfaced while recovering `eval/questions_vnext_regression.yaml` at
+`85bd4381…`, the labels the corrected corpus's retrieval figure was measured
+against, after the splits were regenerated on 10 September and overwrote it. A
+search through every revision in both clones reported that the file had never
+been committed. It had been committed all along. The search compared blob bytes
+against a hash taken from a working tree, and the answer only appeared once both
+line-ending forms were tried.
+
+`tests/test_line_endings.py` covers the corpus text and does not cover this.
+
+The correction is one line — hash the bytes normalised to LF — and it changes
+every hash already published, including the ones inside result files that record
+what they were measured against. It was deliberately not made during the sections
+experiment, because changing the instrument mid-measurement is the defect
+[`docs/decision-rule-sections-amendment-2.md`](docs/decision-rule-sections-amendment-2.md)
+was written to avoid. It is recorded here, with the correction named, so that it
+is not discovered a third time.
+
+## Does correcting the section boundaries produce better answers?
+
+**No, not measurably at this sample size.** The corrected corpus was adopted
+anyway.
+
+Finding 18 established that commit `4001782` fixed the section boundaries on
+14 August and that its output never reached the warehouse: every published
+figure was measured over the corpus that preceded it, with `Item 3` where the
+corrected parse says `Item 7` on 115 of 4,124 shared positions. Correcting a
+defect does not have to earn its place with a gain, so what was in question was
+never whether to adopt the corrected corpus but what could be claimed for it.
+
+The rule was fixed in [`docs/decision-rule-sections.md`](docs/decision-rule-sections.md)
+on 11 September, before the generation figures existed, and amended twice — on
+11 September when the baseline showed that refusal varies between identical
+runs, and on 18 September before the corrected corpus was loaded. Both
+amendments are in `docs/`, dated, and neither edits what preceded it.
+
+### The comparison
+
+Both corpora, the same 50-question regression split, the same question file at
+`85bd4381…`, the same code, the same provider, three generation runs each and
+correctness judged on all three. The uncorrected corpus was measured first,
+because reloading the warehouse is what destroys it; the corrected corpus went
+into a separate Neon branch rather than over the top of it.
+
+| | uncorrected | corrected |
+|---|---:|---:|
+| chunks | 4,169 | 4,124 |
+| correctness, mean of 3 runs | 88.2% | 90.2% |
+| refusal on unanswerable | 95.8% | 100.0% |
+| false refusal | 2.9% | 2.9% |
+| refusal decisions changing between runs | 1 of 50 | 0 of 50 |
+| `JUDGE_ERROR` | 1 | 0 |
+
+**Paired difference +2.0%, 95% bootstrap interval [+0.0%, +4.9%]**, 10,000
+resamples over questions, seed 20260918. Two questions improved, none got
+worse, thirty-two did not move. A sign test on those gives p = 0.25.
+
+The interval includes zero, so this is the second of the rule's three outcomes:
+correcting the boundaries does not measurably change answers at this sample
+size. That is the result, and it is not read as support for the higher figure
+merely because the higher figure is the new one and retrieval had already moved
+in its favour.
+
+### Why the interval reaching exactly zero is not the good news it looks like
+
+The lower bound is `0.0` and not a negative number, which invites the reading
+that the effect is never harmful. It is an artefact of the arithmetic rather
+than evidence.
+
+Thirty-two of the 34 paired differences are zero. A bootstrap resample that
+happens to draw neither of the two questions that moved has a mean of exactly
+zero, and that occurs often enough to sit on the 2.5th percentile. The bound is
+determined almost entirely by whether two observations are drawn, not by the
+spread of the sample. An interval computed over a sample that is 94% zeros is
+not estimating much.
+
+The whole +2.0% is two questions each gaining one run out of three:
+(1/3 + 1/3) / 34 = 0.0196.
+
+### The two questions that moved, named
+
+**Q029**, from 2 of 3 runs correct to 3 of 3. It is also one of the three
+questions whose gold anchor was excused by hand: its anchor is `'2025'`, which
+appears in 143 chunks of the same filing, so the label is satisfied wherever it
+points. Half of the measured gain rests on the question with the weakest label
+in the set. It is named rather than excluded, because excluding it after seeing
+which way it went is the move the rule exists to prevent.
+
+**Q025**, from 0 of 3 runs correct to 1 of 3. `PARTIALLY_CORRECT` in every
+uncorrected run and in two of the corrected ones.
+
+**And Q022 moved without moving.** It scores 1 of 3 on both sides and
+contributes nothing to the difference, yet not one of its three runs agrees
+across the two corpora: `PARTIALLY, PARTIALLY, CORRECT` against `CORRECT,
+PARTIALLY, PARTIALLY`. Judged on a single run it would have been a gain or a
+loss depending on which run was taken. It is the clearest argument for the
+rule's insistence on all three.
+
+### The guardrails, and what they stopped
+
+Nothing. They are reported because a rule whose stop conditions are only
+mentioned when they fire is a rule nobody can check.
+
+- No question answered by the uncorrected corpus in all three runs is refused by
+  the corrected one in all three. **Q005** is refused on both sides in all six
+  runs — a constant of the system, not a behaviour change, and the 2.9% false
+  refusal on both sides is that one question.
+- No question marked unanswerable in the benchmark was answered. 48 of 48
+  refused, three runs, both corpora.
+
+### Q016 stopped oscillating
+
+Amendment 1 excluded Q016 from the correctness comparison, before either side
+was measured, because its verdict varied between identical calls: *"In how many
+countries are YETI products sold?"*, where YETI states no number and Columbia's
+"115 countries" returns at rank 5. On the uncorrected corpus it refused once and
+answered twice across three runs. On the corrected corpus it refuses in all
+three.
+
+That is outside the comparison by construction and it is the most interesting
+thing the experiment produced. The corrected corpus did not answer measurably
+better; it answered **more deterministically**, and the system's single
+published hallucination came from the question that has stopped varying. Whether
+the cause is that the corrected boundaries stop pulling Columbia's figure into
+the top excerpts is checkable by reading them, and has not been checked here.
+
+### A judge verdict that was wrong, and left standing
+
+In run 1 of the corrected corpus the judge returned `INCORRECT` for **Q033**
+with this reason:
+
+> The generated answer claims **Wayfair's** risk is about expansion into new
+> offerings rather than customer acquisition…
+
+The answer it was judging says: *"Yes. Chewy describes the risk that if it fails
+to acquire and retain new customers cost-effectively…"*, against a reference
+reading *"Yes. Chewy says failure to acquire and retain new customers
+cost-effectively could harm growth and profitability."* They agree. The judge
+produced a confident, specific, traceable verdict about an answer it did not
+read, and it named a different company.
+
+It is not a `JUDGE_ERROR` — the JSON parsed, the verdict was legible, and the
+harness counted it. It is left standing in the figures above. Amendment 2 fixes
+the treatment of the judge before the corrected corpus is measured, and
+reclassifying a single verdict after seeing it is the asymmetry the rule
+forbids. Q033 scores 0 of 3 correct runs on both sides, so it contributes
+nothing to the paired difference in either direction.
+
+The figure that deserves attention is not this repository's correctness rate. It
+is that an LLM judge, in a harness built specifically to catch what the other
+metrics miss, produced a wrong verdict with a plausible justification, and only
+reading the two answers side by side revealed it.
+
+### What it cost
+
+204 judge calls where the August measurement made 34, plus 300 generation
+responses across both corpora, 488 API calls on the corrected side alone and
+none served from cache — the cache key includes the excerpt ids and a reloaded
+corpus reissues every one of them, so both sides were paid in full.
 
 ## What measures what
 
@@ -715,7 +927,7 @@ once, by a documented amount, for a documented reason.
 
 ## Every component, and the evidence for it
 
-Twelve experiments, each with the number it produced and what was done about it.
+Thirteen experiments, each with the number it produced and what was done about it.
 Three of them argue against components the system uses, and those are kept in
 the table rather than dropped from it.
 
@@ -734,8 +946,9 @@ the table rather than dropped from it.
 | Re-measure the zero on 22 fresh unanswerable questions | 3.0% and 1.5%, not zero | Both published, inside the interval already given. The sealed holdout was not re-run to settle it *(finding 13)* |
 | Rewrite 24 gold anchors to name their passage | Anchors that identify nothing: 29 → 4, and **not one published figure changed** | Adopted and gated in CI at a threshold that only ratchets down. The unchanged figures are the test that this was verification and not tuning *(finding 7)* |
 | **Does better ordering produce better answers?** Hybrid against lexical, company filter held, 48 answerable questions × 3 runs, both generated fresh in one session | Correctness 0.927 against 0.889. **Paired difference +0.038, 95% CI [−0.003, +0.094]** | **Indistinguishable at this sample size, and that is the published result.** Decided by [`docs/decision-rule-ordering.md`](docs/decision-rule-ordering.md), written and committed before the run. Reproduce it with `python analyse_ordering.py` |
+| **Does correcting the section boundaries produce better answers?** Both corpora, 50-question regression split, 3 runs each, correctness judged on all three | Correctness 0.882 against 0.902. **Paired difference +2.0%, 95% CI [+0.0%, +4.9%]**, two questions up, none down | **Indistinguishable at this sample size, and the corrected corpus was adopted regardless.** Decided by [`docs/decision-rule-sections.md`](docs/decision-rule-sections.md) and its two amendments, all written before the figures existed. Reproduce it with `python src/compare_sections.py` |
 
-**The last row is the only one decided in advance**, and the rule it was decided
+**The last two rows are the only ones decided in advance**, and the rule it was decided
 by is the reason it can be believed. It fixed the criterion — correctness, not
 groundedness, because groundedness is conditional on the excerpts that arrived
 and so rewards whichever branch risks least — and it fixed the analysis as
@@ -888,6 +1101,8 @@ and a re-chunk can falsify it silently.
 | `eval/questions_vnext.yaml` | 100 questions, 127 audited gold labels |
 | `demo/` | self-contained extract, its own database, no API key |
 | `docs/decision-rule-ordering.md` | a decision rule written and committed before the run it decides |
+| `src/compare_sections.py` | the paired comparison of the two corpora, under a rule written first |
+| `docs/decision-rule-sections.md` | the second decision rule, with two dated amendments |
 
 ## Licence
 
