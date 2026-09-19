@@ -67,7 +67,7 @@ python src/generate.py "What brands does Gap Inc. operate?"
 
 ```bash
 docker compose -f demo/docker-compose.yml up -d
-export DATABASE_URL="postgresql://secrag:secrag@localhost:5433/secrag"
+export DATABASE_URL="postgresql://secrag:secrag@localhost:5434/secrag_demo"
 python demo/load_demo.py
 python src/generate.py "What brands does Gap Inc. operate?"
 ```
