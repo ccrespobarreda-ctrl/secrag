@@ -1091,6 +1091,7 @@ and a re-chunk can falsify it silently.
 | `src/check_neighbours.py` | what arrived when a labelled chunk did not |
 | `verify_release.py` | the frozen release artifacts, gated in CI |
 | `find_release_commit.py`, `find_release_blobs.py` | the searches behind finding 14 |
+| `find_questions_blob.py`, `extract_questions.py` | the recovery behind finding 21, kept so the claim can be re-tested |
 | `analyse_ordering.py` | the paired analysis the decision rule specified |
 | `src/pin_corpus.py` | declares the nineteen filings, and verifies the corpus against them |
 | `eval/corpus_expected.yaml` | the declaration itself, gated on every push |

@@ -3,7 +3,7 @@
 **Status of the manifest:** `FINAL_FROZEN`, and correct as published. Its own
 hash verifies.
 
-Three things need saying about it that it cannot say itself. Its freeze rule
+Five things need saying about it that it cannot say itself. Its freeze rule
 makes a change to configuration, benchmark labels, prompts, generation code or
 result files a new evaluation version, and it is listed in `SHA256SUMS.txt` with
 a hash that holds. Editing it would either break that hash or quietly rewrite a
@@ -99,6 +99,53 @@ measured against, and the answer had been in the manifest since 18 August. The
 fact existed; it was in a document rather than in the output of the
 measurement, so nobody looked. That is why every result file now opens with
 `measured_against`.
+
+## 5. The corpus this manifest was measured over is no longer the one the pipeline loads
+
+Every figure in `FINAL_RELEASE_MANIFEST.md` was measured over a 4,169-chunk
+corpus carrying the section boundaries that commit `4001782` was written to fix
+and never reached the warehouse — finding 18. On 18 September that corpus was
+replaced by the corrected one, 4,124 chunks, and `eval/corpus_expected.yaml` now
+declares the corrected corpus rather than the one behind these figures.
+
+**The manifest's figures are unaffected and remain correct as published.** They
+describe the corpus they were measured over, and that corpus is not lost: it
+rebuilds from the nineteen filings pinned by accession number using the parser
+of commit `2dc9a47`, byte-identical at every position, and a copy sits in
+`data/warehouse_dump_20260910/` with its hashes. Recall@16 0.735, MRR 0.310 and
+coverage 0.589 reproduce on it. What changed is which corpus a reader gets by
+following the instructions, and the declaration that says so.
+
+**What was measured before replacing it.** Both corpora, the same 50-question
+regression split, the same question file at `85bd4381…`, three generation runs
+each and correctness judged on all three, under a rule fixed in
+`docs/decision-rule-sections.md` on 11 September and amended twice before the
+corrected corpus was loaded. Correctness 88.2% against 90.2%, paired difference
++2.0% with a 95% bootstrap interval of [+0.0%, +4.9%]: indistinguishable at this
+sample size. Two questions improved, none got worse. The corrected corpus was
+adopted regardless, because the boundaries were wrong, and that was written down
+before either side was measured rather than decided by the result. The README
+carries the full account and `eval/results/sections_comparison.json` the figures.
+
+**The replacement is in commits of its own.** `d7688f3` rewrites the pin and
+contains no measurement, for the reason section 2 of this document illustrates
+at a different scale: a commit that both replaces a corpus and publishes a figure
+makes the order unrecoverable without reading timestamps. The measurements are in
+`50b8a91` and the write-up in `b11b04f`.
+
+**The previous declaration is preserved** as
+`eval/corpus_expected_release_20260817.yaml`, so the nineteen filings and the
+4,169-chunk count behind this manifest stay machine-readable rather than
+surviving only in prose. One flaw in it is worth naming rather than editing: its
+header reads *"4,169 and 4169 are both correct counts of different corpora"*, an
+artefact of `pin_corpus.py --write` interpolating the live chunk count into a
+sentence that assumes it differs from 4,169. It did not, when that file was
+written. The sentence is empty and the data below it is correct. It is left as
+generated, because a preserved declaration edited by hand is no longer the thing
+it was preserved to be.
+
+**`SHA256SUMS.txt` is unchanged.** Nothing it lists was touched: the corpus is
+not among the frozen artifacts, and the nine that verify still verify.
 
 ---
 
