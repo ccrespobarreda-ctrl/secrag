@@ -5,7 +5,7 @@
 · [LinkedIn](https://www.linkedin.com/in/cristina-crespo-/)
 
 **[See it answering questions →](https://ccrespobarreda-ctrl.github.io/secrag/)**
-· **[Run it yourself in three commands →](demo/README.md)**
+· **[Run it yourself, no API key needed →](demo/README.md)**
 · **[The 21 findings →](docs/findings.md)**
 
 ---
