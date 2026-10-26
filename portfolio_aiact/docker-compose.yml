@@ -1,0 +1,22 @@
+# Its own database: different project name, port and volume from both the
+# development stack (5433) and the 10-K demo (5434), so it cannot touch either.
+name: secrag-aiact
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: secrag
+      POSTGRES_PASSWORD: secrag
+      POSTGRES_DB: secrag_aiact
+    ports: ["5435:5432"]
+    volumes:
+      - secrag_aiact_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U secrag -d secrag_aiact"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  secrag_aiact_pgdata:

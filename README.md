@@ -107,9 +107,11 @@ software stack, demonstrated rather than asserted.
 
 **And the intervals matter more than the point estimates.** Zero inventions out
 of sixteen questions is not the same claim as zero out of a thousand: the 95%
-interval reaches 11%. A system evaluated for overclaiming should not overclaim
-in the act of measuring it. [`docs/evidence.md`](docs/evidence.md) carries the
-interval on every figure here.
+interval reaches 19%. A system evaluated for overclaiming should not overclaim
+in the act of measuring it. On the 100-question set in
+[`docs/evidence.md`](docs/evidence.md), measured over the previous corpus, it is
+0 of 31, and the interval reaches 11%. That file carries the interval on every
+figure here.
 
 ## Why this is worth your time
 
@@ -165,3 +167,4 @@ Available for contract and full-time work. Contact above.
 | [`docs/decision-rule-sections.md`](docs/decision-rule-sections.md) | The second one, with two dated amendments |
 | [`demo/README.md`](demo/README.md) | Three commands, no API key, no download |
 | [`docs/reproducing.md`](docs/reproducing.md) | The full pipeline, and what it still does not reproduce |
+| [`portfolio_aiact/`](portfolio_aiact/README.md) | The same pipeline on the EU AI Act, with the run the portfolio video shows |
