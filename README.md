@@ -108,8 +108,10 @@ software stack, demonstrated rather than asserted.
 **And the intervals matter more than the point estimates.** Zero inventions out
 of sixteen questions is not the same claim as zero out of a thousand: the 95%
 interval reaches 19%. A system evaluated for overclaiming should not overclaim
-in the act of measuring it. [`docs/evidence.md`](docs/evidence.md) carries the
-interval on every figure here.
+in the act of measuring it. On the 100-question set in
+[`docs/evidence.md`](docs/evidence.md), measured over the previous corpus, it is
+0 of 31, and the interval reaches 11%. That file carries the interval on every
+figure here.
 
 ## Why this is worth your time
 
